@@ -1270,22 +1270,47 @@
             <div class="page" data-page="lease-renewals">
                 <div class="panel">
                     <div class="panel-title">🔄 Lease Renewal Process</div>
-                    <div style="color: var(--text-sm); line-height: 1.6; margin-bottom: 16px;">
-                        <strong>90 days out:</strong> Pull expiring leases report from AppFolio<br>
-                        <strong>60 days out:</strong> Send renewal offer letter to tenant with new terms<br>
-                        <strong>45 days out:</strong> Follow up if no response<br>
-                        <strong>30 days out:</strong> If declining, begin listing; if accepting, prepare renewal lease<br>
-                        <strong>Renewal signed:</strong> Update lease dates in AppFolio, confirm new rent amount<br>
-                        <strong>If month-to-month:</strong> Document status and notify Property Manager
+                    <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
+                        <strong style="color:var(--accent);">Key Rules:</strong> All leases automatically renew with a <strong>4% increase</strong> (rounded to the nearest number ending in 0 or 5). We do <strong>not</strong> do month-to-month. Tenants must provide notice by <strong>90 days</strong> before lease expiration.
+                    </div>
+                    <div class="pipeline">
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">1</div>
+                            <div class="pipeline-label">120 Days Out</div>
+                            <div class="pipeline-desc">Pull expiring leases report from AppFolio and begin outreach</div>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">2</div>
+                            <div class="pipeline-label">105 Days Out</div>
+                            <div class="pipeline-desc">Send renewal notice with new rent amount (4% increase, rounded to 0 or 5)</div>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">3</div>
+                            <div class="pipeline-label">90 Days Out</div>
+                            <div class="pipeline-desc">Tenant notice deadline — must confirm renewing or not renewing</div>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">4</div>
+                            <div class="pipeline-label">Post-Decision</div>
+                            <div class="pipeline-desc">Follow the appropriate path below based on tenant's decision</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="panel">
-                    <div class="panel-title">✓ Renewal Checklist</div>
-                    <div class="checklist" id="renewalChecklist"></div>
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="resetChecklist('renewal')">Reset Checklist</button>
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        ✅ Tenant is Renewing
+                        <button class="btn" onclick="addRenewal('renewing')">+ Add Renewal</button>
                     </div>
+                    <div id="renewingList"></div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        🚪 Tenant is Not Renewing
+                        <button class="btn" onclick="addRenewal('notRenewing')">+ Add Non-Renewal</button>
+                    </div>
+                    <div id="notRenewingList"></div>
                 </div>
             </div>
 
@@ -2331,6 +2356,7 @@
             eodReports: [],
             workOrders: [],
             applications: [],
+            renewals: [],
             onboardingProperties: [],
             onboardingTenants: [],
             onboardingOwners: []
@@ -2375,6 +2401,7 @@
             if (!state.onboardingTenants) state.onboardingTenants = [];
             if (!state.onboardingOwners) state.onboardingOwners = [];
             if (!state.applications) state.applications = [];
+            if (!state.renewals) state.renewals = [];
         }
 
         // ============================================
@@ -3096,6 +3123,125 @@
         }
 
         // ============================================
+        // RENEWAL TRACKER
+        // ============================================
+        const renewalSteps = {
+            renewing: [
+                'Draft Renewal',
+                'Renewal Sent',
+                'Tenant Signed',
+                'Landlord Executed',
+                'Executed on AppFolio'
+            ],
+            notRenewing: [
+                'Listing Contract Signed',
+                'Unit Drafted in the MLS & AppFolio',
+                'Unit Listed',
+                'Move Out Packet Sent',
+                'Make sure if tenants are owed a credit for Security Deposit #2 that they receive it on their ledger prior to the 1st of their last month',
+                'Walkthrough Inspection Complete',
+                'Security Deposit Issued'
+            ]
+        };
+
+        function addRenewal(type) {
+            const property = prompt('Property address:');
+            if (!property) return;
+            const tenant = prompt('Tenant name(s):');
+            if (!tenant) return;
+            if (!state.renewals) state.renewals = [];
+            state.renewals.push({
+                id: Date.now(),
+                property: property.trim(),
+                tenant: tenant.trim(),
+                type: type,
+                steps: renewalSteps[type].map(s => ({ text: s, done: false })),
+                collapsed: true,
+                dateCreated: new Date().toLocaleDateString()
+            });
+            saveState(state);
+            renderRenewals();
+        }
+
+        function toggleRenewal(id) {
+            const r = state.renewals.find(r => r.id === id);
+            if (r) r.collapsed = !r.collapsed;
+            saveState(state);
+            renderRenewals();
+        }
+
+        function toggleRenewalStep(rId, stepIdx) {
+            const r = state.renewals.find(r => r.id === rId);
+            if (r) r.steps[stepIdx].done = !r.steps[stepIdx].done;
+            saveState(state);
+            renderRenewals();
+        }
+
+        function removeRenewal(id) {
+            if (!confirm('Remove this renewal?')) return;
+            state.renewals = state.renewals.filter(r => r.id !== id);
+            saveState(state);
+            renderRenewals();
+        }
+
+        function renderRenewals() {
+            renderRenewalList('renewing', document.getElementById('renewingList'));
+            renderRenewalList('notRenewing', document.getElementById('notRenewingList'));
+        }
+
+        function renderRenewalList(type, container) {
+            if (!container) return;
+            const items = (state.renewals || []).filter(r => r.type === type);
+            const emptyLabel = type === 'renewing' ? 'renewals' : 'non-renewals';
+
+            if (items.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-sm); text-align:center; padding:20px;">No active ${emptyLabel}. Click the button above to add one.</p>`;
+                return;
+            }
+
+            const statusColor = type === 'renewing' ? 'var(--success)' : 'var(--warning)';
+
+            container.innerHTML = items.map(r => {
+                const completedSteps = r.steps.filter(s => s.done).length;
+                const totalSteps = r.steps.length;
+                const pct = Math.round((completedSteps / totalSteps) * 100);
+
+                const stepsHtml = r.collapsed ? '' : `
+                    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+                        ${r.steps.map((step, idx) => `
+                            <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleRenewalStep(${r.id}, ${idx})">
+                                <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
+                                <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                return `
+                    <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid ${statusColor};">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleRenewal(${r.id})">
+                            <div style="flex:1;">
+                                <div style="font-weight:600; font-size:14px; margin-bottom:2px;">🏠 ${r.property}</div>
+                                <div style="font-size:13px; color:var(--text-sm); margin-bottom:6px;">👤 ${r.tenant}</div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+                                        <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : statusColor}; border-radius:3px; transition:width 0.3s;"></div>
+                                    </div>
+                                    <span style="font-size:11px; color:var(--muted); white-space:nowrap;">${completedSteps}/${totalSteps}</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px; margin-left:12px;">
+                                <span style="font-size:11px; color:var(--muted);">${r.dateCreated}</span>
+                                <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
+                            </div>
+                        </div>
+                        ${stepsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
         // ONBOARDING TRACKER
         // ============================================
         const onboardingTemplates = {
@@ -3537,6 +3683,7 @@
             renderEODHistory();
             renderWorkOrders();
             renderApplications();
+            renderRenewals();
             renderOnboarding();
         }
     </script>
