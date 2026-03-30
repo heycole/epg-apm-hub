@@ -924,23 +924,23 @@
                 <div class="nav-item" data-page="maintenance">🔧 Maintenance</div>
                 <div class="nav-item" data-page="leasing">📋 Rental Applications & Leasing</div>
                 <div class="nav-item" data-page="lease-renewals">🔄 Lease Renewals</div>
-                <div class="nav-item" data-page="move-in-out">🚚 Move-In / Move-Out</div>
-                <div class="nav-item" data-page="relations">💬 Tenant/Owner Relations</div>
-                <div class="nav-item" data-page="rental-licenses">📄 Rental Licenses</div>
-                <div class="nav-item" data-page="utilities">💡 Utilities</div>
-                <div class="nav-item" data-page="inspections">🔍 Inspections</div>
+                <div class="nav-item" data-page="move-in-out">🚚 Move-In / Move-Out <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
+                <div class="nav-item" data-page="relations">💬 Tenant/Owner Relations <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
+                <div class="nav-item" data-page="rental-licenses">📄 Rental Licenses <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
+                <div class="nav-item" data-page="utilities">💡 Utilities <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
+                <div class="nav-item" data-page="inspections">🔍 Inspections <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
                 <div class="nav-item" data-page="onboarding">👋 Onboarding</div>
-                <div class="nav-item" data-page="leads">📞 Leads</div>
-                <div class="nav-item" data-page="listings">🏘️ Listings</div>
+                <div class="nav-item" data-page="leads">📞 Leads <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
+                <div class="nav-item" data-page="listings">🏘️ Listings <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
             </div>
 
             <!-- RESOURCES -->
             <div class="nav-section">
                 <div class="nav-section-label">RESOURCES</div>
-                <div class="nav-item" data-page="sops">📚 SOPs & Docs</div>
-                <div class="nav-item" data-page="compliance">⚖️ Compliance</div>
-                <div class="nav-item" data-page="contacts">👥 Contacts & Links</div>
-                <div class="nav-item" data-page="glossary">❓ Glossary & FAQs</div>
+                <div class="nav-item" data-page="sops">📚 SOPs & Docs <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
+                <div class="nav-item" data-page="compliance">⚖️ Compliance <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
+                <div class="nav-item" data-page="contacts">👥 Contacts & Links <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
+                <div class="nav-item" data-page="glossary">❓ Glossary & FAQs <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
             </div>
         </div>
 
@@ -1219,7 +1219,7 @@
                         </div>
                         <div class="pipeline-stage">
                             <div class="pipeline-num">2</div>
-                            <div class="pipeline-label">Screening Run</div>
+                            <div class="pipeline-label">Run Screening and Present to Owner</div>
                             <div class="pipeline-desc">Credit, criminal, eviction & income verification</div>
                         </div>
                         <div class="pipeline-stage">
@@ -1248,14 +1248,14 @@
                 <div class="panel">
                     <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
                         📂 Application Tracker
-                        <button class="btn" onclick="addApplication()">+ New Application</button>
+                        <button class="btn" onclick="addApplication()">+ Add Application</button>
                     </div>
                     <div id="applicationList"></div>
                 </div>
 
                 <div class="panel" style="padding-bottom:0;">
                     <div class="panel-title" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="document.getElementById('leaseChecklistBody').classList.toggle('hidden'); this.querySelector('.chevron').textContent = document.getElementById('leaseChecklistBody').classList.contains('hidden') ? '▸' : '▾';">
-                        ✓ New Lease Checklist <span class="chevron" style="font-size:14px; color:var(--muted);">▸</span>
+                        ✓ Application-to-Lease Checklist <span class="chevron" style="font-size:14px; color:var(--muted);">▸</span>
                     </div>
                     <div id="leaseChecklistBody" class="hidden" style="padding-bottom:16px;">
                         <div class="checklist" id="newLeaseChecklist"></div>
@@ -1271,7 +1271,7 @@
                 <div class="panel">
                     <div class="panel-title">🔄 Lease Renewal Process</div>
                     <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
-                        <strong style="color:var(--accent);">Key Rules:</strong> All leases automatically renew with a <strong>4% increase</strong> (rounded to the nearest number ending in 0 or 5). We do <strong>not</strong> do month-to-month. Tenants must provide notice by <strong>90 days</strong> before lease expiration.
+                        <strong style="color:var(--accent);">Key Rules:</strong> All leases automatically renew with a <strong>4% increase</strong>. We do <strong>not</strong> do month-to-month. Tenants must provide notice by <strong>90 days</strong> before lease expiration.
                     </div>
                     <div class="pipeline">
                         <div class="pipeline-stage">
@@ -1884,12 +1884,52 @@
             <!-- FINANCE PAGE -->
             <div class="page" data-page="finance">
                 <div class="subtab-bar">
-                    <div class="subtab active" data-subtab="delinquency" onclick="switchSubtab('finance','delinquency')">Rent Collection & Delinquency</div>
+                    <div class="subtab active" data-subtab="owner-dist" onclick="switchSubtab('finance','owner-dist')">Owner Distribution & Reconciliation</div>
+                    <div class="subtab" data-subtab="delinquency" onclick="switchSubtab('finance','delinquency')">Rent Collection & Delinquency</div>
                     <div class="subtab" data-subtab="owner-bills" onclick="switchSubtab('finance','owner-bills')">Owner Bills</div>
                     <div class="subtab" data-subtab="tenant-charges" onclick="switchSubtab('finance','tenant-charges')">Tenant Charges</div>
                     <div class="subtab" data-subtab="water" onclick="switchSubtab('finance','water')">Water Bills</div>
                     <div class="subtab" data-subtab="vendor-inv" onclick="switchSubtab('finance','vendor-inv')">Vendor Invoices</div>
                     <div class="subtab" data-subtab="gl-ref" onclick="switchSubtab('finance','gl-ref')">GL Codes</div>
+                </div>
+
+                <!-- TAB: OWNER DISTRIBUTION & RECONCILIATION -->
+                <div class="subtab-content active" data-subtab="owner-dist">
+                    <div class="panel">
+                        <div class="panel-title">💰 Monthly Owner Distribution & Reconciliation</div>
+                        <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
+                            <strong style="color:var(--accent);">Timing:</strong> Owner distributions are processed monthly. All bills, charges, and credits must be posted before running distributions.
+                        </div>
+                        <div style="font-size:13px; color:var(--text-sm); line-height:1.8;">
+                            <strong style="color:var(--text);">Pre-Distribution Checklist:</strong>
+                            <ol style="margin-left:18px; margin-top:8px;">
+                                <li>Confirm all rent has been collected and posted</li>
+                                <li>Post all outstanding owner bills (repairs, licensing, utilities)</li>
+                                <li>Post all tenant charges (water, trash, key replacements)</li>
+                                <li>Verify all vendor invoices are entered and approved</li>
+                                <li>Review each property ledger for accuracy</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">📋 Distribution Process</div>
+                        <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8; font-size:13px;">
+                            <li>Run the <strong>Owner Statement</strong> report in AppFolio</li>
+                            <li>Review each owner's statement for accuracy — check rent collected, expenses deducted, and management fee</li>
+                            <li>Confirm the net distribution amount is correct for each owner</li>
+                            <li>Process owner payments via AppFolio</li>
+                            <li>Send owner statements with distribution summary</li>
+                        </ol>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">🔍 Reconciliation</div>
+                        <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8; font-size:13px;">
+                            <li>Reconcile the trust account balance against AppFolio records</li>
+                            <li>Verify no outstanding uncleared payments</li>
+                            <li>Confirm management fee income matches expected amounts</li>
+                            <li>Flag any discrepancies and resolve before closing the month</li>
+                        </ol>
+                    </div>
                 </div>
 
                 <!-- TAB: GL CODES -->
@@ -2045,7 +2085,7 @@
                 </div>
 
                 <!-- TAB: RENT COLLECTION & DELINQUENCY -->
-                <div class="subtab-content active" data-subtab="delinquency">
+                <div class="subtab-content" data-subtab="delinquency">
 
                     <!-- PROCESS GRAPHIC -->
                     <div class="panel" style="padding:0; overflow:hidden;">
@@ -3087,7 +3127,7 @@
             if (!container) return;
 
             if (!state.applications || state.applications.length === 0) {
-                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No active applications. Click "+ New Application" to add one.</p>';
+                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No active applications. Click "+ Add Application" to add one.</p>';
                 return;
             }
 
