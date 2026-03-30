@@ -3418,8 +3418,8 @@
         ];
 
         function togglePortfolioExpand(idx) {
-            const el = document.getElementById('portfolio-detail-' + idx);
-            if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            const el = document.getElementById('portfolio-detail-row-' + idx);
+            if (el) el.style.display = el.style.display === 'none' ? 'table-row' : 'none';
         }
 
         function updatePortfolioNotes(idx, value) {
@@ -3447,30 +3447,45 @@
 
             container.innerHTML = `
                 <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'}</div>
-            ` + items.map(p => `
-                <div style="background:var(--bg); border-radius:8px; padding:12px; margin-bottom:8px; border-left:4px solid var(--accent); cursor:pointer;" onclick="togglePortfolioExpand(${p.idx})">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <div style="flex:1;">
-                            <div style="font-weight:600; font-size:14px;">🏠 ${p.address}</div>
-                            <div style="font-size:12px; color:var(--text-sm); margin-top:2px;">
-                                👤 ${p.owner}${p.ownerPhone ? ' &nbsp;·&nbsp; 📞 ' + p.ownerPhone : ''} &nbsp;·&nbsp; ${p.units} unit${p.units !== 1 ? 's' : ''} &nbsp;·&nbsp; Fee: ${p.mgmtFee}${p.minFee ? ' (min ' + p.minFee + ')' : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <div id="portfolio-detail-${p.idx}" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);" onclick="event.stopPropagation()">
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px; color:var(--text-sm); margin-bottom:8px;">
-                            <div><strong>Owner:</strong> ${p.owner}</div>
-                            ${p.ownerPhone ? '<div><strong>Phone:</strong> ' + p.ownerPhone + '</div>' : ''}
-                            <div><strong>Email:</strong> ${p.ownerEmail}</div>
-                            <div><strong>Units:</strong> ${p.units}</div>
-                            <div><strong>Mgmt Fee:</strong> ${p.mgmtFee}${p.minFee ? ' (min ' + p.minFee + ')' : ''}</div>
-                            ${p.reserve ? '<div><strong>Reserve:</strong> $' + p.reserve.toLocaleString() + '</div>' : ''}
-                        </div>
-                        <label style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">📝 Notes</label>
-                        <textarea onchange="updatePortfolioNotes(${p.idx}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:50px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--card); color:var(--text); resize:vertical;">${notes[p.idx] || ''}</textarea>
-                    </div>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <thead>
+                            <tr style="background:var(--bg); text-align:left;">
+                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Property</th>
+                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Units</th>
+                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Owner</th>
+                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Phone</th>
+                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Email</th>
+                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Fee</th>
+                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Reserve</th>
+                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map((p, i) => `
+                                <tr style="border-bottom:1px solid var(--border);${i % 2 === 0 ? '' : ' background:var(--bg);'}" onclick="togglePortfolioExpand(${p.idx})" class="portfolio-row" data-idx="${p.idx}">
+                                    <td style="padding:10px 12px; font-weight:600; color:var(--text); min-width:200px;">${p.address}</td>
+                                    <td style="padding:10px 12px; text-align:center;">${p.units}</td>
+                                    <td style="padding:10px 12px; white-space:nowrap;">${p.owner}</td>
+                                    <td style="padding:10px 12px; white-space:nowrap;">${p.ownerPhone || '—'}</td>
+                                    <td style="padding:10px 12px; font-size:12px; word-break:break-all; max-width:200px;">${p.ownerEmail}</td>
+                                    <td style="padding:10px 12px; white-space:nowrap;">${p.mgmtFee}${p.minFee ? ' <span style="font-size:11px;color:var(--muted);">(min ' + p.minFee + ')</span>' : ''}</td>
+                                    <td style="padding:10px 12px; white-space:nowrap;">${p.reserve ? '$' + p.reserve.toLocaleString() : '—'}</td>
+                                    <td style="padding:10px 12px; max-width:180px; font-size:12px; color:var(--text-sm); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${notes[p.idx] ? notes[p.idx].substring(0, 40) + (notes[p.idx].length > 40 ? '...' : '') : '<span style="color:var(--muted);font-style:italic;">click to add</span>'}</td>
+                                </tr>
+                                <tr id="portfolio-detail-row-${p.idx}" style="display:none;">
+                                    <td colspan="8" style="padding:0 12px 12px 12px; background:var(--bg); border-bottom:2px solid var(--accent);">
+                                        <div style="padding:12px; background:var(--card); border-radius:6px; margin-top:4px;" onclick="event.stopPropagation()">
+                                            <label style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">Notes</label>
+                                            <textarea onchange="updatePortfolioNotes(${p.idx}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:60px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--bg); color:var(--text); resize:vertical;">${notes[p.idx] || ''}</textarea>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
                 </div>
-            `).join('');
+            `;
         }
 
         // ============================================
