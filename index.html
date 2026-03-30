@@ -1252,6 +1252,14 @@
                         <button class="btn btn-secondary" onclick="resetChecklist('newLease')">Reset Checklist</button>
                     </div>
                 </div>
+
+                <div class="panel">
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        📂 Application Tracker
+                        <button class="btn" onclick="addApplication()">+ New Application</button>
+                    </div>
+                    <div id="applicationList"></div>
+                </div>
             </div>
 
             <!-- LEASE RENEWALS PAGE -->
@@ -2318,6 +2326,7 @@
             checklists: {},
             eodReports: [],
             workOrders: [],
+            applications: [],
             onboardingProperties: [],
             onboardingTenants: [],
             onboardingOwners: []
@@ -2361,6 +2370,7 @@
             if (!state.onboardingProperties) state.onboardingProperties = [];
             if (!state.onboardingTenants) state.onboardingTenants = [];
             if (!state.onboardingOwners) state.onboardingOwners = [];
+            if (!state.applications) state.applications = [];
         }
 
         // ============================================
@@ -2973,6 +2983,115 @@
         }
 
         // ============================================
+        // APPLICATION TRACKER
+        // ============================================
+        const applicationSteps = [
+            'Receive application',
+            'Run tenant screening (credit, criminal, eviction)',
+            'Review all documents and let applicants know what\'s missing — required: 2 consecutive paystubs, most recent bank statement (PDF not screenshot), driver\'s license, and photos of any pets',
+            'Verify income documentation (3x rent minimum)',
+            'Must have job verification and landlord references — you can do this directly from AppFolio',
+            'Once complete, put together information to review with the Property Manager. To make things easier use this <a href="https://chatgpt.com/g/g-69b8642bd5a08191b5f8fc3addcf85b7-rental-application-review-assistant" target="_blank" style="color:var(--accent);font-weight:600;">GPT</a> — download all documents that are part of the application including the application itself, all screening documents, and all attached documents',
+            'Once Property Manager approves, draft email to send to owner for approval',
+            'If approved, send a congratulations email with a lease summary',
+            'Draft lease in AppFolio',
+            'For the time being, have Cole or Diana review the lease',
+            'Send lease out',
+            'Send wire instructions for 1st month\'s rent only — to be sent directly to the brokerage, KW Empower',
+            'Lease is fully executed',
+            'Remaining move-in funds must be wired directly to EPG Management — tenant is NOT permitted to pay any move-in funds through AppFolio',
+            'Send move-in instructions email and schedule a move-in inspection'
+        ];
+
+        function addApplication() {
+            const property = prompt('Property address:');
+            if (!property) return;
+            const applicants = prompt('Applicant name(s) — separate multiple with commas:');
+            if (!applicants) return;
+            if (!state.applications) state.applications = [];
+            state.applications.push({
+                id: Date.now(),
+                property: property.trim(),
+                applicants: applicants.split(',').map(n => n.trim()).filter(n => n),
+                steps: applicationSteps.map(s => ({ text: s, done: false })),
+                collapsed: true,
+                dateCreated: new Date().toLocaleDateString()
+            });
+            saveState(state);
+            renderApplications();
+        }
+
+        function toggleApplication(id) {
+            const app = state.applications.find(a => a.id === id);
+            if (app) app.collapsed = !app.collapsed;
+            saveState(state);
+            renderApplications();
+        }
+
+        function toggleApplicationStep(appId, stepIdx) {
+            const app = state.applications.find(a => a.id === appId);
+            if (app) app.steps[stepIdx].done = !app.steps[stepIdx].done;
+            saveState(state);
+            renderApplications();
+        }
+
+        function removeApplication(id) {
+            if (!confirm('Remove this application?')) return;
+            state.applications = state.applications.filter(a => a.id !== id);
+            saveState(state);
+            renderApplications();
+        }
+
+        function renderApplications() {
+            const container = document.getElementById('applicationList');
+            if (!container) return;
+
+            if (!state.applications || state.applications.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No active applications. Click "+ New Application" to add one.</p>';
+                return;
+            }
+
+            container.innerHTML = state.applications.map(app => {
+                const completedSteps = app.steps.filter(s => s.done).length;
+                const totalSteps = app.steps.length;
+                const pct = Math.round((completedSteps / totalSteps) * 100);
+
+                const stepsHtml = app.collapsed ? '' : `
+                    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+                        ${app.steps.map((step, idx) => `
+                            <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleApplicationStep(${app.id}, ${idx})">
+                                <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
+                                <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                return `
+                    <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid var(--accent);">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleApplication(${app.id})">
+                            <div style="flex:1;">
+                                <div style="font-weight:600; font-size:14px; margin-bottom:2px;">🏠 ${app.property}</div>
+                                <div style="font-size:13px; color:var(--text-sm); margin-bottom:6px;">👤 ${app.applicants.join(', ')}</div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+                                        <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : 'var(--accent)'}; border-radius:3px; transition:width 0.3s;"></div>
+                                    </div>
+                                    <span style="font-size:11px; color:var(--muted); white-space:nowrap;">${completedSteps}/${totalSteps}</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px; margin-left:12px;">
+                                <span style="font-size:11px; color:var(--muted);">${app.dateCreated}</span>
+                                <button onclick="event.stopPropagation(); removeApplication(${app.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
+                            </div>
+                        </div>
+                        ${stepsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
         // ONBOARDING TRACKER
         // ============================================
         const onboardingTemplates = {
@@ -3413,6 +3532,7 @@
             renderDashboard();
             renderEODHistory();
             renderWorkOrders();
+            renderApplications();
             renderOnboarding();
         }
     </script>
