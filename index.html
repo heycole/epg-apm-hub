@@ -614,6 +614,69 @@
             color: var(--text-sm);
         }
 
+        /* HORIZONTAL PIPELINE */
+        .pipeline {
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+            padding: 8px 0 12px;
+        }
+        .pipeline-stage {
+            flex: 1;
+            min-width: 140px;
+            position: relative;
+            text-align: center;
+            padding: 0 8px;
+        }
+        .pipeline-stage:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 18px;
+            right: -1px;
+            width: calc(50% + 8px);
+            height: 3px;
+            background: var(--border);
+            z-index: 0;
+        }
+        .pipeline-stage:not(:first-child)::before {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: -1px;
+            width: calc(50% + 8px);
+            height: 3px;
+            background: var(--border);
+            z-index: 0;
+        }
+        .pipeline-num {
+            width: 36px;
+            height: 36px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 2px 6px rgba(203,121,47,0.3);
+        }
+        .pipeline-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .pipeline-desc {
+            font-size: 11.5px;
+            color: var(--text-sm);
+            line-height: 1.4;
+        }
+
         /* PRIORITY GUIDE */
         .priority-grid {
             display: grid;
@@ -1148,48 +1211,36 @@
             <div class="page" data-page="leasing">
                 <div class="panel">
                     <div class="panel-title">📋 Rental Application & Leasing Pipeline</div>
-                    <div class="flow-container">
-                        <div class="flow-step">
-                            <div class="flow-number">1</div>
-                            <div class="flow-content">
-                                <div class="flow-title">Application Received</div>
-                                <div class="flow-description">Review application completeness in AppFolio within same business day</div>
-                            </div>
+                    <div class="pipeline">
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">1</div>
+                            <div class="pipeline-label">Application Received</div>
+                            <div class="pipeline-desc">Review completeness in AppFolio same business day</div>
                         </div>
-                        <div class="flow-step">
-                            <div class="flow-number">2</div>
-                            <div class="flow-content">
-                                <div class="flow-title">Screening Run</div>
-                                <div class="flow-description">Credit, criminal, eviction, and income verification in AppFolio</div>
-                            </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">2</div>
+                            <div class="pipeline-label">Screening Run</div>
+                            <div class="pipeline-desc">Credit, criminal, eviction & income verification</div>
                         </div>
-                        <div class="flow-step">
-                            <div class="flow-number">3</div>
-                            <div class="flow-content">
-                                <div class="flow-title">Application Approved/Denied</div>
-                                <div class="flow-description">Notify applicant, document decision in AppFolio</div>
-                            </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">3</div>
+                            <div class="pipeline-label">Approved / Denied</div>
+                            <div class="pipeline-desc">Notify applicant, document decision in AppFolio</div>
                         </div>
-                        <div class="flow-step">
-                            <div class="flow-number">4</div>
-                            <div class="flow-content">
-                                <div class="flow-title">Lease Prepared</div>
-                                <div class="flow-description">Generate lease in AppFolio, send via DocuSign</div>
-                            </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">4</div>
+                            <div class="pipeline-label">Lease Prepared</div>
+                            <div class="pipeline-desc">Generate lease in AppFolio, send via DocuSign</div>
                         </div>
-                        <div class="flow-step">
-                            <div class="flow-number">5</div>
-                            <div class="flow-content">
-                                <div class="flow-title">Lease Signed</div>
-                                <div class="flow-description">Collect move-in funds, schedule move-in inspection</div>
-                            </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">5</div>
+                            <div class="pipeline-label">Lease Signed</div>
+                            <div class="pipeline-desc">Collect move-in funds, schedule inspection</div>
                         </div>
-                        <div class="flow-step">
-                            <div class="flow-number">6</div>
-                            <div class="flow-content">
-                                <div class="flow-title">Move-In Complete</div>
-                                <div class="flow-description">Unit status updated in AppFolio to Occupied</div>
-                            </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">6</div>
+                            <div class="pipeline-label">Move-In Complete</div>
+                            <div class="pipeline-desc">Unit status updated to Occupied in AppFolio</div>
                         </div>
                     </div>
                 </div>
