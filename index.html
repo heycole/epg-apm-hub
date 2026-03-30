@@ -945,6 +945,9 @@
             </div>
         </div>
 
+        <div style="padding:8px 16px;">
+            <a href="https://elkaim.appfolio.com" target="_blank" style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:rgba(255,255,255,0.08); border-radius:6px; color:white; text-decoration:none; font-size:12px; font-weight:600; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">🔗 Open AppFolio</a>
+        </div>
         <div class="sidebar-footer">
             Powered by Hey Cole Real Estate
         </div>
@@ -992,6 +995,17 @@
                     <div id="urgency-list">
                         <div class="urgency-empty">No urgent items — you're clear.</div>
                     </div>
+                </div>
+
+                <div id="eodNudge" style="display:none; margin-bottom:16px; padding:12px 16px; background:rgba(200,160,60,0.1); border:1px solid rgba(200,160,60,0.3); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:18px;">📝</span>
+                        <div>
+                            <div style="font-weight:600; font-size:14px; color:var(--text);">Time to submit your End of Day report</div>
+                            <div style="font-size:12px; color:var(--text-sm);">Head to the End of Day page to log today's progress before wrapping up.</div>
+                        </div>
+                    </div>
+                    <button class="btn" style="font-size:12px; padding:6px 14px; white-space:nowrap;" onclick="switchPage('eod')">Go to EOD →</button>
                 </div>
 
                 <div class="dashboard-grid">
@@ -2673,8 +2687,8 @@
         function renderDashboard() {
             // Date display
             const dateEl = document.getElementById('dashDate');
+            const now = new Date();
             if (dateEl) {
-                const now = new Date();
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 dateEl.textContent = now.toLocaleDateString('en-US', options);
             }
@@ -2683,6 +2697,17 @@
             document.getElementById('stat-approvals').textContent = state.approvals.length;
             document.getElementById('stat-waiting').textContent = state.waiting.length;
             document.getElementById('stat-meetings').textContent = state.meetings.length;
+
+            // EOD nudge — show after 5pm on weekdays
+            const eodNudge = document.getElementById('eodNudge');
+            if (eodNudge) {
+                const hour = now.getHours();
+                const day = now.getDay();
+                const isWeekday = day >= 1 && day <= 5;
+                const todayKey = now.toLocaleDateString();
+                const hasSubmittedToday = (state.eodReports || []).some(r => r.date === todayKey);
+                eodNudge.style.display = (isWeekday && hour >= 17 && !hasSubmittedToday) ? 'flex' : 'none';
+            }
 
             renderUrgentList();
             renderTaskList(document.getElementById('dashboard-tasks'), state.tasks.slice(0, 3), 'Task');
@@ -3082,6 +3107,19 @@
                 const priorityColors = { emergency: 'var(--danger)', urgent: 'var(--warning)', routine: 'var(--accent)', scheduled: 'var(--success)' };
                 const priorityColor = priorityColors[wo.priority] || 'var(--accent)';
 
+                // Calculate days open
+                const created = new Date(wo.dateCreated);
+                const now = new Date();
+                const daysOpen = Math.max(0, Math.floor((now - created) / (1000 * 60 * 60 * 24)));
+                const isComplete = pct === 100;
+                let agingColor = 'var(--success)';
+                let agingLabel = 'Today';
+                if (isComplete) { agingColor = 'var(--success)'; agingLabel = 'Complete'; }
+                else if (daysOpen === 0) { agingColor = 'var(--success)'; agingLabel = 'Today'; }
+                else if (daysOpen <= 3) { agingColor = 'var(--success)'; agingLabel = daysOpen + 'd open'; }
+                else if (daysOpen <= 7) { agingColor = 'var(--warning)'; agingLabel = daysOpen + 'd open'; }
+                else { agingColor = 'var(--danger)'; agingLabel = daysOpen + 'd open'; }
+
                 const stepsHtml = wo.collapsed ? '' : `
                     <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
                         ${wo.steps.map((step, idx) => `
@@ -3104,6 +3142,7 @@
                                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
                                     <span style="font-size:10px; font-weight:700; text-transform:uppercase; padding:2px 6px; border-radius:3px; background:${priorityColor}; color:white;">${wo.priority}</span>
                                     <span style="font-weight:600; font-size:14px;">${wo.address}${wo.unit ? ' #' + wo.unit : ''}</span>
+                                    <span style="font-size:10px; font-weight:600; padding:2px 6px; border-radius:3px; background:${agingColor}; color:white;">${agingLabel}</span>
                                 </div>
                                 <div style="font-size:13px; color:var(--text-sm); margin-bottom:6px;">${wo.issue}</div>
                                 <div style="display:flex; align-items:center; gap:8px;">
