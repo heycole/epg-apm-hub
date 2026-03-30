@@ -1,0 +1,3365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPG Management — Assistant Property Manager Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-navy: #0c1232;
+            --accent: #cb792f;
+            --accent-hover: #a85b20;
+            --accent-light: #fdf0e6;
+            --sidebar-bg: #0e0f12;
+            --sidebar-active: rgba(203, 121, 47, 0.15);
+            --sidebar-hover: rgba(203, 121, 47, 0.10);
+            --sidebar-border: #cb792f;
+            --danger: #b83232;
+            --danger-light: #fdecea;
+            --success: #2d7a4f;
+            --success-light: #e8f5ee;
+            --warning: #d97706;
+            --warning-light: #fef3cd;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --surface: #ffffff;
+            --bg: #f8f8f8;
+            --text: #1a1a2e;
+            --text-sm: #475569;
+            --sidebar-text: #c8c8c8;
+            --sidebar-width: 224px;
+            --radius: 10px;
+            --shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(203, 121, 47, 0.2);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 16px 16px 14px;
+            border-bottom: 1px solid rgba(203, 121, 47, 0.2);
+        }
+
+        .logo-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .logo-heycole {
+            height: 28px;
+            width: auto;
+            display: block;
+            filter: brightness(0) invert(1);
+        }
+
+        .logo-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255,255,255,0.2);
+            flex-shrink: 0;
+        }
+
+        .logo-epg {
+            height: 32px;
+            width: auto;
+            display: block;
+        }
+
+        .user-block {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: white;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 0;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-label {
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: rgba(203, 121, 47, 0.7);
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            padding: 10px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+            color: var(--sidebar-text);
+        }
+
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: var(--sidebar-active);
+            border-left-color: var(--sidebar-border);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid rgba(203, 121, 47, 0.2);
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* PANELS & SECTIONS */
+        .panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-subtitle {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-sm);
+            margin-top: 20px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* GREETING BANNER */
+        .greeting-banner {
+            background: linear-gradient(135deg, var(--primary-navy) 0%, #1a2d4d 100%);
+            color: white;
+            padding: 18px 24px;
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .greeting-text {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .greeting-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 2px;
+        }
+
+        .greeting-date {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: right;
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-sm);
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* URGENCY SECTION */
+        .urgency-panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--danger);
+            border-left: 5px solid var(--danger);
+        }
+
+        .urgency-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .urgency-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--danger);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .urgency-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            background: var(--danger-light);
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .urgency-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .urgency-item .urgency-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: var(--danger);
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .urgency-item .urgency-tag.warning {
+            background: var(--warning);
+        }
+
+        .urgency-item.warning-item {
+            background: var(--warning-light);
+        }
+
+        .urgency-empty {
+            font-size: 13px;
+            color: var(--muted);
+            padding: 4px 0;
+        }
+
+        /* DASHBOARD GRID */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .dashboard-grid .panel {
+            margin-bottom: 0;
+            padding: 16px;
+        }
+
+        .dashboard-grid .panel-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        /* CHECKLISTS */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            background: var(--bg);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .checklist-item:hover {
+            background: var(--accent-light);
+        }
+
+        .checklist-item.checked {
+            opacity: 0.6;
+        }
+
+        .checklist-item.checked .checklist-text {
+            text-decoration: line-through;
+            color: var(--text-sm);
+        }
+
+        .checkbox-input {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .checklist-text {
+            flex: 1;
+            font-size: 13px;
+            line-height: 1.4;
+            color: var(--text);
+        }
+
+        /* BUTTONS */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface);
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: rgba(184, 50, 50, 0.2);
+        }
+
+        .btn-sop {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            text-align: left;
+            padding: 12px 16px;
+        }
+
+        .btn-sop:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+
+        /* SUB-TABS within pages */
+        .subtab-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 20px;
+            background: var(--surface);
+            border-radius: var(--radius) var(--radius) 0 0;
+            overflow: hidden;
+        }
+
+        .subtab {
+            padding: 11px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .subtab:hover {
+            color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .subtab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .subtab-content {
+            display: none;
+        }
+
+        .subtab-content.active {
+            display: block;
+        }
+
+        /* EXPANDABLE ITEMS / ACCORDION */
+        .expandable-item {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .expandable-header {
+            padding: 14px 16px;
+            background: var(--bg);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.15s ease;
+        }
+
+        .expandable-header:hover {
+            background: var(--accent-light);
+        }
+
+        .expandable-toggle {
+            display: inline-block;
+            transition: transform 0.2s ease;
+            font-size: 12px;
+        }
+
+        .expandable-item.expanded .expandable-toggle {
+            transform: rotate(180deg);
+        }
+
+        .expandable-body {
+            display: none;
+            padding: 16px;
+            background: var(--surface);
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-sm);
+        }
+
+        .expandable-item.expanded .expandable-body {
+            display: block;
+        }
+
+        /* FLOW DIAGRAM */
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .flow-step {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .flow-number {
+            min-width: 32px;
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .flow-content {
+            padding-top: 4px;
+        }
+
+        .flow-title {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .flow-description {
+            font-size: 13px;
+            color: var(--text-sm);
+        }
+
+        /* PRIORITY GUIDE */
+        .priority-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .priority-card {
+            padding: 16px;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+
+        .priority-emergency {
+            background: rgba(184, 50, 50, 0.1);
+            border-left-color: var(--danger);
+        }
+
+        .priority-urgent {
+            background: rgba(217, 119, 6, 0.1);
+            border-left-color: var(--warning);
+        }
+
+        .priority-routine {
+            background: rgba(45, 122, 79, 0.1);
+            border-left-color: var(--success);
+        }
+
+        .priority-scheduled {
+            background: rgba(12, 18, 50, 0.05);
+            border-left-color: var(--primary-navy);
+        }
+
+        .priority-label {
+            font-weight: 700;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .priority-emergency .priority-label {
+            color: var(--danger);
+        }
+
+        .priority-urgent .priority-label {
+            color: var(--warning);
+        }
+
+        .priority-routine .priority-label {
+            color: var(--success);
+        }
+
+        .priority-scheduled .priority-label {
+            color: var(--primary-navy);
+        }
+
+        .priority-time {
+            font-size: 13px;
+            color: var(--text-sm);
+            line-height: 1.4;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 180px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content-area {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                z-index: 100;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* LOGIN OVERLAY */
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--primary-navy);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .login-overlay.hidden { display: none; }
+        .login-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 40px 36px;
+            width: 380px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .login-card h2 {
+            font-size: 22px;
+            color: var(--primary-navy);
+            margin-bottom: 6px;
+        }
+        .login-card p.sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 12px;
+            outline: none;
+        }
+        .login-card input:focus { border-color: var(--accent); }
+        .login-card .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+        .login-card .btn-login:hover { background: var(--accent-hover); }
+        .login-card .login-toggle {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        .login-card .login-toggle a {
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-error {
+            color: var(--danger);
+            font-size: 13px;
+            margin-bottom: 10px;
+            min-height: 18px;
+        }
+        .logout-btn {
+            background: none;
+            border: 1px solid rgba(203,121,47,0.3);
+            color: var(--sidebar-text);
+            font-size: 12px;
+            font-family: inherit;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .logout-btn:hover { background: rgba(203,121,47,0.1); }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- LOGIN OVERLAY -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card">
+            <img src="https://heycolerealestate.com/wp-content/uploads/2023/09/HeyCole-Full-Logo-1.png" alt="Hey Cole" style="height:32px; margin-bottom:20px;">
+            <h2>EPG Management Hub</h2>
+            <p class="sub">Assistant Property Manager Portal</p>
+            <div class="login-error" id="loginError"></div>
+            <form id="loginForm" onsubmit="handleAuth(event)">
+                <input type="email" id="authEmail" placeholder="Email address" required>
+                <input type="password" id="authPassword" placeholder="Password" required>
+                <button type="submit" class="btn-login" id="authBtn">Sign In</button>
+            </form>
+            <div class="login-toggle">
+                <span id="toggleText">Don't have an account?</span>
+                <a id="toggleLink" onclick="toggleAuthMode()">Sign Up</a>
+            </div>
+        </div>
+    </div>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-row">
+                <img src="https://heycolerealestate.com/wp-content/uploads/2023/09/HeyCole-Full-Logo-1.png" alt="Hey Cole" class="logo-heycole">
+                <div class="logo-divider"></div>
+                <img src="logos/epg-logo.png" alt="EPG Management" class="logo-epg">
+            </div>
+            <div class="user-block">
+                <div class="user-avatar" id="userAvatar">APM</div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">Assistant PM</div>
+                    <div class="user-role">EPG Management</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+        </div>
+
+        <div class="sidebar-nav">
+            <!-- DAILY -->
+            <div class="nav-section">
+                <div class="nav-section-label">DAILY</div>
+                <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
+                <div class="nav-item" data-page="tasks">✓ Tasks</div>
+                <div class="nav-item" data-page="eod">📝 End of Day</div>
+            </div>
+
+            <!-- ROLE -->
+            <div class="nav-section">
+                <div class="nav-section-label">ROLE</div>
+                <div class="nav-item" data-page="role-overview">🏠 Role Overview</div>
+                <div class="nav-item" data-page="daily-weekly">📋 Daily & Weekly</div>
+                <div class="nav-item" data-page="monthly">📅 Monthly Calendar</div>
+            </div>
+
+            <!-- OPERATIONS -->
+            <div class="nav-section">
+                <div class="nav-section-label">OPERATIONS</div>
+                <div class="nav-item" data-page="finance">💰 Finance</div>
+                <div class="nav-item" data-page="maintenance">🔧 Maintenance</div>
+                <div class="nav-item" data-page="inspections">🔍 Inspections</div>
+                <div class="nav-item" data-page="leads">📞 Leads</div>
+                <div class="nav-item" data-page="lease-renewals">🔄 Lease Renewals</div>
+                <div class="nav-item" data-page="leasing">📋 Rental Applications & Leasing</div>
+                <div class="nav-item" data-page="listings">🏘️ Listings</div>
+                <div class="nav-item" data-page="move-in-out">🚚 Move-In / Move-Out</div>
+                <div class="nav-item" data-page="onboarding">👋 Onboarding</div>
+                <div class="nav-item" data-page="rental-licenses">📄 Rental Licenses</div>
+                <div class="nav-item" data-page="relations">💬 Tenant/Owner Relations</div>
+                <div class="nav-item" data-page="utilities">💡 Utilities</div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div class="nav-section">
+                <div class="nav-section-label">RESOURCES</div>
+                <div class="nav-item" data-page="sops">📚 SOPs & Docs</div>
+                <div class="nav-item" data-page="compliance">⚖️ Compliance</div>
+                <div class="nav-item" data-page="contacts">👥 Contacts & Links</div>
+                <div class="nav-item" data-page="glossary">❓ Glossary & FAQs</div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            Powered by Hey Cole Real Estate
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="content-area">
+
+            <!-- DASHBOARD PAGE -->
+            <div class="page active" data-page="dashboard">
+                <div class="greeting-banner">
+                    <div>
+                        <div class="greeting-text">Welcome Back King</div>
+                        <div class="greeting-subtitle">EPG Management — Assistant Property Manager</div>
+                    </div>
+                    <div class="greeting-date" id="dashDate"></div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Tasks</div>
+                        <div class="stat-value" id="stat-tasks">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Approvals</div>
+                        <div class="stat-value" id="stat-approvals">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Waiting On</div>
+                        <div class="stat-value" id="stat-waiting">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Meetings</div>
+                        <div class="stat-value" id="stat-meetings">0</div>
+                    </div>
+                </div>
+
+                <!-- URGENCY SECTION -->
+                <div class="urgency-panel">
+                    <div class="urgency-header">
+                        <div class="urgency-title">🔴 Urgent / Must Do Today</div>
+                        <button class="btn" style="font-size:12px; padding:4px 10px; background:var(--danger); color:white;" onclick="openAddUrgentModal()">+ Add</button>
+                    </div>
+                    <div id="urgency-list">
+                        <div class="urgency-empty">No urgent items — you're clear.</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="panel">
+                        <div class="panel-title">📋 Recent Tasks</div>
+                        <div id="dashboard-tasks"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-title">⏳ Awaiting Approval</div>
+                        <div id="dashboard-approvals"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-title">⌛ Waiting On</div>
+                        <div id="dashboard-waiting"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-title">📅 Upcoming Meetings</div>
+                        <div id="dashboard-meetings"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TASKS PAGE -->
+            <div class="page" data-page="tasks">
+                <div class="panel">
+                    <div class="panel-title">✓ All Tasks</div>
+                    <div id="all-tasks"></div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="openAddTaskModal()">+ Add Task</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- END OF DAY PAGE -->
+            <div class="page" data-page="eod">
+                <div class="panel">
+                    <div class="panel-title">📝 End of Day Report</div>
+                    <form id="eodForm" style="display: flex; flex-direction: column; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What's today's date?</label>
+                            <input type="text" id="eodDate" placeholder="e.g. Monday 3/31" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What did you complete today?</label>
+                            <textarea id="eodCompleted" placeholder="List what you finished today..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 80px;" required></textarea>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What is currently in progress?</label>
+                            <textarea id="eodInProgress" placeholder="What's still being worked on..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 80px;" required></textarea>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What did you learn today?</label>
+                            <textarea id="eodLearned" placeholder="New knowledge, processes, or insights..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 60px;"></textarea>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What are tomorrow's top 3 priorities?</label>
+                            <textarea id="eodPriorities" placeholder="1. &#10;2. &#10;3." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 80px;" required></textarea>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Is anything stuck because you are waiting for Elan or Cole?</label>
+                            <textarea id="eodBlocked" placeholder="Any blockers or items waiting on someone else..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 60px;"></textarea>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Additional Notes</label>
+                            <textarea id="eodNotes" placeholder="Anything else you'd like to add..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 60px;"></textarea>
+                        </div>
+                        <div style="background:var(--bg); border-radius:8px; padding:12px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">📧 Email report to:</label>
+                            <div style="font-size:13px; color:var(--text-sm); padding:10px; background:white; border:1px solid var(--border); border-radius:6px;">cole@heycolerealestate.com, elan@elkaimpropertygroup.com</div>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="btn btn-primary">Submit & Email EOD Report</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">📚 Report History</div>
+                    <div id="eodHistory"></div>
+                </div>
+            </div>
+
+            <!-- ROLE OVERVIEW PAGE -->
+            <div class="page" data-page="role-overview">
+                <div class="panel">
+                    <div class="panel-title">🏠 Assistant Property Manager — Role Overview</div>
+                    <p style="margin-bottom: 20px; line-height: 1.6; color: var(--text-sm);">As the Assistant Property Manager for EPG Management, you are responsible for daily operational execution across all key functional areas. You work directly with the Property Manager to ensure smooth operations, tenant satisfaction and property compliance.</p>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                        <!-- Operations & Maintenance -->
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--accent);">
+                            <div style="font-weight:700; font-size:13px; color:var(--accent); margin-bottom:10px;">Operations & Maintenance</div>
+                            <ul style="margin-left:16px; color:var(--text-sm); line-height:1.9; font-size:13px;">
+                                <li>Coordinate maintenance requests and vendor relationships</li>
+                                <li>Track rental licenses and compliance requirements</li>
+                                <li>Manage utility accounts: water, PECO and PGW</li>
+                                <li>Oversee move-in and move-out procedures</li>
+                                <li>Onboard new properties</li>
+                                <li>Support general administrative and property management tasks as needed</li>
+                            </ul>
+                        </div>
+
+                        <!-- Finance & Accounting -->
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--success);">
+                            <div style="font-weight:700; font-size:13px; color:var(--success); margin-bottom:10px;">Finance & Accounting</div>
+                            <ul style="margin-left:16px; color:var(--text-sm); line-height:1.9; font-size:13px;">
+                                <li>Accounts payable & receivable (bills, invoices, rent tracking)</li>
+                                <li>Monitoring and tracking late rent</li>
+                                <li>Identifying discrepancies and solving financial issues before they escalate</li>
+                                <li>Trust accounting & monthly reconciliations</li>
+                                <li>Managing rent money & escrow accounts</li>
+                                <li>Preparing and processing monthly owner distributions</li>
+                                <li>Supporting financial review processes and reporting</li>
+                                <li>Assisting with company financial tracking</li>
+                            </ul>
+                        </div>
+
+                        <!-- Leasing & Marketing -->
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--primary-navy);">
+                            <div style="font-weight:700; font-size:13px; color:var(--primary-navy); margin-bottom:10px;">Leasing & Marketing</div>
+                            <ul style="margin-left:16px; color:var(--text-sm); line-height:1.9; font-size:13px;">
+                                <li>Manage leasing pipeline and rental applications</li>
+                                <li>Process leads and have a weekly check-in with the Leasing Agent to see how showings are going</li>
+                                <li>Post and update rental listings online and monitor their performance and marketing</li>
+                            </ul>
+                        </div>
+
+                        <!-- Communications & Relationships -->
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--warning);">
+                            <div style="font-weight:700; font-size:13px; color:var(--warning); margin-bottom:10px;">Communications & Relationships</div>
+                            <ul style="margin-left:16px; color:var(--text-sm); line-height:1.9; font-size:13px;">
+                                <li>Handle tenant/owner communications and inquiries</li>
+                                <li>Escalate issues appropriately to the Property Manager</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">🛠️ Key Tools & Systems</div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--accent);">
+                            <div style="font-weight:700; font-size:13px; color:var(--accent); margin-bottom:6px;">AppFolio</div>
+                            <div style="font-size:13px; color:var(--text-sm); line-height:1.7;">Tenant management, work orders, leases, communications, and financial tracking.</div>
+                        </div>
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--success);">
+                            <div style="font-weight:700; font-size:13px; color:var(--success); margin-bottom:6px;">Google Drive</div>
+                            <div style="font-size:13px; color:var(--text-sm); line-height:1.7;">Maintain organized documentation and update all SOPs as changes are made in real time.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAILY & WEEKLY PAGE -->
+            <div class="page" data-page="daily-weekly">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="panel" style="margin-bottom: 0;">
+                        <div class="panel-title">📋 Daily Checklist</div>
+                        <div class="checklist" id="dailyChecklist"></div>
+                        <div class="button-group">
+                            <button class="btn btn-secondary" onclick="resetChecklist('daily')">Reset</button>
+                        </div>
+                    </div>
+                    <div class="panel" style="margin-bottom: 0;">
+                        <div class="panel-title">📅 Weekly Checklist</div>
+                        <div class="checklist" id="weeklyChecklist"></div>
+                        <div class="button-group">
+                            <button class="btn btn-secondary" onclick="resetChecklist('weekly')">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONTHLY CALENDAR PAGE -->
+            <div class="page" data-page="monthly">
+                <div class="panel">
+                    <div class="panel-title">📅 Monthly Calendar & Phases</div>
+                    <p style="margin-bottom: 20px; color: var(--text-sm); line-height: 1.6;">The Assistant PM role follows monthly phases across all operational areas. Use this calendar to stay ahead of recurring activities.</p>
+
+                    <div class="panel-subtitle">Phase 1: Lease Management & Renewals (Days 1-7)</div>
+                    <p style="color: var(--text-sm); margin-bottom: 16px;">
+                        • Pull 90-day lease expiration report from AppFolio<br>
+                        • Send renewal notices to tenants with expiring leases<br>
+                        • Follow up on outstanding lease applications<br>
+                        • Process any approved leases and schedule move-ins
+                    </p>
+
+                    <div class="panel-subtitle">Phase 2: Listings & Marketing (Days 8-15)</div>
+                    <p style="color: var(--text-sm); margin-bottom: 16px;">
+                        • Review active listing performance from past month<br>
+                        • Refresh stale listings with new photos/description<br>
+                        • Pull metrics on lead sources and conversion rates<br>
+                        • Schedule photographer for any new vacant units
+                    </p>
+
+                    <div class="panel-subtitle">Phase 3: Maintenance & Compliance (Days 16-23)</div>
+                    <p style="color: var(--text-sm); margin-bottom: 16px;">
+                        • Audit all open work orders — follow up on stale ones<br>
+                        • Review rental license renewal deadlines<br>
+                        • Schedule annual/routine inspections<br>
+                        • Check utility accounts and verify tenant transfers
+                    </p>
+
+                    <div class="panel-subtitle">Phase 4: Reporting & Planning (Days 24-End)</div>
+                    <p style="color: var(--text-sm); margin-bottom: 16px;">
+                        • Compile monthly summary of all operational areas<br>
+                        • Review tenant communication history for any patterns<br>
+                        • Process month-end closings and final invoices<br>
+                        • Plan priorities for next month with Property Manager
+                    </p>
+                </div>
+            </div>
+
+            <!-- LEASING & RENEWALS PAGE -->
+            <div class="page" data-page="leasing">
+                <div class="panel">
+                    <div class="panel-title">📋 Rental Application & Leasing Pipeline</div>
+                    <div class="flow-container">
+                        <div class="flow-step">
+                            <div class="flow-number">1</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Application Received</div>
+                                <div class="flow-description">Review application completeness in AppFolio within same business day</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">2</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Screening Run</div>
+                                <div class="flow-description">Credit, criminal, eviction, and income verification in AppFolio</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">3</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Application Approved/Denied</div>
+                                <div class="flow-description">Notify applicant, document decision in AppFolio</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">4</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Lease Prepared</div>
+                                <div class="flow-description">Generate lease in AppFolio, send via DocuSign</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">5</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Lease Signed</div>
+                                <div class="flow-description">Collect move-in funds, schedule move-in inspection</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">6</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Move-In Complete</div>
+                                <div class="flow-description">Unit status updated in AppFolio to Occupied</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">✓ New Lease Checklist</div>
+                    <div class="checklist" id="newLeaseChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('newLease')">Reset Checklist</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEASE RENEWALS PAGE -->
+            <div class="page" data-page="lease-renewals">
+                <div class="panel">
+                    <div class="panel-title">🔄 Lease Renewal Process</div>
+                    <div style="color: var(--text-sm); line-height: 1.6; margin-bottom: 16px;">
+                        <strong>90 days out:</strong> Pull expiring leases report from AppFolio<br>
+                        <strong>60 days out:</strong> Send renewal offer letter to tenant with new terms<br>
+                        <strong>45 days out:</strong> Follow up if no response<br>
+                        <strong>30 days out:</strong> If declining, begin listing; if accepting, prepare renewal lease<br>
+                        <strong>Renewal signed:</strong> Update lease dates in AppFolio, confirm new rent amount<br>
+                        <strong>If month-to-month:</strong> Document status and notify Property Manager
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">✓ Renewal Checklist</div>
+                    <div class="checklist" id="renewalChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('renewal')">Reset Checklist</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LISTINGS PAGE -->
+            <div class="page" data-page="listings">
+                <div class="panel">
+                    <div class="panel-title">🏘️ Listing Process</div>
+                    <div class="flow-container">
+                        <div class="flow-step">
+                            <div class="flow-number">1</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Receive Vacancy</div>
+                                <div class="flow-description">Notification of upcoming move-out or new vacancy</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">2</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Determine Rent</div>
+                                <div class="flow-description">Get approved rent amount from Property Manager</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">3</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Take Photos</div>
+                                <div class="flow-description">Professional photos or schedule photographer</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">4</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Create Listing</div>
+                                <div class="flow-description">Create listing in AppFolio</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">5</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Syndicate & Promote</div>
+                                <div class="flow-description">Syndicate to Zillow, Apartments.com, social media, local groups</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">6</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Monitor & Schedule</div>
+                                <div class="flow-description">Monitor inquiries, schedule showings, track performance</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">✓ New Listing Checklist</div>
+                    <div class="checklist" id="newListingChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('newListing')">Reset Checklist</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">📸 Listing Quality Standards</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li><strong>Photos:</strong> Minimum 10 high-quality photos per listing, well-lit, wide-angle</li>
+                        <li><strong>Description:</strong> Include bed/bath count, sq ft, key amenities, pet policy, parking, laundry</li>
+                        <li><strong>Pricing:</strong> Must be approved by Property Manager before publishing</li>
+                        <li><strong>Accuracy:</strong> All details must match actual unit condition</li>
+                        <li><strong>Updates:</strong> Refresh photos and description every 30 days if still vacant</li>
+                        <li><strong>Removal:</strong> Take down listing within 24 hours of lease signing</li>
+                    </ul>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">✓ Showing Process Checklist</div>
+                    <div class="checklist" id="showingChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('showing')">Reset Checklist</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEADS PAGE -->
+            <div class="page" data-page="leads">
+                <div class="panel">
+                    <div class="panel-title">📞 Lead Response Standards</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li><strong>Phone inquiry:</strong> Answer or return call within 1 hour during business hours</li>
+                        <li><strong>Email/portal inquiry:</strong> Respond within 2 hours during business hours</li>
+                        <li><strong>After-hours inquiry:</strong> Auto-reply confirming receipt, respond by 10 AM next business day</li>
+                        <li><strong>Showing request:</strong> Confirm or offer alternatives within same business day</li>
+                        <li><strong>Application question:</strong> Respond within 4 hours</li>
+                    </ul>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">🔄 Lead Pipeline Stages</div>
+                    <div class="flow-container">
+                        <div class="flow-step">
+                            <div class="flow-number">1</div>
+                            <div class="flow-content">
+                                <div class="flow-title">New Inquiry</div>
+                                <div class="flow-description">Log in AppFolio, respond promptly</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">2</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Showing Scheduled</div>
+                                <div class="flow-description">Confirm 24 hours in advance</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">3</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Showing Completed</div>
+                                <div class="flow-description">Follow up within 24 hours</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">4</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Application Started</div>
+                                <div class="flow-description">Assist with any questions</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">5</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Application Submitted</div>
+                                <div class="flow-description">Begin screening process</div>
+                            </div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-number">6</div>
+                            <div class="flow-content">
+                                <div class="flow-title">Converted / Lost</div>
+                                <div class="flow-description">Update status and reason in AppFolio</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">✓ Lead Tracking Checklist (Weekly)</div>
+                    <div class="checklist" id="leadTrackingChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('leadTracking')">Reset Checklist</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">📊 Lead Source Tracking</div>
+                    <p style="color: var(--text-sm); margin-bottom: 16px;">Track which sources generate qualified leads:</p>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li>AppFolio website/portal</li>
+                        <li>Zillow / Trulia</li>
+                        <li>Apartments.com</li>
+                        <li>Facebook Marketplace</li>
+                        <li>Craigslist</li>
+                        <li>Referrals</li>
+                        <li>Drive-by / signage</li>
+                        <li>Other</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- MAINTENANCE PAGE -->
+            <div class="page" data-page="maintenance">
+                <div class="subtab-bar">
+                    <div class="subtab active" data-subtab="main" onclick="switchSubtab('maintenance','main')">Work Orders</div>
+                    <div class="subtab" data-subtab="create-wo" onclick="switchSubtab('maintenance','create-wo')">Creating a WO</div>
+                    <div class="subtab" data-subtab="vendors" onclick="switchSubtab('maintenance','vendors')">Vendor Dispatch</div>
+                    <div class="subtab" data-subtab="special" onclick="switchSubtab('maintenance','special')">Special Flows</div>
+                    <div class="subtab" data-subtab="approvals" onclick="switchSubtab('maintenance','approvals')">Owner Approvals</div>
+                    <div class="subtab" data-subtab="completion" onclick="switchSubtab('maintenance','completion')">Completion & Billing</div>
+                </div>
+
+                <!-- TAB: MAIN (Work Orders + Priority + Checklist) -->
+                <div class="subtab-content active" data-subtab="main">
+                    <div class="panel">
+                        <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>🔧 Active Work Orders</span>
+                            <button class="btn btn-primary" style="font-size:12px; padding:6px 14px;" onclick="addWorkOrder()">+ New Work Order</button>
+                        </div>
+                        <div id="workOrderList"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-title">🔧 Work Order Priority Guide</div>
+                        <div class="priority-grid">
+                            <div class="priority-card priority-emergency">
+                                <div class="priority-label">Emergency</div>
+                                <div class="priority-time">Respond immediately. Gas leak, flooding/burst pipe, no heat in winter, fire damage, electrical hazard, security breach (broken locks/windows)</div>
+                            </div>
+                            <div class="priority-card priority-urgent">
+                                <div class="priority-label">Urgent</div>
+                                <div class="priority-time">Respond within 4 hours. No hot water, HVAC failure, plumbing backup/no water, broken exterior door/lock, refrigerator failure</div>
+                            </div>
+                            <div class="priority-card priority-routine">
+                                <div class="priority-label">Routine</div>
+                                <div class="priority-time">Respond within 24-48 hours. Appliance repair, minor leak, cosmetic damage, pest control, light fixtures</div>
+                            </div>
+                            <div class="priority-card priority-scheduled">
+                                <div class="priority-label">Scheduled</div>
+                                <div class="priority-time">Plan in advance. HVAC service, preventive inspections, turnover, landscaping, common area maintenance</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TAB: CREATING A WORK ORDER -->
+                <div class="subtab-content" data-subtab="create-wo">
+                    <div class="panel">
+                        <div class="panel-title">📝 Creating a Work Order in AppFolio</div>
+                        <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8;">
+                            <li>Open the work order — check if there are <strong>multiple items</strong> needing separate vendors</li>
+                            <li>If yes, create <strong>separate Service Requests</strong> for each vendor</li>
+                            <li>Click <strong>Create New Service Request</strong> in AppFolio</li>
+                            <li>Fill in all required fields:
+                                <ul style="margin-left:18px; margin-top:4px; margin-bottom:4px;">
+                                    <li><strong>Work Order Type:</strong> Internal → Resident</li>
+                                    <li><strong>Entry Notice:</strong> Add 24-hour notice text if vendor needs entry</li>
+                                    <li><strong>Priority:</strong> Emergency / Urgent / Routine / Scheduled</li>
+                                    <li><strong>Description:</strong> Detailed issue description with photos</li>
+                                    <li><strong>Vendor Instructions:</strong> Specific notes for the vendor</li>
+                                    <li><strong>Vendor:</strong> Assign from approved vendor list</li>
+                                </ul>
+                            </li>
+                            <li>Contact tenant for discovery — get photos, details, confirm access</li>
+                            <li>Determine if tenant-responsible (per lease) — if yes, communicate to tenant</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- TAB: VENDOR DISPATCH -->
+                <div class="subtab-content" data-subtab="vendors">
+                    <div class="panel">
+                        <div class="panel-title">👥 Vendor Dispatch & Scheduling</div>
+                        <p style="color:var(--text-sm); margin-bottom:12px;">Three ways to schedule vendor work:</p>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:14px;">
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; text-align:center;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:4px;">Option 1</div>
+                                <div style="font-size:12px; color:var(--text-sm);">Vendor dispatched through <strong>AppFolio Vendor Portal</strong> — they accept and schedule directly</div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; text-align:center;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:4px;">Option 2</div>
+                                <div style="font-size:12px; color:var(--text-sm);">Message vendor in <strong>EPG Google Voice Group Chat</strong> to coordinate schedule</div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; text-align:center;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:4px;">Option 3</div>
+                                <div style="font-size:12px; color:var(--text-sm);"><strong>Schedule on behalf</strong> of vendor — coordinate between vendor and tenant</div>
+                            </div>
+                        </div>
+                        <div style="background:var(--warning-light); border-radius:8px; padding:12px; margin-bottom:12px;">
+                            <div style="font-weight:600; color:var(--warning); font-size:13px;">⚠️ 24-Hour Entry Notice Required</div>
+                            <div style="font-size:13px; color:var(--text-sm); margin-top:4px;">Always provide tenant with 24 hours notice before vendor entry. Include notice text in the AppFolio work order.</div>
+                        </div>
+                        <div style="background:var(--accent-light); border-radius:8px; padding:12px;">
+                            <div style="font-weight:600; color:var(--accent); font-size:13px;">📊 Follow-Up Requirement</div>
+                            <div style="font-size:13px; color:var(--text-sm); margin-top:4px;">Follow up on <strong>every open work order minimum 1x per day</strong>. No work order should go a full day without a status update.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: SPECIAL FLOWS -->
+                <div class="subtab-content" data-subtab="special">
+                    <div class="panel">
+                        <div class="panel-title">⚡ Special Vendor Flows</div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                            <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--accent);">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:8px;">QueenStatus 360 / Erika</div>
+                                <ul style="margin-left:16px; color:var(--text-sm); line-height:1.8; font-size:13px;">
+                                    <li>Jobs <strong>$100+</strong> require owner approval first</li>
+                                    <li>Jobs <strong>$500+</strong> are reviewed by Elan</li>
+                                    <li>Always get pricing before dispatching</li>
+                                    <li>Use the <strong>"Request Owner for Approval"</strong> button in AppFolio for approvals</li>
+                                </ul>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--primary-navy);">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:8px;">V2 Properties</div>
+                                <ul style="margin-left:16px; color:var(--text-sm); line-height:1.8; font-size:13px;">
+                                    <li>V2 Properties maintenance goes to <strong>Basecamp</strong>, not standard flow</li>
+                                    <li>Log the request, then submit via Basecamp</li>
+                                    <li>Follow V2's approval process separately</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: OWNER APPROVALS -->
+                <div class="subtab-content" data-subtab="approvals">
+                    <div class="panel">
+                        <div class="panel-title">📨 Submitting Proposal to Owner for Approval</div>
+                        <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8;">
+                            <li>Create the work order in AppFolio with full details</li>
+                            <li>Get the vendor estimate / proposal document</li>
+                            <li>Attach the estimate to the work order</li>
+                            <li>Click <strong>"Request Owner for Approval"</strong> button in AppFolio</li>
+                            <li>Owner receives notification and can approve/deny in their portal</li>
+                            <li>Once approved, dispatch the vendor</li>
+                            <li>If denied, communicate back to tenant and close or modify the work order</li>
+                        </ol>
+                        <div style="background:var(--warning-light); border-radius:8px; padding:12px; margin-top:12px;">
+                            <div style="font-weight:600; color:var(--warning); font-size:13px;">💡 $250+ = Big Bill</div>
+                            <div style="font-size:13px; color:var(--text-sm); margin-top:4px;">Any job estimated at $250 or more is a "big bill." Get vendor pricing immediately and communicate to the owner before authorizing work.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: COMPLETION & BILLING -->
+                <div class="subtab-content" data-subtab="completion">
+                    <div class="panel">
+                        <div class="panel-title">✅ Job Completion & Invoice Process</div>
+                        <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8;">
+                            <li><strong>Confirm with vendor</strong> that the job is complete</li>
+                            <li><strong>Confirm with tenant</strong> that the issue is resolved</li>
+                            <li>Ask <strong>who is at-fault</strong> (tenant or normal wear/tear) for billing purposes</li>
+                            <li>In AppFolio, go to <strong>ACTION → Create Bill → Billable Items</strong></li>
+                            <li>GL Code: <strong>6147 (Repairs-Other)</strong> for most maintenance work</li>
+                            <li>Verify the bill appears in <strong>Accounting → Payables</strong></li>
+                            <li>Close the work order via <strong>ACTION → Mark Job Done</strong></li>
+                            <li><strong>DO NOT</strong> check "No Bill Needed" — always create the bill</li>
+                        </ol>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px;">
+                            <div style="background:var(--success-light); border-radius:8px; padding:12px;">
+                                <div style="font-weight:600; font-size:13px; color:var(--success);">💳 Payment Cycle</div>
+                                <div style="font-size:13px; color:var(--text-sm); margin-top:4px;">Vendor invoices are paid on the <strong>5th and 20th</strong> of each month</div>
+                            </div>
+                            <div style="background:var(--danger-light); border-radius:8px; padding:12px;">
+                                <div style="font-weight:600; font-size:13px; color:var(--danger);">🚫 Never Skip Billing</div>
+                                <div style="font-size:13px; color:var(--text-sm); margin-top:4px;">Every completed work order must have a bill created. "No Bill Needed" should never be checked.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ONBOARDING PAGE -->
+            <div class="page" data-page="onboarding">
+                <!-- PROPERTY ONBOARDING -->
+                <div class="panel">
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>🏢 Property Onboarding</span>
+                        <button class="btn btn-primary" style="font-size:12px; padding:6px 14px;" onclick="addPropertyOnboarding()">+ Add Property</button>
+                    </div>
+                    <div id="propertyOnboardingList"></div>
+                </div>
+
+                <!-- TENANT ONBOARDING -->
+                <div class="panel">
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>👤 Tenant Onboarding</span>
+                        <button class="btn btn-primary" style="font-size:12px; padding:6px 14px;" onclick="addTenantOnboarding()">+ Add Tenant</button>
+                    </div>
+                    <div id="tenantOnboardingList"></div>
+                </div>
+
+                <!-- OWNER ONBOARDING -->
+                <div class="panel">
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>🏦 Owner Onboarding</span>
+                        <button class="btn btn-primary" style="font-size:12px; padding:6px 14px;" onclick="addOwnerOnboarding()">+ Add Owner</button>
+                    </div>
+                    <div id="ownerOnboardingList"></div>
+                </div>
+            </div>
+
+            <!-- RENTAL LICENSES PAGE -->
+            <div class="page" data-page="rental-licenses">
+                <div class="panel">
+                    <div class="panel-title">📄 Rental License Tracking</div>
+                    <p style="color: var(--text-sm); margin-bottom: 16px;">Track all properties requiring rental licenses by municipality. Renewal deadlines are flagged 90 days before expiration. Required inspections are scheduled as needed for renewal.</p>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">✓ Rental License Process Checklist</div>
+                    <div class="checklist" id="rentalLicenseChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('rentalLicense')">Reset Checklist</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">📋 Common License Requirements</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li>Current Certificate of Occupancy or equivalent</li>
+                        <li>Passing property inspection (fire safety, habitability)</li>
+                        <li>Smoke and CO detector compliance</li>
+                        <li>Lead paint compliance (if built before 1978)</li>
+                        <li>Proper egress in bedrooms</li>
+                        <li>Working plumbing, electrical, and HVAC</li>
+                        <li>No outstanding code violations</li>
+                        <li>Current owner and management contact information on file</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- UTILITIES PAGE -->
+            <div class="page" data-page="utilities">
+                <div class="panel">
+                    <div class="panel-title">💡 Utility Management Overview</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li><strong>Owner-paid utilities:</strong> Confirm accounts are active and in owner/management name</li>
+                        <li><strong>Tenant-paid utilities:</strong> Verify transfer into tenant name at move-in</li>
+                        <li><strong>Vacancy utilities:</strong> Ensure service is maintained during vacancy (owner responsibility)</li>
+                        <li><strong>Common area utilities:</strong> Track and allocate per management agreement</li>
+                    </ul>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">✓ Utility Transfer Checklist — Move-In</div>
+                    <div class="checklist" id="utilityMoveInChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('utilityMoveIn')">Reset Checklist</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">✓ Utility Transfer Checklist — Move-Out</div>
+                    <div class="checklist" id="utilityMoveOutChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('utilityMoveOut')">Reset Checklist</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">☎️ Utility Quick Reference</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; color: var(--text-sm);">
+                        <div><strong>Electric:</strong> [Provider TBD]</div>
+                        <div><strong>Gas:</strong> [Provider TBD]</div>
+                        <div><strong>Water/Sewer:</strong> [Provider TBD]</div>
+                        <div><strong>Trash/Recycling:</strong> [Provider TBD]</div>
+                        <div><strong>Internet/Cable:</strong> [Provider TBD]</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MOVE-IN / MOVE-OUT PAGE -->
+            <div class="page" data-page="move-in-out">
+                <div class="panel">
+                    <div class="panel-title">🚪 Move-In Checklist</div>
+                    <div class="checklist" id="moveInChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('moveIn')">Reset Checklist</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">🚪 Move-Out Checklist</div>
+                    <div class="checklist" id="moveOutChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('moveOut')">Reset Checklist</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">💰 Move-In Funds Requirements</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li>First month's rent (due before move-in)</li>
+                        <li>Security deposit (amount per lease, typically one month's rent)</li>
+                        <li>Pet deposit/fee (if applicable per pet policy)</li>
+                        <li>Any other fees per lease (admin fee, key deposit, etc.)</li>
+                        <li>All funds must be cleared before key delivery</li>
+                        <li>Accepted payment methods: per EPG Management policy</li>
+                    </ul>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">📋 Security Deposit Disposition Timeline</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li>Document all deductions with photos and receipts</li>
+                        <li>Normal wear and tear is NOT deductible</li>
+                        <li>Deductible items: damage beyond normal wear, unpaid rent, cleaning beyond normal, lease violation repairs</li>
+                        <li>Return timeline: per state law (check local requirement — typically 30 days)</li>
+                        <li>Must include itemized list of deductions</li>
+                        <li>Send via certified mail to forwarding address</li>
+                        <li>Keep copy in AppFolio property file</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- TENANT/OWNER RELATIONS PAGE -->
+            <div class="page" data-page="relations">
+                <div class="panel">
+                    <div class="panel-title">👥 Tenant Communication Standards</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li><strong>Response time:</strong> All inquiries within 24 hours (business hours)</li>
+                        <li><strong>Tone:</strong> Professional, empathetic, solution-oriented</li>
+                        <li><strong>Documentation:</strong> Log ALL communications in AppFolio</li>
+                        <li><strong>Channel priority:</strong> AppFolio portal > Email > Phone (document phone calls in AppFolio notes)</li>
+                        <li><strong>Escalation:</strong> Forward to Property Manager if legal, fair housing, or eviction-related</li>
+                        <li><strong>Promises:</strong> Never make promises you can't keep — use "I'll look into this and get back to you by [time]"</li>
+                    </ul>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">👔 Owner Communication Standards</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li><strong>Monthly:</strong> Owner statement sent via AppFolio portal</li>
+                        <li><strong>As needed:</strong> Maintenance approvals, vacancy updates, lease renewals</li>
+                        <li><strong>Response time:</strong> Same business day for owner inquiries</li>
+                        <li><strong>Proactive:</strong> Notify owners of any significant property issues immediately</li>
+                        <li><strong>Reporting:</strong> Include property photos with any maintenance or inspection updates</li>
+                        <li><strong>Escalation:</strong> Property Manager handles disputes, legal, and financial discussions</li>
+                    </ul>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">📚 Common Tenant Scenarios</div>
+                    <div id="tenantScenariosAccordion"></div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">⚠️ Lease Violation Process</div>
+                    <div class="checklist" id="violationChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('violation')">Reset Checklist</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INSPECTIONS PAGE -->
+            <div class="page" data-page="inspections">
+                <div class="panel">
+                    <div class="panel-title">🔍 Inspection Types & Schedule</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li><strong>Move-In Inspection:</strong> Required before every new tenant takes possession</li>
+                        <li><strong>Move-Out Inspection:</strong> Required after every tenant vacates</li>
+                        <li><strong>Annual/Routine Inspection:</strong> Scheduled annually for every occupied unit</li>
+                        <li><strong>Drive-By Inspection:</strong> Quarterly exterior and curb appeal check</li>
+                        <li><strong>Complaint-Based Inspection:</strong> Triggered by tenant, neighbor, or owner complaint</li>
+                        <li><strong>Pre-Listing Inspection:</strong> Before marketing a vacant unit</li>
+                        <li><strong>Seasonal Inspection:</strong> Fall (winterization) and Spring (exterior/landscaping)</li>
+                    </ul>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">✓ General Inspection Checklist</div>
+                    <div class="checklist" id="inspectionChecklist"></div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="resetChecklist('inspection')">Reset Checklist</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">📝 Inspection Report Process</div>
+                    <ol style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li>Schedule inspection and notify tenant (24-48 hours notice per state law)</li>
+                        <li>Conduct inspection using checklist — photograph all items noted</li>
+                        <li>Complete inspection report in AppFolio</li>
+                        <li>Share findings with tenant (move-in/move-out) or Property Manager (routine)</li>
+                        <li>Create work orders for any maintenance items found</li>
+                        <li>File photos and report in AppFolio property record</li>
+                        <li>Follow up on work orders generated from inspection</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- FINANCE PAGE -->
+            <div class="page" data-page="finance">
+                <div class="subtab-bar">
+                    <div class="subtab active" data-subtab="delinquency" onclick="switchSubtab('finance','delinquency')">Rent Collection & Delinquency</div>
+                    <div class="subtab" data-subtab="owner-bills" onclick="switchSubtab('finance','owner-bills')">Owner Bills</div>
+                    <div class="subtab" data-subtab="tenant-charges" onclick="switchSubtab('finance','tenant-charges')">Tenant Charges</div>
+                    <div class="subtab" data-subtab="water" onclick="switchSubtab('finance','water')">Water Bills</div>
+                    <div class="subtab" data-subtab="vendor-inv" onclick="switchSubtab('finance','vendor-inv')">Vendor Invoices</div>
+                    <div class="subtab" data-subtab="gl-ref" onclick="switchSubtab('finance','gl-ref')">GL Codes</div>
+                </div>
+
+                <!-- TAB: GL CODES -->
+                <div class="subtab-content" data-subtab="gl-ref">
+                    <div class="panel">
+                        <div class="panel-title">💰 AppFolio GL Code Quick Reference</div>
+                        <p style="color: var(--text-sm); margin-bottom: 14px;">Use these GL codes when entering bills and charges in AppFolio. When in doubt, review with Nicole before posting.</p>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="background:var(--bg); border-radius:8px; padding:12px;">
+                                <div style="font-weight:700; font-size:13px; color:var(--accent); margin-bottom:8px;">EXPENSE GL CODES (Owner Bills)</div>
+                                <div style="font-size:13px; color:var(--text-sm); line-height:2;">
+                                    <div><strong>6077</strong> — Cleaning</div>
+                                    <div><strong>6147</strong> — Repairs-Other (General Repairs)</div>
+                                    <div><strong>6173</strong> — Water (Owner Expense)</div>
+                                    <div><strong>6200</strong> — Licensing</div>
+                                    <div><strong>7010</strong> — New Appliance Purchase</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px;">
+                                <div style="font-weight:700; font-size:13px; color:var(--success); margin-bottom:8px;">INCOME GL CODES (Tenant Charges)</div>
+                                <div style="font-size:13px; color:var(--text-sm); line-height:2;">
+                                    <div><strong>4320</strong> — Tenant Water Bill (Income)</div>
+                                    <div><strong>4480</strong> — Tenant Key/Fob Replacement</div>
+                                    <div><strong>4490</strong> — Oversized Trash Items (Income)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: OWNER BILLS -->
+                <div class="subtab-content" data-subtab="owner-bills">
+                    <div class="panel">
+                        <div class="panel-title">🏠 How to Add an Owner Bill</div>
+                        <p style="color: var(--text-sm); margin-bottom: 14px;">When billing an owner for a property expense, use the correct GL code. Common scenarios:</p>
+                        <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8;">
+                            <li>Go to <strong>Accounting → Payables → Enter Bill</strong></li>
+                            <li>Select the correct payee (vendor, city, etc.)</li>
+                            <li>Select the correct GL code:
+                                <ul style="margin-left:18px; margin-top:4px; margin-bottom:4px;">
+                                    <li><strong>6200</strong> for Licensing</li>
+                                    <li><strong>6173</strong> for Water</li>
+                                    <li><strong>6147</strong> for General Repairs</li>
+                                    <li><strong>6077</strong> for Cleaning</li>
+                                    <li><strong>7010</strong> for New Appliance Purchase</li>
+                                </ul>
+                            </li>
+                            <li>Enter the amount and attach supporting documentation</li>
+                            <li><strong>If unsure about the GL code, review with Nicole before posting</strong></li>
+                        </ol>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">📄 How to Bill for Licensing</div>
+                        <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8;">
+                            <li>Go to <strong>Accounting → Payables → Enter Bill</strong></li>
+                            <li>Payee: <strong>City of Philadelphia</strong></li>
+                            <li>GL Code: <strong>6200 (Licensing)</strong></li>
+                            <li>Enter the license fee amount</li>
+                            <li>Attach the receipt to the bill</li>
+                            <li>Submit for processing</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- TAB: TENANT CHARGES -->
+                <div class="subtab-content" data-subtab="tenant-charges">
+                    <div class="panel">
+                        <div class="panel-title">👤 Tenant Charges</div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                            <div style="background:var(--bg); border-radius:8px; padding:14px;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:8px;">🗑️ Oversized Trash Items</div>
+                                <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8; font-size:13px;">
+                                    <li>Search the property in AppFolio</li>
+                                    <li>Find the tenant</li>
+                                    <li>Click <strong>Enter Charge</strong></li>
+                                    <li>GL Code: <strong>4490 (Oversized Trash Items — Income)</strong></li>
+                                    <li>Enter the charge amount</li>
+                                </ol>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:14px;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:8px;">🔑 Lost Key / Fob Replacement</div>
+                                <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8; font-size:13px;">
+                                    <li>Search the property in AppFolio</li>
+                                    <li>Find the tenant</li>
+                                    <li>Click <strong>Enter Charge</strong></li>
+                                    <li>GL Code: <strong>4480 (Tenant Key/Fob Replacement)</strong></li>
+                                    <li>Description: <em>"TENANT NAME - Key/Fob Replacement"</em></li>
+                                    <li><strong>Make tenant aware so they pay immediately</strong></li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: WATER BILLS -->
+                <div class="subtab-content" data-subtab="water">
+                    <div class="panel">
+                        <div class="panel-title">🚰 Water Bill Process (3 Steps)</div>
+                        <p style="color: var(--text-sm); margin-bottom: 14px;">Water bills require three separate actions. All three must be completed.</p>
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            <div style="background:var(--accent-light); border-radius:8px; padding:14px; border-left:4px solid var(--accent);">
+                                <div style="font-weight:700; color:var(--text); margin-bottom:6px;">Step 1: Pay the Water Bill</div>
+                                <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8; font-size:13px;">
+                                    <li>Go to <strong>phila.gov</strong> and log in with EPG credentials</li>
+                                    <li>Search the property address</li>
+                                    <li>Pay the balance due</li>
+                                    <li>Save the confirmation number</li>
+                                </ol>
+                            </div>
+                            <div style="background:var(--warning-light); border-radius:8px; padding:14px; border-left:4px solid var(--warning);">
+                                <div style="font-weight:700; color:var(--text); margin-bottom:6px;">Step 2: Bill the Owner in AppFolio</div>
+                                <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8; font-size:13px;">
+                                    <li>Go to <strong>Accounting → Payables → Enter Bill</strong></li>
+                                    <li>Payee: <strong>City of Philadelphia</strong></li>
+                                    <li>GL Code: <strong>6173 (Water)</strong></li>
+                                    <li>Enter the amount paid</li>
+                                    <li>Include confirmation number in description</li>
+                                    <li>Attach the receipt/screenshot</li>
+                                </ol>
+                            </div>
+                            <div style="background:var(--success-light); border-radius:8px; padding:14px; border-left:4px solid var(--success);">
+                                <div style="font-weight:700; color:var(--text); margin-bottom:6px;">Step 3: Bill the Tenant in AppFolio</div>
+                                <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8; font-size:13px;">
+                                    <li>Search the property and find the tenant</li>
+                                    <li>Click <strong>Enter Charge</strong></li>
+                                    <li>GL Code: <strong>4320 (Tenant Water Bill — Income)</strong></li>
+                                    <li>Enter the same amount</li>
+                                    <li>Note: This is an Income GL, not Expense</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: VENDOR INVOICES -->
+                <div class="subtab-content" data-subtab="vendor-inv">
+                    <div class="panel">
+                        <div class="panel-title">🔧 Vendor Invoice & Maintenance Billing</div>
+                        <p style="color: var(--text-sm); margin-bottom: 14px;">After a maintenance job is completed and confirmed by both vendor and tenant:</p>
+                        <ol style="margin-left:18px; color:var(--text-sm); line-height:1.8;">
+                            <li>In the work order, go to <strong>ACTION → Create Bill → Billable Items</strong></li>
+                            <li>GL Code: <strong>6147 (Repairs-Other)</strong> for most maintenance</li>
+                            <li>Enter the vendor invoice amount</li>
+                            <li>Verify the bill appears in <strong>Accounting → Payables</strong></li>
+                            <li><strong>Do NOT check "No Bill Needed"</strong> — always create the bill</li>
+                            <li>Vendor invoices are paid on the <strong>5th and 20th of each month</strong> billing cycle</li>
+                        </ol>
+                        <div style="background:var(--warning-light); border-radius:8px; padding:12px; margin-top:12px;">
+                            <div style="font-weight:600; color:var(--warning); font-size:13px;">⚠️ Big Bill Threshold</div>
+                            <div style="font-size:13px; color:var(--text-sm); margin-top:4px;">Any job estimated at <strong>$250+</strong> is considered a "big bill." Get vendor pricing immediately and communicate to the owner before work begins.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: RENT COLLECTION & DELINQUENCY -->
+                <div class="subtab-content active" data-subtab="delinquency">
+
+                    <!-- PROCESS GRAPHIC -->
+                    <div class="panel" style="padding:0; overflow:hidden;">
+                        <!-- Header bar -->
+                        <div style="background:var(--primary-navy); color:white; padding:14px 20px;">
+                            <div style="font-size:18px; font-weight:700;">Rent Collection & Delinquency</div>
+                            <div style="font-size:0;"></div>
+                        </div>
+                        <!-- Timeline bar -->
+                        <div style="position:relative; height:28px; background:#e5e7eb; margin:16px 20px 0;">
+                            <div style="position:absolute; left:0; top:0; width:16%; height:100%; background:var(--success); border-radius:4px 0 0 4px;"></div>
+                            <div style="position:absolute; left:16%; top:0; width:16%; height:100%; background:var(--warning);"></div>
+                            <div style="position:absolute; left:32%; top:0; width:16%; height:100%; background:var(--accent);"></div>
+                            <div style="position:absolute; left:48%; top:0; width:16%; height:100%; background:#e45b3a;"></div>
+                            <div style="position:absolute; left:64%; top:0; width:16%; height:100%; background:var(--danger);"></div>
+                            <div style="position:absolute; left:80%; top:0; width:20%; height:100%; background:#7a1a1a; border-radius:0 4px 4px 0;"></div>
+                            <!-- Day markers -->
+                            <div style="position:absolute; top:-14px; left:0; font-size:9px; font-weight:700; color:var(--muted);">1st</div>
+                            <div style="position:absolute; top:-14px; left:16%; font-size:9px; font-weight:700; color:var(--muted);">5th</div>
+                            <div style="position:absolute; top:-14px; left:32%; font-size:9px; font-weight:700; color:var(--muted);">6th</div>
+                            <div style="position:absolute; top:-14px; left:48%; font-size:9px; font-weight:700; color:var(--muted);">8th</div>
+                            <div style="position:absolute; top:-14px; left:64%; font-size:9px; font-weight:700; color:var(--muted);">10th</div>
+                            <div style="position:absolute; top:-14px; left:80%; font-size:9px; font-weight:700; color:var(--muted);">15th</div>
+                        </div>
+                        <!-- Process cards -->
+                        <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; padding:20px;">
+                            <div style="border:2px solid var(--success); border-radius:8px; padding:10px; text-align:center;">
+                                <div style="font-weight:700; font-size:12px; color:var(--success); margin-bottom:6px;">Rent Collection</div>
+                                <div style="font-size:11px; color:var(--text-sm); line-height:1.5;">Monitor incoming payments. Verify amounts posted correctly in AppFolio.</div>
+                            </div>
+                            <div style="border:2px solid var(--warning); border-radius:8px; padding:10px; text-align:center;">
+                                <div style="font-weight:700; font-size:12px; color:var(--warning); margin-bottom:6px;">Posting Errors</div>
+                                <div style="font-size:11px; color:var(--text-sm); line-height:1.5;">Identify and address discrepancies immediately. Confirm ledger accuracy.</div>
+                            </div>
+                            <div style="border:2px solid var(--accent); border-radius:8px; padding:10px; text-align:center;">
+                                <div style="font-weight:700; font-size:12px; color:var(--accent); margin-bottom:6px;">NSF / Reversals</div>
+                                <div style="font-size:11px; color:var(--text-sm); line-height:1.5;">Monitor closely. Confirm NSF fee has hit tenant ledger if a payment is reversed.</div>
+                            </div>
+                            <div style="border:2px solid #e45b3a; border-radius:8px; padding:10px; text-align:center;">
+                                <div style="font-weight:700; font-size:12px; color:#e45b3a; margin-bottom:6px;">Late Notices</div>
+                                <div style="font-size:11px; color:var(--text-sm); line-height:1.5;">Escalating outreach via AppFolio texts on days 5, 6, and 8–9.</div>
+                            </div>
+                            <div style="border:2px solid var(--danger); border-radius:8px; padding:10px; text-align:center;">
+                                <div style="font-weight:700; font-size:12px; color:var(--danger); margin-bottom:6px;">Legal Action</div>
+                                <div style="font-size:11px; color:var(--text-sm); line-height:1.5;">10-Day Notice to Quit (Day 10). Eviction process begins Day 15 if unresolved.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OUTREACH TIMELINE -->
+                    <div class="panel">
+                        <div class="panel-title">📱 Outreach Timeline</div>
+                        <p style="color:var(--text-sm); margin-bottom:16px;">All texts are sent through AppFolio. Follow this exact schedule each month for any tenant with an unpaid balance.</p>
+
+                        <!-- Day 5 -->
+                        <div style="display:flex; gap:14px; margin-bottom:16px;">
+                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:var(--warning-light); border:2px solid var(--warning); display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                                <div style="font-size:9px; font-weight:600; color:var(--warning); line-height:1;">DAY</div>
+                                <div style="font-size:20px; font-weight:800; color:var(--warning); line-height:1;">5</div>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--text);">Friendly Reminder — Late Fee Warning</div>
+                                <div style="background:var(--warning-light); border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid var(--warning);">
+                                    Hi <strong>[Tenant Name]</strong>, this is <strong>[NAME]</strong> from the property management company. I'm reaching out because we noticed your rent payment hasn't been received yet. This is just a reminder that the late fee will automatically hit your account tomorrow. Please let us know if you have any questions.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Day 6 -->
+                        <div style="display:flex; gap:14px; margin-bottom:16px;">
+                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:var(--accent-light); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                                <div style="font-size:9px; font-weight:600; color:var(--accent); line-height:1;">DAY</div>
+                                <div style="font-size:20px; font-weight:800; color:var(--accent); line-height:1;">6</div>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--text);">Late Fee Applied — Payment Update Request</div>
+                                <div style="background:var(--accent-light); border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid var(--accent);">
+                                    Hi <strong>[Tenant Name]</strong>, this is <strong>[NAME]</strong> from the property management company. I'm reaching out your rent payment hasn't been received yet. A late fee has hit your ledger. Please update us on when we can expect your account to be paid.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Day 8/9 -->
+                        <div style="display:flex; gap:14px; margin-bottom:16px;">
+                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:#fde8e4; border:2px solid #e45b3a; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                                <div style="font-size:9px; font-weight:600; color:#e45b3a; line-height:1;">DAY</div>
+                                <div style="font-size:18px; font-weight:800; color:#e45b3a; line-height:1;">8/9</div>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--text);">Urgent — 10-Day Notice Warning</div>
+                                <div style="background:#fde8e4; border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid #e45b3a;">
+                                    Hi <strong>[Tenant Name]</strong>, this is <strong>[NAME]</strong> from the property management company. I'm following up regarding your past-due rent. We have still not received your payment and this matter is becoming urgent. Please be advised that unless we receive your rent payment you will automatically receive a 10-Day Notice to Quit. Please update us on the status of your payment as quickly as possible. Thank you.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Day 10 -->
+                        <div style="display:flex; gap:14px; margin-bottom:16px;">
+                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:var(--danger-light); border:2px solid var(--danger); display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                                <div style="font-size:9px; font-weight:600; color:var(--danger); line-height:1;">DAY</div>
+                                <div style="font-size:20px; font-weight:800; color:var(--danger); line-height:1;">10</div>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--danger);">10-Day Notice to Quit</div>
+                                <div style="background:var(--danger-light); border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid var(--danger);">
+                                    <strong>10-Day Notice to Quit must be sent.</strong> Confirm with Property Manager whether to submit directly through AppFolio or send via certified mail. Do not skip this step — document the method used and keep confirmation on file.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Day 15 -->
+                        <div style="display:flex; gap:14px;">
+                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:#f0d0d0; border:2px solid #7a1a1a; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                                <div style="font-size:9px; font-weight:600; color:#7a1a1a; line-height:1;">DAY</div>
+                                <div style="font-size:20px; font-weight:800; color:#7a1a1a; line-height:1;">15</div>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:#7a1a1a;">Eviction Diversion / Eviction Process</div>
+                                <div style="background:#f0d0d0; border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid #7a1a1a;">
+                                    <strong>Eviction Diversion or Eviction Process must begin</strong> unless the Property Manager has provided an alternative arrangement. Escalate immediately — do not delay past this date without explicit PM authorization.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SOPs & DOCS PAGE -->
+            <div class="page" data-page="sops">
+                <div class="panel">
+                    <div class="panel-title">📚 SOPs & Documentation</div>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button class="btn btn-sop" onclick="expandSOP(this)">1. Leasing & Lease Renewals</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">2. Listings & Marketing</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">3. Lead Management</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">4. Maintenance & Work Orders</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">5. Onboarding</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">6. Rental License Management</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">7. Utility Management</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">8. Move-In / Move-Out Procedures</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">9. Tenant & Owner Communication</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">10. Inspection Protocol</button>
+                        <button class="btn btn-sop" onclick="expandSOP(this)">11. Finance & Billing</button>
+                    </div>
+                    <div id="sopDetails" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- COMPLIANCE PAGE -->
+            <div class="page" data-page="compliance">
+                <div class="panel">
+                    <div class="panel-title">⚖️ Compliance & Fair Housing</div>
+                    <p style="margin-bottom: 16px; color: var(--text-sm); line-height: 1.6;">As the Assistant PM, you are responsible for ensuring all operations comply with fair housing laws, local regulations, and company policies. Any questions regarding compliance or fair housing should be escalated to the Property Manager immediately.</p>
+
+                    <div class="panel-subtitle">Fair Housing Requirements</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8; margin-bottom: 16px;">
+                        <li>Apply consistent screening criteria to all applicants</li>
+                        <li>Never discriminate based on protected classes (race, color, religion, national origin, sex, familial status, disability)</li>
+                        <li>Document all decisions with objective reasons</li>
+                        <li>Reasonable accommodation requests go to Property Manager immediately</li>
+                        <li>Service animal requests must be reviewed and documented</li>
+                        <li>Never discuss fair housing violations with tenants or staff — escalate immediately</li>
+                    </ul>
+
+                    <div class="panel-subtitle">Lease & Rental Compliance</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8; margin-bottom: 16px;">
+                        <li>All leases must be reviewed by Property Manager before execution</li>
+                        <li>Security deposit limits and handling per state law</li>
+                        <li>Rent increase notice requirements (typically 30-60 days)</li>
+                        <li>Move-out inspection and deposit return within state-required timeframe</li>
+                        <li>Proper notice and cure periods for lease violations</li>
+                        <li>Eviction procedures (when applicable, handled by Property Manager)</li>
+                    </ul>
+
+                    <div class="panel-subtitle">Property & Safety Compliance</div>
+                    <ul style="margin-left: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <li>Smoke detectors present and functional in all units and common areas</li>
+                        <li>CO detectors present and functional (where required by local law)</li>
+                        <li>Fire extinguishers in common areas</li>
+                        <li>Habitable conditions: heat, water, electricity, roof, floors, windows</li>
+                        <li>Lead paint disclosures for pre-1978 properties</li>
+                        <li>Working locks on all entry doors and windows</li>
+                        <li>Proper egress in bedrooms (operable windows or door)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- CONTACTS & LINKS PAGE -->
+            <div class="page" data-page="contacts">
+                <div class="panel">
+                    <div class="panel-title">👥 Key Contacts & Resources</div>
+                    <div class="panel-subtitle">Internal Contacts</div>
+                    <div style="margin-bottom: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <strong>Property Manager:</strong> [Contact TBD]<br>
+                        <strong>EPG Management:</strong> [Contact TBD]<br>
+                        <strong>Accounting:</strong> [Contact TBD]
+                    </div>
+
+                    <div class="panel-subtitle">Systems & Portals</div>
+                    <div style="margin-bottom: 20px; color: var(--text-sm); line-height: 1.8;">
+                        <strong>AppFolio:</strong> Primary property management software — all tenants, leases, work orders, communications<br>
+                        <strong>DocuSign:</strong> E-signature portal for leases and official documents<br>
+                        <strong>Zillow:</strong> Listing syndication and lead generation<br>
+                        <strong>Apartments.com:</strong> Listing syndication and lead generation
+                    </div>
+
+                    <div class="panel-subtitle">Vendor Categories</div>
+                    <div style="color: var(--text-sm); line-height: 1.8;">
+                        <strong>Plumbing, HVAC, Electrical, Pest Control, Cleaning, Painting, Landscaping, Appliance Repair</strong><br>
+                        [Vendor lists to be maintained in AppFolio and shared by Property Manager]
+                    </div>
+                </div>
+            </div>
+
+            <!-- GLOSSARY PAGE -->
+            <div class="page" data-page="glossary">
+                <div class="panel">
+                    <div class="panel-title">❓ Glossary & FAQs</div>
+
+                    <div class="panel-subtitle">Glossary</div>
+                    <div id="glossaryAccordion"></div>
+
+                    <div class="panel-subtitle" style="margin-top: 24px;">Frequently Asked Questions</div>
+                    <div id="faqAccordion"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SUPABASE INIT
+        // ============================================
+        const SUPABASE_URL = 'https://kwhcdkmkfpsfldivxnvf.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3aGNka21rZnBzZmxkaXZ4bnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDMwNTAsImV4cCI6MjA5MDQxOTA1MH0.zbRMRPAOP5bZQ4I5ejxL8hwCFC8R5XJIyzuHiw5lRqA';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ============================================
+        // AUTH
+        // ============================================
+        let isSignUp = false;
+
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('authBtn').textContent = isSignUp ? 'Create Account' : 'Sign In';
+            document.getElementById('toggleText').textContent = isSignUp ? 'Already have an account?' : "Don't have an account?";
+            document.getElementById('toggleLink').textContent = isSignUp ? 'Sign In' : 'Sign Up';
+            document.getElementById('loginError').textContent = '';
+        }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const errorEl = document.getElementById('loginError');
+            const btn = document.getElementById('authBtn');
+            errorEl.textContent = '';
+            btn.disabled = true;
+            btn.textContent = isSignUp ? 'Creating account...' : 'Signing in...';
+
+            try {
+                let result;
+                if (isSignUp) {
+                    result = await supabase.auth.signUp({ email, password });
+                } else {
+                    result = await supabase.auth.signInWithPassword({ email, password });
+                }
+                if (result.error) throw result.error;
+
+                if (isSignUp && result.data?.user?.identities?.length === 0) {
+                    errorEl.textContent = 'Account already exists. Try signing in.';
+                } else if (isSignUp) {
+                    errorEl.style.color = 'var(--success)';
+                    errorEl.textContent = 'Account created! Check your email to confirm, then sign in.';
+                }
+                // onAuthStateChange will handle showing the app
+            } catch (err) {
+                errorEl.style.color = 'var(--danger)';
+                errorEl.textContent = err.message || 'Authentication failed';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = isSignUp ? 'Create Account' : 'Sign In';
+            }
+        }
+
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            document.getElementById('loginOverlay').classList.remove('hidden');
+        }
+
+        // Listen for auth state changes
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session) {
+                // User is logged in — show app
+                document.getElementById('loginOverlay').classList.add('hidden');
+                const email = session.user.email || '';
+                const initials = email.split('@')[0].slice(0,2).toUpperCase();
+                document.getElementById('userAvatar').textContent = initials;
+                document.getElementById('userName').textContent = email.split('@')[0];
+                await initApp();
+            } else {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+            }
+        });
+
+        // ============================================
+        // STATE MANAGEMENT (Supabase)
+        // ============================================
+        let state = {
+            tasks: [],
+            approvals: [],
+            waiting: [],
+            meetings: [],
+            urgent: [],
+            checklists: {},
+            eodReports: [],
+            workOrders: [],
+            onboardingProperties: [],
+            onboardingTenants: [],
+            onboardingOwners: []
+        };
+
+        let saveTimeout = null;
+
+        function saveState(newState) {
+            state = newState;
+            // Debounce saves to avoid hammering the database
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                try {
+                    await supabase.from('hub_state').upsert({
+                        id: 'epg_main',
+                        state_data: state,
+                        updated_at: new Date().toISOString()
+                    });
+                } catch (err) {
+                    console.error('Save failed:', err);
+                }
+            }, 400);
+        }
+
+        async function loadState() {
+            try {
+                const { data, error } = await supabase
+                    .from('hub_state')
+                    .select('state_data')
+                    .eq('id', 'epg_main')
+                    .single();
+                if (data && data.state_data) {
+                    state = { ...state, ...data.state_data };
+                }
+            } catch (err) {
+                console.error('Load failed, using defaults:', err);
+            }
+            // Ensure all arrays exist
+            if (!state.urgent) state.urgent = [];
+            if (!state.workOrders) state.workOrders = [];
+            if (!state.onboardingProperties) state.onboardingProperties = [];
+            if (!state.onboardingTenants) state.onboardingTenants = [];
+            if (!state.onboardingOwners) state.onboardingOwners = [];
+        }
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
+        function navigateTo(pageName) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            const activePage = document.querySelector(`.page[data-page="${pageName}"]`);
+            if (activePage) {
+                activePage.classList.add('active');
+            }
+
+            const activeNav = document.querySelector(`.nav-item[data-page="${pageName}"]`);
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
+
+            // Scroll content to top
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) contentArea.scrollTop = 0;
+        }
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const pageName = this.dataset.page;
+                navigateTo(pageName);
+            });
+        });
+
+        // ============================================
+        // TASK MANAGEMENT
+        // ============================================
+        function renderTaskList(container, tasks, type) {
+            if (tasks.length === 0) {
+                container.innerHTML = `<p style="color: var(--text-sm); padding: 16px; text-align: center;">No ${type}s yet</p>`;
+                return;
+            }
+
+            container.innerHTML = tasks.map((task, idx) => `
+                <div style="padding: 12px; background: var(--bg); border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: var(--text); flex: 1;">${task.title}</span>
+                    <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="removeTask('${type}', ${idx})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function openAddTaskModal() {
+            const title = prompt('Enter task title:');
+            if (title) {
+                state.tasks.push({ title });
+                saveState(state);
+                renderDashboard();
+            }
+        }
+
+        function removeTask(type, idx) {
+            if (type === 'Task') {
+                state.tasks.splice(idx, 1);
+            } else if (type === 'Approval') {
+                state.approvals.splice(idx, 1);
+            } else if (type === 'Waiting') {
+                state.waiting.splice(idx, 1);
+            } else if (type === 'Meeting') {
+                state.meetings.splice(idx, 1);
+            }
+            saveState(state);
+            renderDashboard();
+        }
+
+        // ============================================
+        // END OF DAY
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const eodForm = document.getElementById('eodForm');
+            if (eodForm) {
+                eodForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const report = {
+                        date: document.getElementById('eodDate').value,
+                        completed: document.getElementById('eodCompleted').value,
+                        inProgress: document.getElementById('eodInProgress').value,
+                        learned: document.getElementById('eodLearned').value,
+                        priorities: document.getElementById('eodPriorities').value,
+                        blocked: document.getElementById('eodBlocked').value,
+                        notes: document.getElementById('eodNotes').value
+                    };
+                    state.eodReports.push(report);
+                    saveState(state);
+                    renderEODHistory();
+
+                    // Build email body
+                    const eodRecipient = 'cole@heycolerealestate.com,elan@elkaimpropertygroup.com';
+                    let body = 'EOD REPORT — ' + report.date + '\n\n';
+                    body += 'COMPLETED TODAY:\n' + report.completed + '\n\n';
+                    body += 'CURRENTLY IN PROGRESS:\n' + report.inProgress + '\n\n';
+                    if (report.learned) body += 'WHAT I LEARNED:\n' + report.learned + '\n\n';
+                    body += "TOMORROW'S TOP 3 PRIORITIES:\n" + report.priorities + '\n\n';
+                    if (report.blocked) body += 'WAITING ON ELAN/COLE:\n' + report.blocked + '\n\n';
+                    if (report.notes) body += 'ADDITIONAL NOTES:\n' + report.notes + '\n\n';
+
+                    const subject = 'EOD Report — ' + report.date;
+                    const mailtoLink = 'mailto:' + encodeURIComponent(eodRecipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+                    window.open(mailtoLink, '_blank');
+
+                    ['eodDate','eodCompleted','eodInProgress','eodLearned','eodPriorities','eodBlocked','eodNotes'].forEach(id => document.getElementById(id).value = '');
+                });
+            }
+        });
+
+        function renderEODHistory() {
+            const history = document.getElementById('eodHistory');
+            if (!history) return;
+
+            if (state.eodReports.length === 0) {
+                history.innerHTML = '<p style="color: var(--text-sm); text-align: center; padding: 20px;">No reports yet</p>';
+                return;
+            }
+
+            history.innerHTML = state.eodReports.slice().reverse().map(report => `
+                <div style="padding: 16px; background: var(--bg); border-radius: var(--radius); margin-bottom: 12px;">
+                    <div style="font-weight: 600; margin-bottom: 10px; font-size: 14px;">${report.date}</div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div>
+                            <div style="font-size:11px; font-weight:700; color:var(--success); text-transform:uppercase; margin-bottom:4px;">Completed</div>
+                            <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.completed || report.summary || ''}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; margin-bottom:4px;">In Progress</div>
+                            <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.inProgress || ''}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:11px; font-weight:700; color:var(--primary-navy); text-transform:uppercase; margin-bottom:4px;">Learned</div>
+                            <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.learned || ''}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:11px; font-weight:700; color:var(--warning); text-transform:uppercase; margin-bottom:4px;">Tomorrow's Top 3</div>
+                            <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.priorities || ''}</div>
+                        </div>
+                    </div>
+                    ${report.blocked ? '<div style="margin-top:10px;"><div style="font-size:11px; font-weight:700; color:var(--danger); text-transform:uppercase; margin-bottom:4px;">Waiting on Elan/Cole</div><div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">' + report.blocked + '</div></div>' : ''}
+                    ${report.notes ? '<div style="margin-top:10px;"><div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Notes</div><div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">' + report.notes + '</div></div>' : ''}
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // URGENCY MANAGEMENT
+        // ============================================
+        function openAddUrgentModal() {
+            const title = prompt('What needs to be done urgently?');
+            if (title) {
+                const priority = confirm('Is this an EMERGENCY? (OK = Emergency, Cancel = Must Do Today)');
+                state.urgent.push({ title, priority: priority ? 'emergency' : 'today' });
+                saveState(state);
+                renderDashboard();
+            }
+        }
+
+        function removeUrgent(idx) {
+            state.urgent.splice(idx, 1);
+            saveState(state);
+            renderDashboard();
+        }
+
+        function renderUrgentList() {
+            const container = document.getElementById('urgency-list');
+            if (!container) return;
+            if (!state.urgent || state.urgent.length === 0) {
+                container.innerHTML = '<div class="urgency-empty">No urgent items — you\'re clear.</div>';
+                return;
+            }
+            container.innerHTML = state.urgent.map((item, idx) => `
+                <div class="urgency-item ${item.priority === 'today' ? 'warning-item' : ''}">
+                    <span class="urgency-tag ${item.priority === 'today' ? 'warning' : ''}">${item.priority === 'emergency' ? '🔴 EMERGENCY' : '🟡 TODAY'}</span>
+                    <span style="flex:1; font-size:13px;">${item.title}</span>
+                    <button onclick="removeUrgent(${idx})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // DASHBOARD RENDERING
+        // ============================================
+        function renderDashboard() {
+            // Date display
+            const dateEl = document.getElementById('dashDate');
+            if (dateEl) {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateEl.textContent = now.toLocaleDateString('en-US', options);
+            }
+
+            document.getElementById('stat-tasks').textContent = state.tasks.length;
+            document.getElementById('stat-approvals').textContent = state.approvals.length;
+            document.getElementById('stat-waiting').textContent = state.waiting.length;
+            document.getElementById('stat-meetings').textContent = state.meetings.length;
+
+            renderUrgentList();
+            renderTaskList(document.getElementById('dashboard-tasks'), state.tasks.slice(0, 3), 'Task');
+            renderTaskList(document.getElementById('dashboard-approvals'), state.approvals.slice(0, 3), 'Approval');
+            renderTaskList(document.getElementById('dashboard-waiting'), state.waiting.slice(0, 3), 'Waiting');
+            renderTaskList(document.getElementById('dashboard-meetings'), state.meetings.slice(0, 3), 'Meeting');
+        }
+
+        // ============================================
+        // CHECKLISTS
+        // ============================================
+        const checklistItems = {
+            daily: [
+                'Review yourfriends@epgmgmt.com inbox for urgent issues',
+                'Check Google Voice number for texts or voicemails that need to be addressed',
+                'Add all new rental leads in AppFolio and assign to Leasing Agent',
+                'Process new maintenance requests — assign work orders needed in AppFolio',
+                'Follow up on open work orders',
+                'Process any new rental applications and follow up on any outstanding documents',
+                'Stay diligent checking AppFolio texts — if Diana texts a tenant with no response and you text them, only you get notified. Always check for texts others need to know about',
+                'Respond to all tenant and owner communications promptly',
+                'Clear the inbox as much as possible — if you don\'t know how to handle something or answer somebody, that\'s ok, just ask',
+                'Submit End of Day report'
+            ],
+            weekly: [
+                'Review all active lease applications and move pipeline forward',
+                'Audit open work orders — flag anything stale over 5 business days',
+                'Pull lease expiration report — follow up on renewals due within 90 days',
+                'Review listing performance — refresh any stale listings',
+                'Check rental license renewal deadlines',
+                'Verify utility transfers for recent move-ins/move-outs',
+                'Schedule upcoming inspections',
+                'Review lead conversion metrics',
+                'Friday: Email cole@heycolerealestate.com a summary of the week'
+            ],
+            newLease: [
+                'Verify application is complete in AppFolio',
+                'Run tenant screening (credit, criminal, eviction)',
+                'Verify income documentation (3x rent minimum)',
+                'Check landlord references',
+                'Review screening results with Property Manager',
+                'Prepare lease agreement in AppFolio',
+                'Send lease for e-signature via DocuSign',
+                'Collect first month\'s rent and security deposit',
+                'Schedule move-in date and inspection',
+                'Create tenant profile in AppFolio',
+                'Send welcome packet and move-in instructions'
+            ],
+            renewal: [
+                'Pull 90-day lease expiration report from AppFolio',
+                'Review current rent vs market rate',
+                'Get Property Manager approval on renewal terms',
+                'Send renewal notice to tenant',
+                'Follow up on unsigned renewals at 45 days',
+                'Process signed renewal in AppFolio',
+                'Update rent amount if changed',
+                'File renewal documentation'
+            ],
+            newListing: [
+                'Confirm unit is market-ready or schedule turnover timeline',
+                'Get approved rent amount from Property Manager',
+                'Take listing photos (minimum: exterior, kitchen, bathroom, bedrooms, living area)',
+                'Write listing description highlighting key features',
+                'Create listing in AppFolio',
+                'Verify syndication to third-party sites',
+                'Post to social media channels',
+                'Add to showing schedule',
+                'Set up auto-responses for inquiries'
+            ],
+            showing: [
+                'Confirm showing time with prospect (text/email)',
+                'Ensure unit is clean, lights on, HVAC running',
+                'Bring application materials / share AppFolio application link',
+                'Greet prospect and conduct tour',
+                'Highlight key features and nearby amenities',
+                'Answer questions honestly (Fair Housing compliant)',
+                'Lock all doors and windows after showing',
+                'Log showing outcome in AppFolio',
+                'Follow up with prospect within 24 hours'
+            ],
+            leadTracking: [
+                'Review all new inquiries from the past week',
+                'Follow up on any unanswered inquiries',
+                'Update lead statuses in AppFolio',
+                'Review showing conversion rate',
+                'Identify top sources of leads',
+                'Report weekly lead activity to Property Manager'
+            ],
+            maintenance: [
+                'Receive request and open work order in AppFolio',
+                'Check if multiple items need separate vendors — create separate Service Requests',
+                'Contact tenant for discovery — get photos, confirm details and access',
+                'Determine if tenant-responsible per lease terms',
+                'Create New Service Request: Type Internal→Resident, priority, description, vendor instructions',
+                'If $250+ (big bill): Get vendor pricing, submit proposal to owner for approval',
+                'For QueenStatus 360/Erika: $100+ needs owner approval, $500+ Elan reviews',
+                'For V2 Properties: Submit via Basecamp instead of standard flow',
+                'Assign vendor — dispatch via AppFolio Portal, Google Voice chat, or schedule on behalf',
+                'Provide tenant 24-hour entry notice before vendor access',
+                'Follow up minimum 1x per day on all open work orders',
+                'Confirm completion with both vendor AND tenant',
+                'Determine at-fault party for billing',
+                'Create bill: ACTION → Create Bill → Billable Items (GL 6147)',
+                'Close: ACTION → Mark Job Done (never check "No Bill Needed")',
+                'Verify bill in Accounting → Payables (pay cycle: 5th and 20th)'
+            ],
+            violation: [
+                'Identify and document the violation (date, unit, description, photos)',
+                'Review lease for applicable clause',
+                'Draft violation notice with cure period',
+                'Get Property Manager approval before sending',
+                'Deliver notice to tenant (email + posted at unit)',
+                'Log notice in AppFolio with copy attached',
+                'Schedule follow-up after cure period expires',
+                'If cured: Document resolution, close issue',
+                'If not cured: Escalate to Property Manager for next steps'
+            ],
+            moveIn: [
+                'Verify lease is fully signed in AppFolio',
+                'Confirm all move-in funds received (first month, security deposit, any fees)',
+                'Conduct move-in inspection — photograph every room, note all existing conditions',
+                'Have tenant sign move-in condition report',
+                'Deliver welcome packet (emergency contacts, maintenance request process, community rules, trash schedule, parking)',
+                'Set up tenant portal access in AppFolio — send login instructions',
+                'Deliver keys, mailbox key, garage remote, access fobs',
+                'Walk tenant through property-specific items (thermostat, alarm system, laundry, parking)',
+                'Confirm utility transfers are complete',
+                'Update unit status in AppFolio to "Occupied"',
+                'Schedule 30-day check-in with tenant'
+            ],
+            moveOut: [
+                'Confirm move-out date in writing (email or notice)',
+                'Send move-out instructions and expectations to tenant (cleaning requirements, key return, forwarding address)',
+                'Schedule move-out inspection',
+                'Conduct move-out inspection — photograph every room',
+                'Compare move-in vs move-out condition reports side by side',
+                'Collect all keys, remotes, fobs, and access devices',
+                'Document any damages beyond normal wear and tear with photos',
+                'Prepare security deposit disposition with itemized deductions',
+                'Submit disposition to Property Manager for approval',
+                'Send itemized statement and deposit refund within state-required timeframe',
+                'Update unit status in AppFolio to "Vacant"',
+                'Coordinate turnover (cleaning, painting, repairs) with vendors',
+                'Begin listing process if no new tenant assigned'
+            ],
+            propertyOnboarding: [
+                'Receive signed management agreement',
+                'Set up property in AppFolio (address, unit details, photos, owner info)',
+                'Obtain copies of all existing leases',
+                'Enter tenant information into AppFolio',
+                'Collect security deposit records and transfer to trust account',
+                'Obtain current rent roll and payment history',
+                'Schedule property inspection',
+                'Introduce yourself to tenants (welcome letter from new management)',
+                'Set up utility accounts (confirm owner vs tenant responsibility)',
+                'Obtain rental license and verify compliance',
+                'File all documents in property folder',
+                'Confirm insurance requirements (owner\'s policy, require renter\'s insurance if applicable)'
+            ],
+            tenantOnboarding: [
+                'Lease fully signed and filed in AppFolio',
+                'All move-in funds collected (first month, security deposit, fees)',
+                'Tenant portal set up in AppFolio — send login instructions',
+                'Move-in inspection completed and signed',
+                'Welcome packet delivered (emergency contacts, maintenance request process, community rules, trash/recycling schedule, parking info)',
+                'Keys and access devices delivered',
+                'Introduce to any on-site staff or neighbors (if applicable)',
+                'Utility transfer confirmed (tenant responsible utilities)',
+                'Set up recurring rent payment in AppFolio',
+                'Schedule 30-day check-in call/email'
+            ],
+            ownerOnboarding: [
+                'Management agreement fully executed',
+                'Owner portal set up in AppFolio — send login instructions',
+                'Collect owner banking info for distributions',
+                'Confirm reporting preferences (monthly statements, maintenance approvals)',
+                'Set communication expectations (response times, preferred contact method)',
+                'Review property condition and any immediate maintenance needs',
+                'Discuss budget for improvements and maintenance reserve',
+                'Confirm insurance requirements and obtain copy of owner\'s policy',
+                'Schedule introductory call with Property Manager'
+            ],
+            rentalLicense: [
+                'Identify municipality requirements for the property',
+                'Check current license status — new application vs renewal',
+                'Schedule required inspection if applicable',
+                'Prepare property for inspection (smoke detectors, CO detectors, egress, safety)',
+                'Submit application with required documents and fee',
+                'Track application status',
+                'Receive and file approved license',
+                'Upload license copy to AppFolio property record',
+                'Set renewal reminder 90 days before expiration',
+                'Bill owner for license fee if per management agreement'
+            ],
+            utilityMoveIn: [
+                'Confirm which utilities are tenant responsibility per lease',
+                'Provide tenant with utility company contact info and account numbers',
+                'Set transfer deadline (typically move-in date)',
+                'Verify tenant has transferred utilities into their name',
+                'If tenant fails to transfer, follow up and notify Property Manager',
+                'Document in AppFolio'
+            ],
+            utilityMoveOut: [
+                'Notify tenant to schedule utility disconnection for move-out date',
+                'Verify utilities are not disconnected early (protect property)',
+                'Transfer owner-paid utilities back to owner/management name',
+                'Confirm final meter readings',
+                'Set up vacancy utility service if needed',
+                'Document in AppFolio'
+            ],
+            inspection: [
+                'EXTERIOR: Roof condition (visible damage, missing shingles)',
+                'EXTERIOR: Gutters and downspouts (clean, attached, draining properly)',
+                'EXTERIOR: Siding/exterior walls (damage, peeling paint, cracks)',
+                'EXTERIOR: Windows (seals intact, screens, operation)',
+                'EXTERIOR: Doors (locks working, weatherstripping, condition)',
+                'EXTERIOR: Landscaping (overgrown, trip hazards, drainage)',
+                'EXTERIOR: Parking area (condition, lighting, signage)',
+                'EXTERIOR: Mailbox (secure, labeled)',
+                'INTERIOR: Walls and ceilings (damage, stains, mold)',
+                'INTERIOR: Floors (damage, cleanliness, wear)',
+                'INTERIOR: Doors and locks (operation, condition)',
+                'INTERIOR: Light fixtures and switches (working)',
+                'INTERIOR: Windows (operation, locks, blinds/screens)',
+                'INTERIOR: Smoke detectors (present, tested, battery)',
+                'INTERIOR: CO detectors (present, tested, battery)',
+                'KITCHEN: Appliances (stove, oven, refrigerator, dishwasher, microwave — all functioning)',
+                'KITCHEN: Cabinets and countertops (condition, damage)',
+                'KITCHEN: Sink and faucet (leaks, operation, disposal)',
+                'KITCHEN: Under-sink (leaks, mold, pests)',
+                'BATHROOM: Toilet (flush, leaks, secure)',
+                'BATHROOM: Sink and faucet (leaks, operation)',
+                'BATHROOM: Tub/shower (drain, caulking, tile, showerhead)',
+                'BATHROOM: Ventilation fan (working)',
+                'BATHROOM: Under-sink (leaks, mold)',
+                'MECHANICALS: HVAC system (operational, filter condition, last service date)',
+                'MECHANICALS: Water heater (condition, temperature setting, age)',
+                'MECHANICALS: Electrical panel (labeled, accessible, no hazards)',
+                'MECHANICALS: Plumbing (visible leaks, water pressure)',
+                'MECHANICALS: Laundry hookups (if applicable — supply lines, dryer vent)',
+                'SAFETY: Fire extinguisher (present, charged, accessible)',
+                'SAFETY: Handrails (secure on all stairs)',
+                'SAFETY: Egress (bedroom windows operable, not blocked)',
+                'SAFETY: Pest evidence (droppings, damage, traps)',
+                'SAFETY: Overall cleanliness and housekeeping'
+            ]
+        };
+
+        function populateChecklists() {
+            Object.keys(checklistItems).forEach(key => {
+                const container = document.getElementById(`${key}Checklist`);
+                if (container) {
+                    container.innerHTML = checklistItems[key].map((item, idx) => {
+                        const checkboxId = `${key}-${idx}`;
+                        const isChecked = state.checklists[checkboxId] || false;
+                        return `
+                            <label class="checklist-item ${isChecked ? 'checked' : ''}">
+                                <input type="checkbox" class="checkbox-input" id="${checkboxId}"
+                                    ${isChecked ? 'checked' : ''}
+                                    onchange="toggleChecklistItem('${checkboxId}')">
+                                <span class="checklist-text">${item}</span>
+                            </label>
+                        `;
+                    }).join('');
+                }
+            });
+        }
+
+        function toggleChecklistItem(id) {
+            state.checklists[id] = document.getElementById(id).checked;
+            saveState(state);
+        }
+
+        function resetChecklist(key) {
+            Object.keys(state.checklists).forEach(k => {
+                if (k.startsWith(key + '-')) {
+                    delete state.checklists[k];
+                }
+            });
+            saveState(state);
+            populateChecklists();
+        }
+
+        // ============================================
+        // WORK ORDER MANAGEMENT
+        // ============================================
+        const workOrderSteps = [
+            'Receive request — open work order in AppFolio',
+            'Check if multiple items need separate vendors (create separate Service Requests if yes)',
+            'Contact tenant for discovery — get photos, confirm details and access',
+            'Determine tenant responsibility (check lease) — if tenant-responsible, communicate',
+            'Create New Service Request: Type Internal→Resident, set priority, add description + vendor instructions',
+            'If $250+: Get vendor pricing immediately, submit proposal to owner for approval',
+            'Assign vendor — dispatch via AppFolio Portal, Google Voice chat, or schedule on behalf',
+            'Provide tenant 24-hour entry notice',
+            'Follow up minimum 1x per day until resolved',
+            'Confirm completion with vendor AND tenant — get before/after photos',
+            'Determine at-fault party for billing purposes',
+            'Create bill: ACTION → Create Bill → Billable Items (GL 6147 Repairs-Other)',
+            'Close work order: ACTION → Mark Job Done (do NOT check "No Bill Needed")',
+            'Verify bill in Accounting → Payables (paid on 5th/20th cycle)'
+        ];
+
+        function addWorkOrder() {
+            const address = prompt('Property address:');
+            if (!address) return;
+            const unit = prompt('Unit # (leave blank if single-family):') || '';
+            const issue = prompt('Describe the issue:');
+            if (!issue) return;
+            const priority = prompt('Priority: emergency, urgent, routine, or scheduled?') || 'routine';
+
+            const wo = {
+                id: Date.now(),
+                address: address,
+                unit: unit,
+                issue: issue,
+                priority: priority.toLowerCase(),
+                dateCreated: new Date().toLocaleDateString(),
+                steps: workOrderSteps.map(s => ({ text: s, done: false })),
+                collapsed: true
+            };
+            state.workOrders.push(wo);
+            saveState(state);
+            renderWorkOrders();
+        }
+
+        function toggleWorkOrder(id) {
+            const wo = state.workOrders.find(w => w.id === id);
+            if (wo) {
+                wo.collapsed = !wo.collapsed;
+                saveState(state);
+                renderWorkOrders();
+            }
+        }
+
+        function toggleWorkOrderStep(woId, stepIdx) {
+            const wo = state.workOrders.find(w => w.id === woId);
+            if (wo) {
+                wo.steps[stepIdx].done = !wo.steps[stepIdx].done;
+                saveState(state);
+                renderWorkOrders();
+            }
+        }
+
+        function removeWorkOrder(id) {
+            if (!confirm('Remove this work order?')) return;
+            state.workOrders = state.workOrders.filter(w => w.id !== id);
+            saveState(state);
+            renderWorkOrders();
+        }
+
+        function renderWorkOrders() {
+            const container = document.getElementById('workOrderList');
+            if (!container) return;
+
+            if (!state.workOrders || state.workOrders.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No active work orders. Click "+ New Work Order" to add one.</p>';
+                return;
+            }
+
+            container.innerHTML = state.workOrders.map(wo => {
+                const completedSteps = wo.steps.filter(s => s.done).length;
+                const totalSteps = wo.steps.length;
+                const pct = Math.round((completedSteps / totalSteps) * 100);
+                const priorityColors = { emergency: 'var(--danger)', urgent: 'var(--warning)', routine: 'var(--accent)', scheduled: 'var(--success)' };
+                const priorityColor = priorityColors[wo.priority] || 'var(--accent)';
+
+                const stepsHtml = wo.collapsed ? '' : `
+                    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+                        ${wo.steps.map((step, idx) => `
+                            <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleWorkOrderStep(${wo.id}, ${idx})">
+                                <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
+                                <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                return `
+                    <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid ${priorityColor};">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleWorkOrder(${wo.id})">
+                            <div style="flex:1;">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                    <span style="font-size:10px; font-weight:700; text-transform:uppercase; padding:2px 6px; border-radius:3px; background:${priorityColor}; color:white;">${wo.priority}</span>
+                                    <span style="font-weight:600; font-size:14px;">${wo.address}${wo.unit ? ' #' + wo.unit : ''}</span>
+                                </div>
+                                <div style="font-size:13px; color:var(--text-sm); margin-bottom:6px;">${wo.issue}</div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+                                        <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : 'var(--accent)'}; border-radius:3px; transition:width 0.3s;"></div>
+                                    </div>
+                                    <span style="font-size:11px; color:var(--muted); white-space:nowrap;">${completedSteps}/${totalSteps}</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px; margin-left:12px;">
+                                <span style="font-size:11px; color:var(--muted);">${wo.dateCreated}</span>
+                                <button onclick="event.stopPropagation(); removeWorkOrder(${wo.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
+                            </div>
+                        </div>
+                        ${stepsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // ONBOARDING TRACKER
+        // ============================================
+        const onboardingTemplates = {
+            property: [
+                'Receive signed management agreement',
+                'Set up property in AppFolio (address, unit details, photos, owner info)',
+                'Obtain copies of all existing leases',
+                'Enter tenant information into AppFolio',
+                'Collect security deposit records and transfer to trust account',
+                'Obtain current rent roll and payment history',
+                'Schedule property inspection',
+                'Send welcome letter to tenants (introduce new management)',
+                'Set up utility accounts (confirm owner vs tenant responsibility)',
+                'Obtain rental license and verify compliance',
+                'File all documents in property folder',
+                'Confirm insurance requirements'
+            ],
+            tenant: [
+                'Lease fully signed and filed in AppFolio',
+                'All move-in funds collected (first month, security deposit, fees)',
+                'Tenant portal set up in AppFolio — send login instructions',
+                'Move-in inspection completed and signed',
+                'Welcome packet delivered',
+                'Keys and access devices delivered',
+                'Introduce to on-site staff or neighbors (if applicable)',
+                'Utility transfer confirmed (tenant responsible utilities)',
+                'Set up recurring rent payment in AppFolio',
+                'Schedule 30-day check-in call/email'
+            ],
+            owner: [
+                'Management agreement fully executed',
+                'Owner portal set up in AppFolio — send login instructions',
+                'Collect owner banking info for distributions',
+                'Confirm reporting preferences (monthly statements, maintenance approvals)',
+                'Set communication expectations (response times, preferred contact method)',
+                'Review property condition and any immediate maintenance needs',
+                'Discuss budget for improvements and maintenance reserve',
+                'Confirm insurance requirements and obtain copy of owner\'s policy',
+                'Schedule introductory call with Property Manager'
+            ]
+        };
+
+        function addPropertyOnboarding() {
+            const address = prompt('Property address:');
+            if (!address) return;
+            if (!state.onboardingProperties) state.onboardingProperties = [];
+            state.onboardingProperties.push({
+                id: Date.now(),
+                name: address,
+                type: 'property',
+                steps: onboardingTemplates.property.map(s => ({ text: s, done: false })),
+                collapsed: true
+            });
+            saveState(state);
+            renderOnboarding();
+        }
+
+        function addTenantOnboarding() {
+            const name = prompt('Tenant name:');
+            if (!name) return;
+            const address = prompt('Property address:');
+            if (!address) return;
+            if (!state.onboardingTenants) state.onboardingTenants = [];
+            state.onboardingTenants.push({
+                id: Date.now(),
+                name: name + ' — ' + address,
+                type: 'tenant',
+                steps: onboardingTemplates.tenant.map(s => ({ text: s, done: false })),
+                collapsed: true
+            });
+            saveState(state);
+            renderOnboarding();
+        }
+
+        function addOwnerOnboarding() {
+            const name = prompt('Owner name:');
+            if (!name) return;
+            if (!state.onboardingOwners) state.onboardingOwners = [];
+            state.onboardingOwners.push({
+                id: Date.now(),
+                name: name,
+                type: 'owner',
+                steps: onboardingTemplates.owner.map(s => ({ text: s, done: false })),
+                collapsed: true
+            });
+            saveState(state);
+            renderOnboarding();
+        }
+
+        function toggleOnboarding(type, id) {
+            const list = type === 'property' ? state.onboardingProperties : type === 'tenant' ? state.onboardingTenants : state.onboardingOwners;
+            const item = list.find(i => i.id === id);
+            if (item) {
+                item.collapsed = !item.collapsed;
+                saveState(state);
+                renderOnboarding();
+            }
+        }
+
+        function toggleOnboardingStep(type, itemId, stepIdx) {
+            const list = type === 'property' ? state.onboardingProperties : type === 'tenant' ? state.onboardingTenants : state.onboardingOwners;
+            const item = list.find(i => i.id === itemId);
+            if (item) {
+                item.steps[stepIdx].done = !item.steps[stepIdx].done;
+                saveState(state);
+                renderOnboarding();
+            }
+        }
+
+        function removeOnboarding(type, id) {
+            if (!confirm('Remove this onboarding item?')) return;
+            if (type === 'property') state.onboardingProperties = state.onboardingProperties.filter(i => i.id !== id);
+            else if (type === 'tenant') state.onboardingTenants = state.onboardingTenants.filter(i => i.id !== id);
+            else state.onboardingOwners = state.onboardingOwners.filter(i => i.id !== id);
+            saveState(state);
+            renderOnboarding();
+        }
+
+        function renderOnboardingList(containerId, items, type) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (!items || items.length === 0) {
+                const labels = { property: 'properties', tenant: 'tenants', owner: 'owners' };
+                container.innerHTML = `<p style="color:var(--text-sm); text-align:center; padding:20px;">No ${labels[type]} being onboarded. Click the + button to add one.</p>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const completed = item.steps.filter(s => s.done).length;
+                const total = item.steps.length;
+                const pct = Math.round((completed / total) * 100);
+
+                const stepsHtml = item.collapsed ? '' : `
+                    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+                        ${item.steps.map((step, idx) => `
+                            <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleOnboardingStep('${type}', ${item.id}, ${idx})">
+                                <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
+                                <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                return `
+                    <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid var(--accent);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleOnboarding('${type}', ${item.id})">
+                            <div style="flex:1;">
+                                <div style="font-weight:600; font-size:14px; margin-bottom:6px;">${item.name}</div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden; max-width:200px;">
+                                        <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : 'var(--accent)'}; border-radius:3px; transition:width 0.3s;"></div>
+                                    </div>
+                                    <span style="font-size:11px; color:var(--muted);">${completed}/${total} (${pct}%)</span>
+                                </div>
+                            </div>
+                            <button onclick="event.stopPropagation(); removeOnboarding('${type}', ${item.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
+                        </div>
+                        ${stepsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderOnboarding() {
+            renderOnboardingList('propertyOnboardingList', state.onboardingProperties || [], 'property');
+            renderOnboardingList('tenantOnboardingList', state.onboardingTenants || [], 'tenant');
+            renderOnboardingList('ownerOnboardingList', state.onboardingOwners || [], 'owner');
+        }
+
+        // ============================================
+        // TENANT SCENARIOS
+        // ============================================
+        const tenantScenarios = [
+            {
+                title: 'Noise Complaint',
+                answer: 'Document the complaint with date/time. Send notice to offending tenant. Follow up in 48 hours to confirm resolution.'
+            },
+            {
+                title: 'Late Rent',
+                answer: 'Refer to lease terms and grace period. Provide payment portal link. If still late after grace period, escalate per lease terms.'
+            },
+            {
+                title: 'Maintenance Emergency',
+                answer: 'Create emergency work order in AppFolio immediately. Dispatch vendor and notify Property Manager. Document resolution.'
+            },
+            {
+                title: 'Lease Violation',
+                answer: 'Document with photos and details. Review lease clause. Draft violation notice with PM approval. Send via email + posted notice.'
+            },
+            {
+                title: 'Lease Renewal Request',
+                answer: 'Pull renewal terms from lease file. Present renewal options to tenant. Route approval to PM. Execute new lease via DocuSign.'
+            },
+            {
+                title: 'Move-Out Notice',
+                answer: 'Confirm move-out date in writing. Schedule inspection. Provide move-out checklist. Process final walkthrough and deposit return per state law.'
+            },
+            {
+                title: 'Neighbor Dispute',
+                answer: 'Hear both sides, document, mediate if possible, escalate to PM if unresolved.'
+            },
+            {
+                title: 'Request to Add Occupant',
+                answer: 'Requires lease amendment, screening of new occupant, PM approval.'
+            },
+            {
+                title: 'Pet Request',
+                answer: 'Review pet policy, collect pet deposit/fee, update lease addendum.'
+            },
+            {
+                title: 'Parking Issue',
+                answer: 'Review parking policy, issue notice if violation, document.'
+            }
+        ];
+
+        function populateScenarios() {
+            const container = document.getElementById('tenantScenariosAccordion');
+            if (!container) return;
+            container.innerHTML = tenantScenarios.map((scenario, idx) => `
+                <div class="expandable-item" id="scenario-${idx}">
+                    <div class="expandable-header" onclick="toggleAccordion('scenario-${idx}')">
+                        <span>${scenario.title}</span>
+                        <span class="expandable-toggle">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        ${scenario.answer}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // GLOSSARY
+        // ============================================
+        const glossaryTerms = [
+            {
+                term: 'AppFolio',
+                definition: 'Cloud-based property management software used for all operations including units, tenants, leases, work orders, and accounting.'
+            },
+            {
+                term: 'Work Order',
+                definition: 'A maintenance request logged in AppFolio and assigned to a vendor for completion and tracking.'
+            },
+            {
+                term: 'Lease Violation',
+                definition: 'A documented breach of lease terms requiring formal written notice and cure period before further action.'
+            },
+            {
+                term: 'Turnover',
+                definition: 'The process of preparing a unit between tenants including cleaning, repairs, inspections, and make-ready work.'
+            },
+            {
+                term: 'Security Deposit Disposition',
+                definition: 'The itemized accounting of deposit deductions and refund amount provided to tenant within state-required timeframe.'
+            },
+            {
+                term: 'Rent Roll',
+                definition: 'A report showing all units, current tenants, rent amounts, lease expiration dates, and occupancy status.'
+            },
+            {
+                term: 'Lease Renewal',
+                definition: 'Extending a tenant\'s lease for a new term with updated terms and signatures from both parties.'
+            },
+            {
+                term: 'COI (Certificate of Insurance)',
+                definition: 'Proof of insurance required from vendors showing they have appropriate coverage for their work.'
+            },
+            {
+                term: 'Move-In Funds',
+                definition: 'All payments required before a tenant takes possession including first month rent, security deposit, and applicable fees.'
+            },
+            {
+                term: 'Grace Period',
+                definition: 'The number of days after rent is due before a late fee applies per lease terms.'
+            },
+            {
+                term: 'Syndication',
+                definition: 'The process of publishing a rental listing to multiple platforms (Zillow, Apartments.com, etc.) simultaneously.'
+            },
+            {
+                term: 'Cure Period',
+                definition: 'The number of days a tenant has to fix a lease violation before escalation or eviction proceedings.'
+            },
+            {
+                term: 'Fair Housing',
+                definition: 'Federal and state laws prohibiting discrimination in rental housing based on protected classes (race, color, religion, national origin, sex, familial status, disability).'
+            },
+            {
+                term: 'Habitable Condition',
+                definition: 'A unit must have working heat, water, electricity, roof, floors, windows, and doors to be considered safe for occupancy.'
+            },
+            {
+                term: 'Normal Wear and Tear',
+                definition: 'Expected deterioration of a unit from regular use that is not deductible from a security deposit.'
+            }
+        ];
+
+        function populateGlossary() {
+            const container = document.getElementById('glossaryAccordion');
+            if (!container) return;
+            container.innerHTML = glossaryTerms.map((item, idx) => `
+                <div class="expandable-item" id="glossary-${idx}">
+                    <div class="expandable-header" onclick="toggleAccordion('glossary-${idx}')">
+                        <span><strong>${item.term}</strong></span>
+                        <span class="expandable-toggle">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        ${item.definition}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // FAQs
+        // ============================================
+        const faqs = [
+            {
+                q: 'What do I do if a tenant locks themselves out?',
+                a: 'Refer them to the locksmith on the vendor list. If after hours, provide the emergency maintenance number. Do not provide personal keys.'
+            },
+            {
+                q: 'Can I approve a maintenance expense over $500?',
+                a: 'No. All expenses over $500 require Property Manager approval with 3 competitive bids and documentation in AppFolio.'
+            },
+            {
+                q: 'How do I handle a fair housing complaint?',
+                a: 'Do not respond directly. Document everything with dates and details. Escalate to the Property Manager immediately. Do not discuss with other staff.'
+            },
+            {
+                q: 'What if a tenant wants to break their lease early?',
+                a: 'Refer them to the specific lease terms regarding early termination and associated fees. Escalate to Property Manager for approval of any special arrangements.'
+            },
+            {
+                q: 'How do I process a rental application?',
+                a: 'Enter the application in AppFolio. Run screening (credit, criminal, eviction checks). Verify income at 3x rent minimum. Check 2-3 previous landlord references. Review results with PM for approval decision.'
+            },
+            {
+                q: 'What\'s the process for a tenant transferring units?',
+                a: 'Treat as a move-out and move-in. Conduct full inspections of both units with photos. Create new lease. Transfer security deposit per policy. Update AppFolio.'
+            },
+            {
+                q: 'How long do I have to return a security deposit?',
+                a: 'The timeframe depends on state law (typically 30 days). You must provide an itemized list of any deductions. Consult your Property Manager for your specific state requirements.'
+            },
+            {
+                q: 'What if a tenant refuses to let me in for an inspection?',
+                a: 'Per lease terms, tenant must allow access with proper notice (typically 24-48 hours). If they refuse, document and escalate to Property Manager immediately.'
+            }
+        ];
+
+        function populateFAQ() {
+            const container = document.getElementById('faqAccordion');
+            if (!container) return;
+            container.innerHTML = faqs.map((item, idx) => `
+                <div class="expandable-item" id="faq-${idx}">
+                    <div class="expandable-header" onclick="toggleAccordion('faq-${idx}')">
+                        <span><strong>${item.q}</strong></span>
+                        <span class="expandable-toggle">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        ${item.a}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // ACCORDION TOGGLE
+        // ============================================
+        function switchSubtab(pageId, tabName) {
+            const page = document.querySelector(`.page[data-page="${pageId}"]`);
+            if (!page) return;
+            page.querySelectorAll('.subtab').forEach(t => t.classList.toggle('active', t.dataset.subtab === tabName));
+            page.querySelectorAll('.subtab-content').forEach(c => c.classList.toggle('active', c.dataset.subtab === tabName));
+        }
+
+        function toggleAccordion(id) {
+            const item = document.getElementById(id);
+            if (item) {
+                item.classList.toggle('expanded');
+            }
+        }
+
+        // ============================================
+        // SOP DETAILS
+        // ============================================
+        const sopDetails = {
+            '1. Leasing & Lease Renewals': 'This SOP covers the full rental application and leasing workflow in AppFolio. Follow these steps: (1) Respond to inquiries within 1 hour with unit availability and application link. (2) Schedule showings and confirm 24 hours before. (3) Once application submitted, run screening (credit, criminal, eviction) same day in AppFolio. (4) Verify income at minimum 3x monthly rent. (5) Check previous landlord references. (6) Review screening results with Property Manager. (7) If approved, send lease via DocuSign. (8) Obtain signatures from both parties. (9) Schedule move-in inspection. (10) Collect move-in funds and process in accounting.',
+            '2. Listings & Marketing': 'Take high-quality photos of every unit (minimum 10 photos). Create detailed listing in AppFolio with bed/bath count, square footage, amenities, pet policy, parking, and laundry. Get rent approval from Property Manager. Syndicate listing to Zillow, Apartments.com, and other major sites. Post to social media and local Facebook groups. Set up auto-response for inquiries. Track lead source and showing conversions. Refresh listings every 30 days if vacant. Remove listing within 24 hours of lease signing.',
+            '3. Lead Management': 'Respond to phone inquiries within 1 hour during business hours. Email inquiries within 2 hours. After-hours inquiries get auto-reply confirming receipt, then response by 10 AM next business day. Log all inquiries in AppFolio. Schedule showings and confirm with prospect 24 hours in advance. Follow up within 24 hours after showing. If prospect applies, begin screening process. Track lead source and conversion rate weekly.',
+            '4. Maintenance & Work Orders': 'Open work order in AppFolio. Check if multiple items need separate vendors — create separate Service Requests. Contact tenant for discovery (photos, details, access). Determine tenant responsibility per lease. Create New Service Request: Type Internal→Resident, set priority, add description and vendor instructions. If $250+ ("big bill"), get vendor pricing immediately and submit proposal to owner via "Request Owner for Approval" button. For QueenStatus 360/Erika: $100+ needs owner approval, $500+ Elan reviews. V2 Properties go to Basecamp. Dispatch vendor via AppFolio Portal, Google Voice group chat, or schedule on behalf. 24-hour entry notice required. Follow up minimum 1x/day. Confirm completion with vendor AND tenant. Determine at-fault. Create bill: ACTION → Create Bill → Billable Items, GL 6147. Close via ACTION → Mark Job Done (never check "No Bill Needed"). Verify bill in Accounting → Payables. Payment cycle: 5th and 20th.',
+            '5. Onboarding': 'Property onboarding: Set up in AppFolio, collect existing leases and deposit records, meet tenants, confirm utilities, get rental license, file documents. Tenant onboarding: Conduct move-in inspection with photos, have tenant sign condition report, set up portal access, deliver welcome packet, deliver keys, schedule 30-day check-in. Owner onboarding: Set up portal, collect banking info, confirm reporting preferences, review property, discuss budgets, confirm insurance.',
+            '6. Rental License Management': 'Identify municipality requirements. Check current license status. Schedule required inspection. Prepare property (detectors, egress, safety). Submit application with documents and fee. Track status. File approved license in AppFolio. Set renewal reminder 90 days before expiration. Bill owner for fee per management agreement.',
+            '7. Utility Management': 'At move-in: Confirm tenant responsibility per lease. Provide utility company contact info. Set transfer deadline. Verify tenant transfer. Document in AppFolio. At move-out: Notify tenant to schedule disconnection. Transfer owner utilities back. Confirm readings. Set up vacancy service if needed. Document in AppFolio.',
+            '8. Move-In / Move-Out Procedures': 'Move-in: Verify signed lease in AppFolio. Collect all move-in funds. Conduct inspection with photos/video. Have tenant sign condition report. Set up portal access. Deliver welcome packet and keys. Confirm utilities. Update unit status to Occupied. Schedule 30-day check-in. Move-out: Confirm date. Send move-out instructions. Conduct inspection. Compare conditions. Collect keys/devices. Calculate deposit disposition. Submit to PM for approval. Send itemized statement within timeframe.',
+            '9. Tenant & Owner Communication': 'Tenant response time: 24 hours. Tone: professional, empathetic, solution-oriented. Log ALL communications in AppFolio. Escalate fair housing, legal, eviction matters to PM immediately. Owner response time: same business day. Send monthly statement via portal. Proactive notification of significant issues with photos. PM handles disputes, legal, financial discussions.',
+            '10. Inspection Protocol': 'Types: Move-in/move-out (all tenants), Annual routine (occupied units), Quarterly drive-by, Complaint-based, Pre-listing, Seasonal. Use standardized checklist. Photograph all items. Notify tenant 24-48 hours in advance. Complete report in AppFolio. Share findings. Create work orders for issues. File photos and report.',
+            '11. Finance & Billing': 'GL Code Reference — Expense (Owner Bills): 6077 Cleaning, 6147 Repairs-Other, 6173 Water, 6200 Licensing, 7010 New Appliance. Income (Tenant Charges): 4320 Water Bill, 4480 Key/Fob Replacement, 4490 Oversized Trash. Water Bill Process (3 steps): (1) Pay at phila.gov with EPG credentials, (2) Bill owner in AppFolio GL 6173, (3) Bill tenant in AppFolio GL 4320. Licensing: Accounting → Payables → Enter Bill, Payee City of Philadelphia, GL 6200, attach receipt. Vendor invoices: ACTION → Create Bill → Billable Items, GL 6147, verify in Payables, paid on 5th/20th cycle. Tenant charges: Enter Charge on tenant record. Rent Collection & Delinquency: Day 5 text (late fee warning), Day 6 text (late fee applied), Day 8-9 text (urgent/10-day notice warning), Day 10 (10-Day Notice to Quit via AppFolio or certified mail — confirm with PM), Day 15 (eviction diversion/process begins). If unsure about any GL code, review with Nicole.'
+        };
+
+        function expandSOP(button) {
+            const sopName = button.textContent.trim();
+            const details = document.getElementById('sopDetails');
+
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                details.innerHTML = `
+                    <div style="padding: 20px; background: var(--bg); border-radius: var(--radius); margin-top: 16px; line-height: 1.6; color: var(--text-sm);">
+                        <div style="font-weight: 600; margin-bottom: 12px; color: var(--text);">${sopName}</div>
+                        ${sopDetails[sopName] || 'Content coming soon — check with your Property Manager.'}
+                    </div>
+                `;
+                button.style.background = 'var(--accent-hover)';
+                button.style.color = 'white';
+            } else {
+                details.classList.add('hidden');
+                document.querySelectorAll('.btn-sop').forEach(btn => {
+                    btn.style.background = '';
+                    btn.style.color = '';
+                });
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        let appInitialized = false;
+        async function initApp() {
+            if (appInitialized) return;
+            appInitialized = true;
+            await loadState();
+            populateChecklists();
+            populateScenarios();
+            populateGlossary();
+            populateFAQ();
+            renderDashboard();
+            renderEODHistory();
+            renderWorkOrders();
+            renderOnboarding();
+        }
+    </script>
+</body>
+</html>
