@@ -2185,7 +2185,7 @@
         // ============================================
         const SUPABASE_URL = 'https://kwhcdkmkfpsfldivxnvf.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3aGNka21rZnBzZmxkaXZ4bnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDMwNTAsImV4cCI6MjA5MDQxOTA1MH0.zbRMRPAOP5bZQ4I5ejxL8hwCFC8R5XJIyzuHiw5lRqA';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ============================================
         // AUTH
@@ -2213,9 +2213,9 @@
             try {
                 let result;
                 if (isSignUp) {
-                    result = await supabase.auth.signUp({ email, password });
+                    result = await sb.auth.signUp({ email, password });
                 } else {
-                    result = await supabase.auth.signInWithPassword({ email, password });
+                    result = await sb.auth.signInWithPassword({ email, password });
                 }
                 if (result.error) throw result.error;
 
@@ -2236,12 +2236,12 @@
         }
 
         async function handleLogout() {
-            await supabase.auth.signOut();
+            await sb.auth.signOut();
             document.getElementById('loginOverlay').classList.remove('hidden');
         }
 
         // Listen for auth state changes
-        supabase.auth.onAuthStateChange(async (event, session) => {
+        sb.auth.onAuthStateChange(async (event, session) => {
             if (session) {
                 // User is logged in — show app
                 document.getElementById('loginOverlay').classList.add('hidden');
@@ -2280,7 +2280,7 @@
             if (saveTimeout) clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
                 try {
-                    await supabase.from('hub_state').upsert({
+                    await sb.from('hub_state').upsert({
                         id: 'epg_main',
                         state_data: state,
                         updated_at: new Date().toISOString()
