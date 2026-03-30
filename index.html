@@ -1277,12 +1277,12 @@
                         <div class="pipeline-stage">
                             <div class="pipeline-num">1</div>
                             <div class="pipeline-label">120 Days Out</div>
-                            <div class="pipeline-desc">Pull expiring leases report from AppFolio and begin outreach</div>
+                            <div class="pipeline-desc">Pull expiring leases report from AppFolio — reach out to owners to confirm they are interested in renewing the lease</div>
                         </div>
                         <div class="pipeline-stage">
                             <div class="pipeline-num">2</div>
                             <div class="pipeline-label">105 Days Out</div>
-                            <div class="pipeline-desc">Send renewal notice with new rent amount (4% increase, rounded to 0 or 5)</div>
+                            <div class="pipeline-desc">Follow up with owners if there is no decision</div>
                         </div>
                         <div class="pipeline-stage">
                             <div class="pipeline-num">3</div>
@@ -1295,6 +1295,15 @@
                             <div class="pipeline-desc">Follow the appropriate path below based on tenant's decision</div>
                         </div>
                     </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        ⏳ Pending Response
+                        <button class="btn" onclick="addRenewal('pending')">+ Add Pending</button>
+                    </div>
+                    <p style="font-size:12px; color:var(--text-sm); margin:0 0 12px;">Tenants who haven't confirmed whether they're renewing or not — don't let these slip through the cracks.</p>
+                    <div id="pendingRenewalList"></div>
                 </div>
 
                 <div class="panel">
@@ -3126,6 +3135,12 @@
         // RENEWAL TRACKER
         // ============================================
         const renewalSteps = {
+            pending: [
+                'Reached out to owner to confirm interest in renewing',
+                'Sent renewal notice to tenant',
+                'Followed up with tenant (if no response)',
+                'Decision received — move to Renewing or Not Renewing'
+            ],
             renewing: [
                 'Draft Renewal',
                 'Renewal Sent',
@@ -3149,12 +3164,14 @@
             if (!property) return;
             const tenant = prompt('Tenant name(s):');
             if (!tenant) return;
+            const leaseExp = type === 'pending' ? (prompt('Lease expiration date (e.g. 8/31/2026):') || '') : '';
             if (!state.renewals) state.renewals = [];
             state.renewals.push({
                 id: Date.now(),
                 property: property.trim(),
                 tenant: tenant.trim(),
                 type: type,
+                leaseExp: leaseExp.trim(),
                 steps: renewalSteps[type].map(s => ({ text: s, done: false })),
                 collapsed: true,
                 dateCreated: new Date().toLocaleDateString()
@@ -3185,6 +3202,7 @@
         }
 
         function renderRenewals() {
+            renderRenewalList('pending', document.getElementById('pendingRenewalList'));
             renderRenewalList('renewing', document.getElementById('renewingList'));
             renderRenewalList('notRenewing', document.getElementById('notRenewingList'));
         }
@@ -3192,14 +3210,16 @@
         function renderRenewalList(type, container) {
             if (!container) return;
             const items = (state.renewals || []).filter(r => r.type === type);
-            const emptyLabel = type === 'renewing' ? 'renewals' : 'non-renewals';
+            const emptyLabels = { pending: 'pending responses', renewing: 'renewals', notRenewing: 'non-renewals' };
+            const emptyLabel = emptyLabels[type] || 'items';
 
             if (items.length === 0) {
                 container.innerHTML = `<p style="color:var(--text-sm); text-align:center; padding:20px;">No active ${emptyLabel}. Click the button above to add one.</p>`;
                 return;
             }
 
-            const statusColor = type === 'renewing' ? 'var(--success)' : 'var(--warning)';
+            const statusColors = { pending: 'var(--accent)', renewing: 'var(--success)', notRenewing: 'var(--warning)' };
+            const statusColor = statusColors[type] || 'var(--accent)';
 
             container.innerHTML = items.map(r => {
                 const completedSteps = r.steps.filter(s => s.done).length;
@@ -3222,7 +3242,8 @@
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleRenewal(${r.id})">
                             <div style="flex:1;">
                                 <div style="font-weight:600; font-size:14px; margin-bottom:2px;">🏠 ${r.property}</div>
-                                <div style="font-size:13px; color:var(--text-sm); margin-bottom:6px;">👤 ${r.tenant}</div>
+                                <div style="font-size:13px; color:var(--text-sm); margin-bottom:${r.leaseExp ? '2' : '6'}px;">👤 ${r.tenant}</div>
+                                ${r.leaseExp ? `<div style="font-size:12px; color:var(--muted); margin-bottom:6px;">📅 Lease expires: ${r.leaseExp}</div>` : ''}
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
                                         <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : statusColor}; border-radius:3px; transition:width 0.3s;"></div>
