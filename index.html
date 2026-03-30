@@ -1884,72 +1884,12 @@
 
             <!-- PROPERTY & OWNER DIRECTORY PAGE -->
             <div class="page" data-page="portfolio">
-                <div class="subtab-bar">
-                    <div class="subtab active" data-subtab="properties" onclick="switchSubtab('portfolio','properties')">Properties</div>
-                    <div class="subtab" data-subtab="owners" onclick="switchSubtab('portfolio','owners')">Owners</div>
-                    <div class="subtab" data-subtab="import" onclick="switchSubtab('portfolio','import')">Import Data</div>
-                </div>
-
-                <!-- TAB: PROPERTIES -->
-                <div class="subtab-content active" data-subtab="properties">
-                    <div class="panel">
-                        <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-                            🏠 Properties
-                            <div style="display:flex; gap:8px; align-items:center;">
-                                <input type="text" id="propertySearch" placeholder="Search properties..." oninput="renderProperties()" style="padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); width:200px;">
-                                <button class="btn" onclick="addPropertyManual()">+ Add Property</button>
-                            </div>
-                        </div>
-                        <div id="propertyDirectory"></div>
+                <div class="panel">
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        🏢 Property & Owner Directory
+                        <input type="text" id="portfolioSearch" placeholder="Search by address, owner, phone..." oninput="renderPortfolio()" style="padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); width:260px;">
                     </div>
-                </div>
-
-                <!-- TAB: OWNERS -->
-                <div class="subtab-content" data-subtab="owners">
-                    <div class="panel">
-                        <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-                            👤 Owners
-                            <div style="display:flex; gap:8px; align-items:center;">
-                                <input type="text" id="ownerSearch" placeholder="Search owners..." oninput="renderOwners()" style="padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); width:200px;">
-                                <button class="btn" onclick="addOwnerManual()">+ Add Owner</button>
-                            </div>
-                        </div>
-                        <div id="ownerDirectory"></div>
-                    </div>
-                </div>
-
-                <!-- TAB: IMPORT -->
-                <div class="subtab-content" data-subtab="import">
-                    <div class="panel">
-                        <div class="panel-title">📥 Import from AppFolio</div>
-                        <p style="color:var(--text-sm); margin-bottom:16px; line-height:1.6;">Export your data from AppFolio as CSV files, then import them here. The importer will auto-detect columns and map them to the directory.</p>
-
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-                            <div style="background:var(--bg); border-radius:8px; padding:16px; border:2px dashed var(--border); text-align:center;">
-                                <div style="font-weight:600; font-size:14px; margin-bottom:8px;">🏠 Property CSV</div>
-                                <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">AppFolio → Reports → Property Directory → Export CSV</p>
-                                <input type="file" id="propertyCSV" accept=".csv" onchange="handlePropertyCSV(this)" style="display:none;">
-                                <button class="btn" onclick="document.getElementById('propertyCSV').click()">Choose File</button>
-                                <div id="propertyCSVStatus" style="font-size:12px; color:var(--muted); margin-top:8px;"></div>
-                            </div>
-                            <div style="background:var(--bg); border-radius:8px; padding:16px; border:2px dashed var(--border); text-align:center;">
-                                <div style="font-weight:600; font-size:14px; margin-bottom:8px;">👤 Owner CSV</div>
-                                <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">AppFolio → Reports → Owner Directory → Export CSV</p>
-                                <input type="file" id="ownerCSV" accept=".csv" onchange="handleOwnerCSV(this)" style="display:none;">
-                                <button class="btn" onclick="document.getElementById('ownerCSV').click()">Choose File</button>
-                                <div id="ownerCSVStatus" style="font-size:12px; color:var(--muted); margin-top:8px;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="panel" id="csvPreviewPanel" style="display:none;">
-                        <div class="panel-title">👁️ Import Preview</div>
-                        <div id="csvPreview"></div>
-                        <div class="button-group" style="margin-top:12px;">
-                            <button class="btn" id="csvConfirmBtn" onclick="confirmCSVImport()">Confirm Import</button>
-                            <button class="btn btn-secondary" onclick="cancelCSVImport()">Cancel</button>
-                        </div>
-                    </div>
+                    <div id="portfolioDirectory"></div>
                 </div>
             </div>
 
@@ -2540,6 +2480,7 @@
             if (!state.renewals) state.renewals = [];
             if (!state.properties) state.properties = [];
             if (!state.owners) state.owners = [];
+            if (!state.portfolioNotes) state.portfolioNotes = {};
         }
 
         // ============================================
@@ -3130,7 +3071,7 @@
             if (!container) return;
 
             if (!state.workOrders || state.workOrders.length === 0) {
-                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No active work orders. Click "+ New Work Order" to add one.</p>';
+                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No active work orders. Click + New Work Order to add one.</p>';
                 return;
             }
 
@@ -3254,7 +3195,7 @@
             if (!container) return;
 
             if (!state.applications || state.applications.length === 0) {
-                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No active applications. Click "+ Add Application" to add one.</p>';
+                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No active applications. Click + Add Application to add one.</p>';
                 return;
             }
 
@@ -3446,356 +3387,87 @@
         // ============================================
         // PROPERTY & OWNER DIRECTORY
         // ============================================
-        let pendingCSVData = null;
-        let pendingCSVType = null;
+        const portfolioData = [
+            { address: '1013 Daly St Philadelphia, PA 19148', units: 1, owner: 'Chaya Mushca Medalie', ownerPhone: '(718) 407-9324', ownerEmail: 'chaya@mweb.co.za', mgmtFee: '10%', minFee: '$100' },
+            { address: '1723 S 29th St Philadelphia, PA 19145', units: 1, owner: 'Chaya Mushca Medalie', ownerPhone: '(718) 407-9324', ownerEmail: 'chaya@mweb.co.za', mgmtFee: '10%', minFee: '' },
+            { address: '1945 N 7th St Philadelphia, PA 19122', units: 4, owner: 'Abraham Grunfeld', ownerPhone: '(347) 739-3851', ownerEmail: 'Acg3851@gmail.com, 1945n7@gmail.com', mgmtFee: '10%', minFee: '', reserve: 3750 },
+            { address: '1953 N 9th St Philadelphia, PA 19122', units: 2, owner: 'Golden Rule LLC', ownerPhone: '(610) 952-1298', ownerEmail: 'karen.cressman@v2prop.com', mgmtFee: '5%', minFee: '$100' },
+            { address: '2001 Dorrance St Philadelphia, PA 19145', units: 2, owner: 'Sababa Properties LLC', ownerPhone: '(215) 779-9322', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '10%', minFee: '' },
+            { address: '2028 E Fletcher St Philadelphia, PA 19125', units: 3, owner: 'Justin Brown', ownerPhone: '(737) 215-9174', ownerEmail: 'kim@ludo.llc', mgmtFee: '10%', minFee: '' },
+            { address: '21 E Price Street Philadelphia, PA 19144', units: 6, owner: 'T and J Zone Holdings LLC', ownerPhone: '', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '10%', minFee: '' },
+            { address: '2134 E Arizona St Philadelphia, PA 19125', units: 1, owner: '2134 E Arizona Street QOZF, LLC', ownerPhone: '', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '5%', minFee: '' },
+            { address: '2218 E Oakdale Street Philadelphia, PA 19125', units: 1, owner: 'Eric Fromhart', ownerPhone: '(971) 322-4935', ownerEmail: 'efromhart@gmail.com', mgmtFee: '8%', minFee: '$100' },
+            { address: '2240 N 2nd St Philadelphia, PA 19122', units: 3, owner: 'Golden Rule LLC', ownerPhone: '(610) 952-1298', ownerEmail: 'karen.cressman@v2prop.com', mgmtFee: '5%', minFee: '$100' },
+            { address: '2262 N 2nd St Philadelphia, PA 19133', units: 3, owner: 'Golden Rule LLC', ownerPhone: '(610) 952-1298', ownerEmail: 'karen.cressman@v2prop.com', mgmtFee: '5%', minFee: '$100' },
+            { address: '2329 N Palethorp St Philadelphia, PA 19133', units: 1, owner: 'Ziv Rottman', ownerPhone: '972-54-812-3499', ownerEmail: 'zivrottman@gmail.com', mgmtFee: '8%', minFee: '' },
+            { address: '2408 N Mascher St Philadelphia, PA 19133', units: 3, owner: 'V2 Properties Entity6 LLC', ownerPhone: '', ownerEmail: 'karen.cressman@v2prop.com', mgmtFee: '5%', minFee: '$100' },
+            { address: '2429 N 3rd St Philadelphia, PA 19133', units: 2, owner: 'V2 Properties Entity6 LLC', ownerPhone: '', ownerEmail: 'karen.cressman@v2prop.com', mgmtFee: '5%', minFee: '$100' },
+            { address: '2439 W Oxford Philadelphia, PA 19121', units: 2, owner: 'V2 Properties Entity2 LLC', ownerPhone: '', ownerEmail: 'karen.cressman@v2prop.com', mgmtFee: '5%', minFee: '' },
+            { address: '2735 Oakford St Philadelphia, PA 19133', units: 1, owner: 'Zachary McClanahan', ownerPhone: '(304) 400-9415', ownerEmail: 'zacmc21@gmail.com', mgmtFee: '10%', minFee: '$100' },
+            { address: '3016 N 3rd St Philadelphia, PA 19133', units: 1, owner: 'Jonathan Ari', ownerPhone: '(267) 515-3270', ownerEmail: 'yoniari71@gmail.com', mgmtFee: '10%', minFee: '$100', reserve: 1000 },
+            { address: '3520 N 7th St Philadelphia, PA 19140', units: 1, owner: 'Jonathan Ari', ownerPhone: '(267) 515-3270', ownerEmail: 'yoniari71@gmail.com', mgmtFee: '10%', minFee: '$100', reserve: 1000 },
+            { address: '4216 Westminster Ave Philadelphia, PA 19104', units: 3, owner: 'Philadelphia Property Ventures LP', ownerPhone: '(215) 901-0635', ownerEmail: 'abennett@brwkgroup.com, elanelkaim@gmail.com', mgmtFee: '10%', minFee: '' },
+            { address: '6141 1/2 Old York Road Philadelphia, PA 19141', units: 2, owner: 'Sababa Properties LLC', ownerPhone: '(215) 779-9322', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '10%', minFee: '' },
+            { address: '6143 Old York Road Philadelphia, PA 19141', units: 2, owner: 'Sababa Properties LLC', ownerPhone: '(215) 779-9322', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '10%', minFee: '' },
+            { address: '6147 1/2 Old York Road Philadelphia, PA 19141', units: 2, owner: 'Sababa Properties LLC', ownerPhone: '(215) 779-9322', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '10%', minFee: '' },
+            { address: '708 S Sartain St Unit 4 Philadelphia, PA 19147', units: 1, owner: 'Dragos L Mihaila', ownerPhone: '(315) 254-5385', ownerEmail: 'dlmihaila@yahoo.com', mgmtFee: '10%', minFee: '$100' },
+            { address: '716 Cantrell St Philadelphia, PA 19148', units: 1, owner: 'Eugene Dennis / Kerry Wilkinson', ownerPhone: '(215) 779-3424 / (303) 941-5301', ownerEmail: 'cablegene@comcast.net / kerrywilkinson1@comcast.net', mgmtFee: '10%', minFee: '' },
+            { address: '742 N 20th Street Philadelphia, PA 19130', units: 1, owner: '742 North 20th LLC', ownerPhone: '(215) 779-9322', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '5%', minFee: '$100' },
+            { address: 'Uber Commons I - 814 N Uber Street Philadelphia, PA 19130', units: 6, owner: '812 N Uber Street LLC', ownerPhone: '', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '5%', minFee: '' },
+            { address: 'Uber Commons II - 812 N Uber St Philadelphia, PA 19130', units: 6, owner: '812 N Uber Street LLC', ownerPhone: '', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '5%', minFee: '' }
+        ];
 
-        function parseCSV(text) {
-            const lines = text.split('\n').filter(l => l.trim());
-            if (lines.length < 2) return { headers: [], rows: [] };
-            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-            const rows = [];
-            for (let i = 1; i < lines.length; i++) {
-                const values = [];
-                let current = '';
-                let inQuotes = false;
-                for (let c = 0; c < lines[i].length; c++) {
-                    if (lines[i][c] === '"') { inQuotes = !inQuotes; }
-                    else if (lines[i][c] === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
-                    else { current += lines[i][c]; }
-                }
-                values.push(current.trim());
-                const row = {};
-                headers.forEach((h, idx) => row[h] = values[idx] || '');
-                rows.push(row);
-            }
-            return { headers, rows };
-        }
-
-        function findColumn(headers, ...candidates) {
-            for (const c of candidates) {
-                const found = headers.find(h => h.toLowerCase().includes(c.toLowerCase()));
-                if (found) return found;
-            }
-            return null;
-        }
-
-        function handlePropertyCSV(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const parsed = parseCSV(e.target.result);
-                if (parsed.rows.length === 0) {
-                    document.getElementById('propertyCSVStatus').textContent = 'No data found in file.';
-                    return;
-                }
-                document.getElementById('propertyCSVStatus').innerHTML = '<span style="color:var(--success);">✓ ' + parsed.rows.length + ' rows detected</span>';
-                pendingCSVData = parsed;
-                pendingCSVType = 'properties';
-                showCSVPreview(parsed, 'properties');
-            };
-            reader.readAsText(file);
-        }
-
-        function handleOwnerCSV(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const parsed = parseCSV(e.target.result);
-                if (parsed.rows.length === 0) {
-                    document.getElementById('ownerCSVStatus').textContent = 'No data found in file.';
-                    return;
-                }
-                document.getElementById('ownerCSVStatus').innerHTML = '<span style="color:var(--success);">✓ ' + parsed.rows.length + ' rows detected</span>';
-                pendingCSVData = parsed;
-                pendingCSVType = 'owners';
-                showCSVPreview(parsed, 'owners');
-            };
-            reader.readAsText(file);
-        }
-
-        function showCSVPreview(parsed, type) {
-            const panel = document.getElementById('csvPreviewPanel');
-            const preview = document.getElementById('csvPreview');
-            panel.style.display = 'block';
-
-            const previewRows = parsed.rows.slice(0, 5);
-            const cols = parsed.headers.slice(0, 8);
-
-            preview.innerHTML = `
-                <p style="font-size:12px; color:var(--muted); margin-bottom:8px;">Showing first ${previewRows.length} of ${parsed.rows.length} rows (${parsed.headers.length} columns detected)</p>
-                <p style="font-size:12px; color:var(--text-sm); margin-bottom:12px;"><strong>Columns found:</strong> ${parsed.headers.join(', ')}</p>
-                <div style="overflow-x:auto;">
-                    <table style="width:100%; font-size:12px; border-collapse:collapse;">
-                        <thead>
-                            <tr>${cols.map(h => `<th style="text-align:left; padding:6px 8px; border-bottom:2px solid var(--border); color:var(--accent); font-size:11px; white-space:nowrap;">${h}</th>`).join('')}</tr>
-                        </thead>
-                        <tbody>
-                            ${previewRows.map(row => `<tr>${cols.map(h => `<td style="padding:6px 8px; border-bottom:1px solid var(--border); color:var(--text-sm); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${row[h] || ''}</td>`).join('')}</tr>`).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                ${parsed.rows.length > 5 ? `<p style="font-size:11px; color:var(--muted); margin-top:8px;">...and ${parsed.rows.length - 5} more rows</p>` : ''}
-            `;
-
-            document.getElementById('csvConfirmBtn').textContent = type === 'properties'
-                ? 'Import ' + parsed.rows.length + ' Properties'
-                : 'Import ' + parsed.rows.length + ' Owners';
-        }
-
-        function confirmCSVImport() {
-            if (!pendingCSVData || !pendingCSVType) return;
-            const h = pendingCSVData.headers;
-
-            if (pendingCSVType === 'properties') {
-                const addrCol = findColumn(h, 'property', 'address', 'property address', 'street');
-                const rentCol = findColumn(h, 'market rent', 'rent', 'listed rent');
-                const unitsCol = findColumn(h, 'units', 'unit count');
-                const sqftCol = findColumn(h, 'sqft', 'square feet');
-                const ownerCol = findColumn(h, 'owner', 'owner(s)');
-                const feeCol = findColumn(h, 'management fee percent', 'fee percent');
-                const minFeeCol = findColumn(h, 'minimum fee');
-                const waiveCol = findColumn(h, 'waive fees when vacant', 'waive');
-                const reserveCol = findColumn(h, 'reserve');
-
-                const imported = pendingCSVData.rows.filter(row => {
-                    const addr = row[addrCol] || '';
-                    const exclude = ['Total', 'Elkaim Corp', 'Other Properties', 'TEST ONLY', '114 Conestoga', '2819 W Montgomery', '7239 Haverford', 'LEASE ONLY'];
-                    return addr && !exclude.some(x => addr.startsWith(x) || addr.includes(x));
-                }).map(row => {
-                    const fullAddr = row[addrCol] || '';
-                    const ownerRaw = row[ownerCol] || '';
-                    const ownerName = ownerRaw.split(' - ')[0].trim();
-                    const ownerPhone = ownerRaw.includes(' - ') ? ownerRaw.split(' - ').slice(1).join(' - ').replace(/^(Phone|Mobile|Home):\s*/i, '').trim() : '';
-
-                    return {
-                        id: Date.now() + Math.random(),
-                        address: fullAddr,
-                        owner: ownerName,
-                        ownerPhone: ownerPhone,
-                        rent: (row[rentCol] || '0.00').replace(/,/g, ''),
-                        units: row[unitsCol] || '',
-                        sqft: (row[sqftCol] || '0').replace(/,/g, ''),
-                        mgmtFee: row[feeCol] || '',
-                        minFee: row[minFeeCol] || '',
-                        waiveVacant: row[waiveCol] || '',
-                        reserve: (row[reserveCol] || '0.00').replace(/,/g, ''),
-                        notes: ''
-                    };
-                });
-                state.properties = imported;
-            } else {
-                const nameCol = findColumn(h, 'name', 'owner name');
-                const phoneCol = findColumn(h, 'phone number', 'phone');
-                const emailCol = findColumn(h, 'email', 'email address');
-                const propCol = findColumn(h, 'properties owned', 'properties', 'property');
-                const addrCol = findColumn(h, 'address');
-                const payTypeCol = findColumn(h, 'payment type');
-                const lastPayCol = findColumn(h, 'last payment date');
-                const holdCol = findColumn(h, 'hold payments');
-                const reportsCol = findColumn(h, 'owner packet reports');
-
-                const imported = pendingCSVData.rows.filter(row => {
-                    const name = row[nameCol] || '';
-                    const excludeOwners = ['TEST '];
-                    return name && !excludeOwners.some(x => name.startsWith(x));
-                }).map(row => {
-                    const phoneRaw = row[phoneCol] || '';
-                    const phone = phoneRaw.replace(/^(Phone|Mobile|Home):\s*/i, '').trim();
-
-                    return {
-                        id: Date.now() + Math.random(),
-                        name: row[nameCol] || '',
-                        phone: phone,
-                        email: row[emailCol] || '',
-                        properties: row[propCol] || '',
-                        mailingAddress: row[addrCol] || '',
-                        paymentType: row[payTypeCol] || '',
-                        lastPayment: row[lastPayCol] || '',
-                        holdPayments: row[holdCol] || '',
-                        reports: row[reportsCol] || '',
-                        notes: ''
-                    };
-                });
-                state.owners = imported;
-            }
-
-            saveState(state);
-            cancelCSVImport();
-            renderProperties();
-            renderOwners();
-
-            const count = pendingCSVType === 'properties' ? state.properties.length : state.owners.length;
-            alert('Successfully imported ' + count + ' records!');
-        }
-
-        function cancelCSVImport() {
-            document.getElementById('csvPreviewPanel').style.display = 'none';
-            pendingCSVData = null;
-            pendingCSVType = null;
-        }
-
-        function addPropertyManual() {
-            const address = prompt('Property address:');
-            if (!address) return;
-            const unit = prompt('Unit # (leave blank if single-family):') || '';
-            const owner = prompt('Owner name:') || '';
-            state.properties.push({
-                id: Date.now(),
-                address: address.trim(),
-                unit: unit.trim(),
-                city: '', state: '', zip: '',
-                owner: owner.trim(),
-                status: 'Active',
-                type: '', rent: '', beds: '', baths: '',
-                notes: '', raw: {}
-            });
-            saveState(state);
-            renderProperties();
-        }
-
-        function addOwnerManual() {
-            const name = prompt('Owner name:');
-            if (!name) return;
-            const email = prompt('Email:') || '';
-            const phone = prompt('Phone:') || '';
-            state.owners.push({
-                id: Date.now(),
-                name: name.trim(),
-                email: email.trim(),
-                phone: phone.trim(),
-                properties: '',
-                company: '',
-                notes: '', raw: {}
-            });
-            saveState(state);
-            renderOwners();
-        }
-
-        function removeProperty(id) {
-            if (!confirm('Remove this property?')) return;
-            state.properties = state.properties.filter(p => p.id !== id);
-            saveState(state);
-            renderProperties();
-        }
-
-        function removeOwner(id) {
-            if (!confirm('Remove this owner?')) return;
-            state.owners = state.owners.filter(o => o.id !== id);
-            saveState(state);
-            renderOwners();
-        }
-
-        function updatePropertyNotes(id, value) {
-            const p = state.properties.find(p => p.id === id);
-            if (p) p.notes = value;
-            saveState(state);
-        }
-
-        function updateOwnerNotes(id, value) {
-            const o = state.owners.find(o => o.id === id);
-            if (o) o.notes = value;
-            saveState(state);
-        }
-
-        function togglePropertyExpand(id) {
-            const el = document.getElementById('prop-detail-' + id);
+        function togglePortfolioExpand(idx) {
+            const el = document.getElementById('portfolio-detail-' + idx);
             if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
         }
 
-        function toggleOwnerExpand(id) {
-            const el = document.getElementById('owner-detail-' + id);
-            if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        function updatePortfolioNotes(idx, value) {
+            if (!state.portfolioNotes) state.portfolioNotes = {};
+            state.portfolioNotes[idx] = value;
+            saveState(state);
         }
 
-        function renderProperties() {
-            const container = document.getElementById('propertyDirectory');
+        function renderPortfolio() {
+            const container = document.getElementById('portfolioDirectory');
             if (!container) return;
-            const search = (document.getElementById('propertySearch')?.value || '').toLowerCase();
+            const search = (document.getElementById('portfolioSearch')?.value || '').toLowerCase();
 
-            let items = state.properties || [];
+            let items = portfolioData.map((p, idx) => ({ ...p, idx }));
             if (search) items = items.filter(p =>
-                (p.address + ' ' + p.owner + ' ' + (p.ownerPhone || '')).toLowerCase().includes(search)
+                (p.address + ' ' + p.owner + ' ' + p.ownerPhone + ' ' + p.ownerEmail).toLowerCase().includes(search)
             );
 
             if (items.length === 0) {
-                container.innerHTML = state.properties.length === 0
-                    ? '<p style="color:var(--text-sm); text-align:center; padding:20px;">No properties yet. Import a CSV from AppFolio or add manually.</p>'
-                    : '<p style="color:var(--text-sm); text-align:center; padding:20px;">No properties match your search.</p>';
+                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No results match your search.</p>';
                 return;
             }
+
+            const notes = state.portfolioNotes || {};
 
             container.innerHTML = `
                 <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'}</div>
-            ` + items.map(p => {
-                return `
-                <div style="background:var(--bg); border-radius:8px; padding:12px; margin-bottom:8px; border-left:4px solid var(--accent);">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="togglePropertyExpand(${JSON.stringify(p.id)})">
+            ` + items.map(p => `
+                <div style="background:var(--bg); border-radius:8px; padding:12px; margin-bottom:8px; border-left:4px solid var(--accent); cursor:pointer;" onclick="togglePortfolioExpand(${p.idx})">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                         <div style="flex:1;">
                             <div style="font-weight:600; font-size:14px;">🏠 ${p.address}</div>
                             <div style="font-size:12px; color:var(--text-sm); margin-top:2px;">
-                                ${p.owner ? '👤 ' + p.owner : ''}
-                                ${p.units && p.units !== '0' ? ' &nbsp;·&nbsp; ' + p.units + ' unit' + (p.units !== '1' ? 's' : '') : ''}
+                                👤 ${p.owner}${p.ownerPhone ? ' &nbsp;·&nbsp; 📞 ' + p.ownerPhone : ''} &nbsp;·&nbsp; ${p.units} unit${p.units !== 1 ? 's' : ''} &nbsp;·&nbsp; Fee: ${p.mgmtFee}${p.minFee ? ' (min ' + p.minFee + ')' : ''}
                             </div>
                         </div>
-                        <button onclick="event.stopPropagation(); removeProperty(${JSON.stringify(p.id)})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
                     </div>
-                    <div id="prop-detail-${p.id}" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
+                    <div id="portfolio-detail-${p.idx}" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);" onclick="event.stopPropagation()">
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px; color:var(--text-sm); margin-bottom:8px;">
-                            ${p.owner ? '<div><strong>Owner:</strong> ' + p.owner + '</div>' : ''}
-                            ${p.ownerPhone ? '<div><strong>Owner Phone:</strong> ' + p.ownerPhone + '</div>' : ''}
-                            ${p.units ? '<div><strong>Units:</strong> ' + p.units + '</div>' : ''}
-                            ${p.mgmtFee ? '<div><strong>Mgmt Fee:</strong> ' + p.mgmtFee + '</div>' : ''}
-                            ${p.minFee && p.minFee !== '' ? '<div><strong>Min Fee:</strong> $' + p.minFee + '</div>' : ''}
-                            ${p.waiveVacant ? '<div><strong>Waive When Vacant:</strong> ' + p.waiveVacant + '</div>' : ''}
-                            ${p.reserve && parseFloat(p.reserve) > 0 ? '<div><strong>Reserve:</strong> $' + parseFloat(p.reserve).toLocaleString('en-US', {minimumFractionDigits:2}) + '</div>' : ''}
+                            <div><strong>Owner:</strong> ${p.owner}</div>
+                            ${p.ownerPhone ? '<div><strong>Phone:</strong> ' + p.ownerPhone + '</div>' : ''}
+                            <div><strong>Email:</strong> ${p.ownerEmail}</div>
+                            <div><strong>Units:</strong> ${p.units}</div>
+                            <div><strong>Mgmt Fee:</strong> ${p.mgmtFee}${p.minFee ? ' (min ' + p.minFee + ')' : ''}</div>
+                            ${p.reserve ? '<div><strong>Reserve:</strong> $' + p.reserve.toLocaleString() + '</div>' : ''}
                         </div>
                         <label style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">📝 Notes</label>
-                        <textarea onchange="updatePropertyNotes(${JSON.stringify(p.id)}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:50px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--card); color:var(--text); resize:vertical;">${p.notes || ''}</textarea>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function renderOwners() {
-            const container = document.getElementById('ownerDirectory');
-            if (!container) return;
-            const search = (document.getElementById('ownerSearch')?.value || '').toLowerCase();
-
-            let items = state.owners || [];
-            if (search) items = items.filter(o =>
-                (o.name + ' ' + o.email + ' ' + o.phone + ' ' + o.properties).toLowerCase().includes(search)
-            );
-
-            if (items.length === 0) {
-                container.innerHTML = state.owners.length === 0
-                    ? '<p style="color:var(--text-sm); text-align:center; padding:20px;">No owners yet. Import a CSV from AppFolio or add manually.</p>'
-                    : '<p style="color:var(--text-sm); text-align:center; padding:20px;">No owners match your search.</p>';
-                return;
-            }
-
-            container.innerHTML = `
-                <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">${items.length} owner${items.length === 1 ? '' : 's'}</div>
-            ` + items.map(o => `
-                <div style="background:var(--bg); border-radius:8px; padding:12px; margin-bottom:8px; border-left:4px solid var(--success);">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleOwnerExpand(${JSON.stringify(o.id)})">
-                        <div style="flex:1;">
-                            <div style="font-weight:600; font-size:14px;">👤 ${o.name}</div>
-                            <div style="font-size:12px; color:var(--text-sm); margin-top:2px;">
-                                ${o.email ? '✉️ ' + o.email : ''}
-                                ${o.phone ? ' &nbsp;·&nbsp; 📞 ' + o.phone : ''}
-                            </div>
-                        </div>
-                        <button onclick="event.stopPropagation(); removeOwner(${JSON.stringify(o.id)})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
-                    </div>
-                    <div id="owner-detail-${o.id}" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
-                        <div style="font-size:12px; color:var(--text-sm); margin-bottom:8px; line-height:1.8;">
-                            ${o.properties ? '<div><strong>Properties:</strong> ' + o.properties + '</div>' : ''}
-                            ${o.mailingAddress ? '<div><strong>Mailing Address:</strong> ' + o.mailingAddress + '</div>' : ''}
-                        </div>
-                        <label style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">📝 Notes</label>
-                        <textarea onchange="updateOwnerNotes(${JSON.stringify(o.id)}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:50px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--card); color:var(--text); resize:vertical;">${o.notes || ''}</textarea>
+                        <textarea onchange="updatePortfolioNotes(${p.idx}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:50px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--card); color:var(--text); resize:vertical;">${notes[p.idx] || ''}</textarea>
                     </div>
                 </div>
             `).join('');
@@ -4244,8 +3916,7 @@
             renderWorkOrders();
             renderApplications();
             renderRenewals();
-            renderProperties();
-            renderOwners();
+            renderPortfolio();
             renderOnboarding();
         }
     </script>
