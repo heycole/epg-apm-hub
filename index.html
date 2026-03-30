@@ -3413,8 +3413,8 @@
             { address: '708 S Sartain St Unit 4 Philadelphia, PA 19147', units: 1, owner: 'Dragos L Mihaila', ownerPhone: '(315) 254-5385', ownerEmail: 'dlmihaila@yahoo.com', mgmtFee: '10%', minFee: '$100' },
             { address: '716 Cantrell St Philadelphia, PA 19148', units: 1, owner: 'Eugene Dennis / Kerry Wilkinson', ownerPhone: '(215) 779-3424 / (303) 941-5301', ownerEmail: 'cablegene@comcast.net / kerrywilkinson1@comcast.net', mgmtFee: '10%', minFee: '' },
             { address: '742 N 20th Street Philadelphia, PA 19130', units: 1, owner: '742 North 20th LLC', ownerPhone: '(215) 779-9322', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '5%', minFee: '$100' },
-            { address: 'Uber Commons I - 814 N Uber Street Philadelphia, PA 19130', units: 6, owner: '812 N Uber Street LLC', ownerPhone: '', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '5%', minFee: '' },
-            { address: 'Uber Commons II - 812 N Uber St Philadelphia, PA 19130', units: 6, owner: '812 N Uber Street LLC', ownerPhone: '', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '5%', minFee: '' }
+            { address: '814 N Uber St Philadelphia, PA 19130', units: 6, owner: '812 N Uber Street LLC', ownerPhone: '', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '5%', minFee: '' },
+            { address: '812 N Uber St Philadelphia, PA 19130', units: 6, owner: '812 N Uber Street LLC', ownerPhone: '', ownerEmail: 'clivegoldin@gmail.com, elan@elkaimpropertygroup.com', mgmtFee: '5%', minFee: '' }
         ];
 
         function togglePortfolioExpand(idx) {
@@ -3446,42 +3446,48 @@
             const notes = state.portfolioNotes || {};
 
             container.innerHTML = `
-                <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'}</div>
+                <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'} — click any row for notes</div>
                 <div style="overflow-x:auto;">
-                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                    <table style="width:100%; border-collapse:collapse; font-size:12px; line-height:1.3;">
                         <thead>
                             <tr style="background:var(--bg); text-align:left;">
-                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Property</th>
-                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Units</th>
-                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Owner</th>
-                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Phone</th>
-                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Email</th>
-                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Fee</th>
-                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Reserve</th>
-                                <th style="padding:10px 12px; font-weight:600; font-size:12px; color:var(--muted); border-bottom:2px solid var(--border); white-space:nowrap;">Notes</th>
+                                <th style="padding:6px 8px; font-weight:600; font-size:11px; color:var(--muted); border-bottom:2px solid var(--border);">Address</th>
+                                <th style="padding:6px 8px; font-weight:600; font-size:11px; color:var(--muted); border-bottom:2px solid var(--border); text-align:center;">Units</th>
+                                <th style="padding:6px 8px; font-weight:600; font-size:11px; color:var(--muted); border-bottom:2px solid var(--border);">Owner</th>
+                                <th style="padding:6px 8px; font-weight:600; font-size:11px; color:var(--muted); border-bottom:2px solid var(--border);">Phone</th>
+                                <th style="padding:6px 8px; font-weight:600; font-size:11px; color:var(--muted); border-bottom:2px solid var(--border);">Email</th>
+                                <th style="padding:6px 8px; font-weight:600; font-size:11px; color:var(--muted); border-bottom:2px solid var(--border);">Fee</th>
+                                <th style="padding:6px 8px; font-weight:600; font-size:11px; color:var(--muted); border-bottom:2px solid var(--border);">Reserve</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${items.map((p, i) => `
-                                <tr style="border-bottom:1px solid var(--border);${i % 2 === 0 ? '' : ' background:var(--bg);'}" onclick="togglePortfolioExpand(${p.idx})" class="portfolio-row" data-idx="${p.idx}">
-                                    <td style="padding:10px 12px; font-weight:600; color:var(--text); min-width:200px;">${p.address}</td>
-                                    <td style="padding:10px 12px; text-align:center;">${p.units}</td>
-                                    <td style="padding:10px 12px; white-space:nowrap;">${p.owner}</td>
-                                    <td style="padding:10px 12px; white-space:nowrap;">${p.ownerPhone || '—'}</td>
-                                    <td style="padding:10px 12px; font-size:12px; word-break:break-all; max-width:200px;">${p.ownerEmail}</td>
-                                    <td style="padding:10px 12px; white-space:nowrap;">${p.mgmtFee}${p.minFee ? ' <span style="font-size:11px;color:var(--muted);">(min ' + p.minFee + ')</span>' : ''}</td>
-                                    <td style="padding:10px 12px; white-space:nowrap;">${p.reserve ? '$' + p.reserve.toLocaleString() : '—'}</td>
-                                    <td style="padding:10px 12px; max-width:180px; font-size:12px; color:var(--text-sm); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${notes[p.idx] ? notes[p.idx].substring(0, 40) + (notes[p.idx].length > 40 ? '...' : '') : '<span style="color:var(--muted);font-style:italic;">click to add</span>'}</td>
+                            ${items.map((p, i) => {
+                                const shortAddr = p.address.replace(' Philadelphia, PA ', ' Phila ');
+                                return `
+                                <tr style="border-bottom:1px solid var(--border);${i % 2 === 0 ? '' : ' background:var(--bg);'} cursor:pointer;" onclick="togglePortfolioExpand(${p.idx})">
+                                    <td style="padding:5px 8px; font-weight:600; color:var(--text); white-space:nowrap;">${shortAddr}</td>
+                                    <td style="padding:5px 8px; text-align:center;">${p.units}</td>
+                                    <td style="padding:5px 8px; white-space:nowrap; max-width:160px; overflow:hidden; text-overflow:ellipsis;">${p.owner}</td>
+                                    <td style="padding:5px 8px; white-space:nowrap; font-size:11px;">${p.ownerPhone || '—'}</td>
+                                    <td style="padding:5px 8px; font-size:11px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.ownerEmail}">${p.ownerEmail}</td>
+                                    <td style="padding:5px 8px; white-space:nowrap;">${p.mgmtFee}${p.minFee ? ' <span style="font-size:10px;color:var(--muted);">(' + p.minFee + ')</span>' : ''}</td>
+                                    <td style="padding:5px 8px; white-space:nowrap;">${p.reserve ? '$' + p.reserve.toLocaleString() : '—'}</td>
                                 </tr>
                                 <tr id="portfolio-detail-row-${p.idx}" style="display:none;">
-                                    <td colspan="8" style="padding:0 12px 12px 12px; background:var(--bg); border-bottom:2px solid var(--accent);">
-                                        <div style="padding:12px; background:var(--card); border-radius:6px; margin-top:4px;" onclick="event.stopPropagation()">
-                                            <label style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">Notes</label>
-                                            <textarea onchange="updatePortfolioNotes(${p.idx}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:60px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--bg); color:var(--text); resize:vertical;">${notes[p.idx] || ''}</textarea>
+                                    <td colspan="7" style="padding:0 8px 8px 8px; background:var(--bg); border-bottom:2px solid var(--accent);">
+                                        <div style="padding:10px; background:var(--card); border-radius:6px; margin-top:2px; display:flex; gap:16px; align-items:flex-start;" onclick="event.stopPropagation()">
+                                            <div style="flex:1;">
+                                                <div style="font-size:11px; color:var(--muted); margin-bottom:2px;">Full Email: <span style="color:var(--text);">${p.ownerEmail}</span></div>
+                                                ${p.reserve ? '<div style="font-size:11px; color:var(--muted);">Reserve: <span style="color:var(--text);">$' + p.reserve.toLocaleString() + '</span></div>' : ''}
+                                            </div>
+                                            <div style="flex:2;">
+                                                <label style="font-size:11px; font-weight:600; color:var(--muted); display:block; margin-bottom:3px;">Notes</label>
+                                                <textarea onchange="updatePortfolioNotes(${p.idx}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:50px; padding:6px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--bg); color:var(--text); resize:vertical;">${notes[p.idx] || ''}</textarea>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `}).join('')}
                         </tbody>
                     </table>
                 </div>
