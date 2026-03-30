@@ -972,9 +972,10 @@
                         <div class="stat-label">WAITING ON</div>
                         <div class="stat-value" id="stat-waiting">0</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" id="stat-workorders-card">
                         <div class="stat-label">OPEN WORK ORDERS</div>
                         <div class="stat-value" id="stat-workorders">0</div>
+                        <div id="stat-workorders-overdue" style="display:none; font-size:11px; font-weight:600; color:var(--danger); margin-top:2px;"></div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">ACTIVE APPLICATIONS</div>
@@ -2721,11 +2722,27 @@
             document.getElementById('stat-waiting').textContent = state.waiting.length;
 
             // Live counts from trackers
-            const openWOs = (state.workOrders || []).filter(wo => {
+            const openWOsList = (state.workOrders || []).filter(wo => {
                 const done = wo.steps.filter(s => s.done).length;
                 return done < wo.steps.length;
+            });
+            const openWOs = openWOsList.length;
+            const overdueWOs = openWOsList.filter(wo => {
+                const created = new Date(wo.dateCreated);
+                const daysOpen = Math.floor((now - created) / (1000 * 60 * 60 * 24));
+                return daysOpen >= 14;
             }).length;
             document.getElementById('stat-workorders').textContent = openWOs;
+            const overdueEl = document.getElementById('stat-workorders-overdue');
+            const woCard = document.getElementById('stat-workorders-card');
+            if (overdueWOs > 0) {
+                overdueEl.textContent = overdueWOs + ' overdue (14+ days)';
+                overdueEl.style.display = 'block';
+                woCard.style.borderLeftColor = 'var(--danger)';
+            } else {
+                overdueEl.style.display = 'none';
+                woCard.style.borderLeftColor = 'var(--accent)';
+            }
             document.getElementById('stat-applications').textContent = (state.applications || []).length;
 
             // EOD nudge — show after 5pm on weekdays
