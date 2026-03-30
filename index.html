@@ -1246,19 +1246,23 @@
                 </div>
 
                 <div class="panel">
-                    <div class="panel-title">✓ New Lease Checklist</div>
-                    <div class="checklist" id="newLeaseChecklist"></div>
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="resetChecklist('newLease')">Reset Checklist</button>
-                    </div>
-                </div>
-
-                <div class="panel">
                     <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
                         📂 Application Tracker
                         <button class="btn" onclick="addApplication()">+ New Application</button>
                     </div>
                     <div id="applicationList"></div>
+                </div>
+
+                <div class="panel" style="padding-bottom:0;">
+                    <div class="panel-title" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="document.getElementById('leaseChecklistBody').classList.toggle('hidden'); this.querySelector('.chevron').textContent = document.getElementById('leaseChecklistBody').classList.contains('hidden') ? '▸' : '▾';">
+                        ✓ New Lease Checklist <span class="chevron" style="font-size:14px; color:var(--muted);">▸</span>
+                    </div>
+                    <div id="leaseChecklistBody" class="hidden" style="padding-bottom:16px;">
+                        <div class="checklist" id="newLeaseChecklist"></div>
+                        <div class="button-group">
+                            <button class="btn btn-secondary" onclick="resetChecklist('newLease')">Reset Checklist</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
