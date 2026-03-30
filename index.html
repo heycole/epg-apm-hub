@@ -885,9 +885,6 @@
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <div class="logo-row" style="justify-content:center;">
-                <span style="font-weight:700; font-size:18px; color:white; letter-spacing:0.5px;">EPG Management</span>
-            </div>
             <div class="user-block">
                 <div class="user-avatar" id="userAvatar">APM</div>
                 <div class="user-info">
@@ -1012,43 +1009,48 @@
 
                 <!-- QUICK ACTIONS -->
                 <div style="margin-bottom:16px;">
-                    <div style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Quick Actions</div>
-                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <button onclick="switchPage('maintenance'); setTimeout(()=>document.querySelector('[onclick*=addWorkOrder]')?.click(), 100)" style="padding:8px 16px; background:var(--card); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--text); display:flex; align-items:center; gap:6px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">🔧 New Work Order</button>
-                        <button onclick="switchPage('applications'); setTimeout(()=>document.querySelector('[onclick*=addApplication]')?.click(), 100)" style="padding:8px 16px; background:var(--card); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--text); display:flex; align-items:center; gap:6px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">📄 New Application</button>
-                        <button onclick="switchPage('renewals')" style="padding:8px 16px; background:var(--card); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--text); display:flex; align-items:center; gap:6px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">🔄 Lease Renewals</button>
-                        <button onclick="switchPage('finance')" style="padding:8px 16px; background:var(--card); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--text); display:flex; align-items:center; gap:6px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">💰 Finance</button>
-                        <button onclick="window.open('https://elkaim.appfolio.com','_blank')" style="padding:8px 16px; background:var(--card); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--text); display:flex; align-items:center; gap:6px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">🔗 AppFolio</button>
-                        <button onclick="switchPage('eod')" style="padding:8px 16px; background:var(--card); border:1px solid var(--border); border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--text); display:flex; align-items:center; gap:6px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">📝 Submit EOD</button>
+                    <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Quick Actions</div>
+                    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px;">
+                        <button onclick="switchPage('maintenance'); setTimeout(()=>document.querySelector('[onclick*=addWorkOrder]')?.click(), 100)" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">🔧</span>Work Order</button>
+                        <button onclick="switchPage('applications'); setTimeout(()=>document.querySelector('[onclick*=addApplication]')?.click(), 100)" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">📄</span>Application</button>
+                        <button onclick="switchPage('renewals')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">🔄</span>Renewals</button>
+                        <button onclick="switchPage('finance')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">💰</span>Finance</button>
+                        <button onclick="window.open('https://elkaim.appfolio.com','_blank')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">🔗</span>AppFolio</button>
+                        <button onclick="switchPage('eod')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">📝</span>End of Day</button>
                     </div>
                 </div>
 
-                <!-- MY TASKS -->
-                <div class="panel" style="margin-bottom:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <div class="panel-title" style="margin-bottom:0;">📋 My Tasks</div>
-                        <button class="btn" style="font-size:12px; padding:4px 10px;" onclick="openAddTaskModal('tasks')">+ Add Task</button>
-                    </div>
-                    <div id="dashboard-tasks"></div>
-                </div>
+                <!-- MAIN CONTENT: 60/40 split -->
+                <div style="display:grid; grid-template-columns:3fr 2fr; gap:16px; align-items:start;">
 
-                <!-- PENDING: Approvals + Waiting On -->
-                <div class="dashboard-grid">
-                    <div class="panel">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div class="panel-title" style="margin-bottom:0;">⏳ Awaiting Approval</div>
-                            <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('approvals')">+ Add</button>
+                    <!-- LEFT: My Tasks (60%) -->
+                    <div class="panel" style="margin-bottom:0; min-height:280px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">📋 My Tasks</div>
+                            <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="openAddTaskModal('tasks')">+ Add Task</button>
                         </div>
-                        <div id="dashboard-approvals"></div>
+                        <div id="dashboard-tasks"></div>
                     </div>
 
-                    <div class="panel">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div class="panel-title" style="margin-bottom:0;">⌛ Waiting On</div>
-                            <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('waiting')">+ Add</button>
+                    <!-- RIGHT: Approvals + Waiting On stacked (40%) -->
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        <div class="panel" style="margin-bottom:0; border-left:4px solid var(--warning);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <div class="panel-title" style="margin-bottom:0; font-size:14px;">⏳ Awaiting Approval</div>
+                                <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('approvals')">+ Add</button>
+                            </div>
+                            <div id="dashboard-approvals"></div>
                         </div>
-                        <div id="dashboard-waiting"></div>
+
+                        <div class="panel" style="margin-bottom:0; border-left:4px solid #6c8ebf;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <div class="panel-title" style="margin-bottom:0; font-size:14px;">⌛ Waiting On</div>
+                                <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('waiting')">+ Add</button>
+                            </div>
+                            <div id="dashboard-waiting"></div>
+                        </div>
                     </div>
+
                 </div>
             </div>
 
