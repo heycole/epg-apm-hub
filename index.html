@@ -2439,7 +2439,12 @@
         // ============================================
         const SUPABASE_URL = 'https://kwhcdkmkfpsfldivxnvf.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3aGNka21rZnBzZmxkaXZ4bnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDMwNTAsImV4cCI6MjA5MDQxOTA1MH0.zbRMRPAOP5bZQ4I5ejxL8hwCFC8R5XJIyzuHiw5lRqA';
+        // Auth client — handles login/logout only
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Data client — handles all read/write operations (no auth lock)
+        const sbData = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { persistSession: false, autoRefreshToken: false }
+        });
 
         // ============================================
         // AUTH
@@ -2555,7 +2560,7 @@
             if (saveTimeout) clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
                 try {
-                    const { error } = await sb.from('hub_state').upsert({
+                    const { error } = await sbData.from('hub_state').upsert({
                         id: 'epg_main',
                         state_data: state,
                         updated_at: new Date().toISOString()
@@ -2573,7 +2578,7 @@
 
         async function loadState() {
             try {
-                const { data, error } = await sb
+                const { data, error } = await sbData
                     .from('hub_state')
                     .select('state_data')
                     .eq('id', 'epg_main')
