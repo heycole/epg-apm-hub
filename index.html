@@ -2439,16 +2439,7 @@
         // ============================================
         const SUPABASE_URL = 'https://kwhcdkmkfpsfldivxnvf.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3aGNka21rZnBzZmxkaXZ4bnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NDMwNTAsImV4cCI6MjA5MDQxOTA1MH0.zbRMRPAOP5bZQ4I5ejxL8hwCFC8R5XJIyzuHiw5lRqA';
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: false,
-                flowType: 'implicit',
-                storage: window.localStorage,
-                storageKey: 'epg-hub-auth'
-            }
-        });
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ============================================
         // AUTH
@@ -2512,6 +2503,18 @@
                 document.getElementById('userAvatar').textContent = 'APM';
                 document.getElementById('userName').textContent = 'Assistant Property Manager';
                 await initApp();
+                // If state wasn't loaded yet (RLS blocked before auth), retry now
+                if (!stateLoadedFromDB) {
+                    console.log('Retrying state load after auth...');
+                    await loadState();
+                    renderDashboard();
+                    renderEODHistory();
+                    renderWorkOrders();
+                    renderApplications();
+                    renderRenewals();
+                    renderPortfolio();
+                    renderOnboarding();
+                }
             } else {
                 document.getElementById('loginOverlay').classList.remove('hidden');
             }
@@ -2539,8 +2542,14 @@
         };
 
         let saveTimeout = null;
+        let stateLoadedFromDB = false;
 
         function saveState(newState) {
+            // Safety: never save if we haven't successfully loaded from DB yet
+            if (!stateLoadedFromDB) {
+                console.warn('Save blocked — state not yet loaded from DB');
+                return;
+            }
             state = newState;
             // Debounce saves to avoid hammering the database
             if (saveTimeout) clearTimeout(saveTimeout);
@@ -2569,11 +2578,23 @@
                     .select('state_data')
                     .eq('id', 'epg_main')
                     .single();
+                if (error) {
+                    console.error('Load error:', error);
+                    // If RLS blocks us, don't mark as loaded — prevents overwriting
+                    if (error.code === '42501') {
+                        console.warn('RLS blocked read — waiting for auth');
+                        return;
+                    }
+                }
                 if (data && data.state_data) {
                     state = { ...state, ...data.state_data };
                 }
+                stateLoadedFromDB = true;
+                console.log('State loaded from DB');
             } catch (err) {
                 console.error('Load failed, using defaults:', err);
+                // Still mark as loaded if it was a network issue (not RLS)
+                stateLoadedFromDB = true;
             }
             // Ensure all arrays exist
             if (!state.urgent) state.urgent = [];
