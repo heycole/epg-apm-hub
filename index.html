@@ -953,7 +953,7 @@
             <div class="page active" data-page="dashboard">
                 <div class="greeting-banner">
                     <div>
-                        <div class="greeting-text">Welcome Back King</div>
+                        <div class="greeting-text">Welcome Back</div>
                         <div class="greeting-subtitle">EPG Management — Assistant Property Manager</div>
                     </div>
                     <div class="greeting-date" id="dashDate"></div>
@@ -1050,6 +1050,16 @@
                     </div>
 
                 </div>
+
+                <!-- SCRATCHPAD -->
+                <div class="panel" style="margin-top:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div class="panel-title" style="margin-bottom:0; font-size:15px;">📌 Scratchpad</div>
+                        <span style="font-size:11px; color:var(--text-sm);" id="scratchpad-status">Auto-saved</span>
+                    </div>
+                    <textarea id="scratchpad" placeholder="Quick notes, reminders, things to remember..." style="width:100%; min-height:120px; padding:12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); background:var(--bg); resize:vertical; line-height:1.6;" oninput="saveScratchpad()"></textarea>
+                </div>
+
             </div>
 
             <!-- TASKS PAGE -->
@@ -1169,15 +1179,61 @@
                 </div>
 
                 <div class="panel">
-                    <div class="panel-title">🛠️ Key Tools & Systems</div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div class="panel-title">🔐 Systems & Logins</div>
+                    <div style="display:grid; grid-template-columns: 1fr; gap:10px;">
                         <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--accent);">
-                            <div style="font-weight:700; font-size:13px; color:var(--accent); margin-bottom:6px;">AppFolio</div>
-                            <div style="font-size:13px; color:var(--text-sm); line-height:1.7;">Tenant management, work orders, leases, communications, and financial tracking.</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <div style="font-weight:700; font-size:14px; color:var(--accent);">Gmail — EPG Management</div>
+                                <a href="https://mail.google.com" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none;">Open →</a>
+                            </div>
+                            <div style="font-size:13px; color:var(--text-sm); line-height:1.8;">
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">EMAIL:</span> yourfriends@epgmgmt.com<br>
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">PASSWORD:</span> EPG2026!!**yourfriends
+                            </div>
                         </div>
+
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--accent);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <div style="font-weight:700; font-size:14px; color:var(--accent);">AppFolio</div>
+                                <a href="https://elkaim.appfolio.com" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none;">Open →</a>
+                            </div>
+                            <div style="font-size:13px; color:var(--text-sm); line-height:1.8;">
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">EMAIL:</span> epgpropmgmt@gmail.com<br>
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">PASSWORD:</span> EPG2026!!**yourfriends
+                            </div>
+                        </div>
+
                         <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--success);">
-                            <div style="font-weight:700; font-size:13px; color:var(--success); margin-bottom:6px;">Google Drive</div>
-                            <div style="font-size:13px; color:var(--text-sm); line-height:1.7;">Maintain organized documentation and update all SOPs as changes are made in real time.</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <div style="font-weight:700; font-size:14px; color:var(--success);">Gmail — AppFolio Account</div>
+                                <a href="https://mail.google.com" target="_blank" style="font-size:11px; color:var(--success); text-decoration:none;">Open →</a>
+                            </div>
+                            <div style="font-size:13px; color:var(--text-sm); line-height:1.8;">
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">EMAIL:</span> epgpropmgmt@gmail.com<br>
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">PASSWORD:</span> EPG2025!
+                            </div>
+                        </div>
+
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--primary-navy);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <div style="font-weight:700; font-size:14px; color:var(--primary-navy);">Google Voice</div>
+                                <a href="https://voice.google.com/u/0/messages" target="_blank" style="font-size:11px; color:var(--primary-navy); text-decoration:none;">Open →</a>
+                            </div>
+                            <div style="font-size:13px; color:var(--text-sm); line-height:1.8;">
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">EMAIL:</span> Diana@ElkaimPropertyGroup.com<br>
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">PASSWORD:</span> EPGSINCE2020!
+                            </div>
+                        </div>
+
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; border-left:4px solid var(--warning);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <div style="font-weight:700; font-size:14px; color:var(--warning);">Basecamp</div>
+                                <a href="https://3.basecamp.com/3642337/projects" target="_blank" style="font-size:11px; color:var(--warning); text-decoration:none;">Open →</a>
+                            </div>
+                            <div style="font-size:13px; color:var(--text-sm); line-height:1.8;">
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">EMAIL:</span> elan@elkaimpropertygroup.com<br>
+                                <span style="color:var(--muted); font-size:11px; font-weight:600;">PASSWORD:</span> JodiTaliJonah2024!
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2494,7 +2550,7 @@
 
         async function loadState() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await sb
                     .from('hub_state')
                     .select('state_data')
                     .eq('id', 'epg_main')
@@ -2516,6 +2572,7 @@
             if (!state.properties) state.properties = [];
             if (!state.owners) state.owners = [];
             if (!state.portfolioNotes) state.portfolioNotes = {};
+            if (!state.scratchpad) state.scratchpad = '';
         }
 
         // ============================================
@@ -2561,9 +2618,15 @@
             }
 
             container.innerHTML = tasks.map((task, idx) => `
-                <div style="padding: 12px; background: var(--bg); border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 13px; color: var(--text); flex: 1;">${task.title}</span>
-                    <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="removeTask('${type}', ${idx})">Remove</button>
+                <div style="padding: 10px 12px; background: ${task.completed ? 'rgba(34,197,94,0.06)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${task.completed ? 'opacity:0.6;' : ''}">
+                    <button onclick="toggleCompleteTask('${type}', ${idx})" title="${task.completed ? 'Mark incomplete' : 'Mark complete'}" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid ${task.completed ? 'var(--success)' : 'var(--border)'}; background:${task.completed ? 'var(--success)' : 'transparent'}; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.2s;">
+                        ${task.completed ? '<span style="color:white; font-size:11px; line-height:1;">✓</span>' : ''}
+                    </button>
+                    <span style="font-size: 13px; color: var(--text); flex: 1; ${task.completed ? 'text-decoration: line-through; color: var(--text-sm);' : ''}">${task.title}</span>
+                    <div style="display:flex; gap:4px; flex-shrink:0;">
+                        <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="editTask('${type}', ${idx})" title="Edit">✏️</button>
+                        <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeTask('${type}', ${idx})" title="Remove">✕</button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -2574,9 +2637,30 @@
             const title = prompt('Enter ' + (labels[type] || 'task') + ':');
             if (title) {
                 if (!state[type]) state[type] = [];
-                state[type].push({ title });
+                state[type].push({ title, completed: false });
                 saveState(state);
                 renderDashboard();
+            }
+        }
+
+        function toggleCompleteTask(type, idx) {
+            const key = type === 'Task' ? 'tasks' : type === 'Approval' ? 'approvals' : type === 'Waiting' ? 'waiting' : type === 'Meeting' ? 'meetings' : type;
+            if (state[key] && state[key][idx]) {
+                state[key][idx].completed = !state[key][idx].completed;
+                saveState(state);
+                renderDashboard();
+            }
+        }
+
+        function editTask(type, idx) {
+            const key = type === 'Task' ? 'tasks' : type === 'Approval' ? 'approvals' : type === 'Waiting' ? 'waiting' : type === 'Meeting' ? 'meetings' : type;
+            if (state[key] && state[key][idx]) {
+                const newTitle = prompt('Edit item:', state[key][idx].title);
+                if (newTitle !== null && newTitle.trim()) {
+                    state[key][idx].title = newTitle.trim();
+                    saveState(state);
+                    renderDashboard();
+                }
             }
         }
 
@@ -2760,6 +2844,26 @@
             renderTaskList(document.getElementById('dashboard-tasks'), state.tasks, 'Task');
             renderTaskList(document.getElementById('dashboard-approvals'), state.approvals, 'Approval');
             renderTaskList(document.getElementById('dashboard-waiting'), state.waiting, 'Waiting');
+
+            // Load scratchpad
+            const scratchpadEl = document.getElementById('scratchpad');
+            if (scratchpadEl && state.scratchpad) {
+                scratchpadEl.value = state.scratchpad;
+            }
+        }
+
+        let scratchpadTimer = null;
+        function saveScratchpad() {
+            const el = document.getElementById('scratchpad');
+            const statusEl = document.getElementById('scratchpad-status');
+            if (!el) return;
+            if (statusEl) statusEl.textContent = 'Saving...';
+            clearTimeout(scratchpadTimer);
+            scratchpadTimer = setTimeout(() => {
+                state.scratchpad = el.value;
+                saveState(state);
+                if (statusEl) statusEl.textContent = 'Auto-saved';
+            }, 600);
         }
 
         // ============================================
