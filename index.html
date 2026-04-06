@@ -210,6 +210,10 @@
             border: 1px solid var(--border);
         }
 
+        .app-card.drag-over {
+            box-shadow: 0 0 0 2px var(--accent), 0 4px 12px rgba(200,160,60,0.2);
+        }
+
         .panel-title {
             font-size: 16px;
             font-weight: 700;
@@ -3403,6 +3407,15 @@
             'Send move-in instructions email and schedule a move-in inspection'
         ];
 
+        const applicationDocs = [
+            '2 consecutive pay stubs',
+            'Bank statement (PDF, not screenshot)',
+            'Rental history verification',
+            'Employment verification',
+            "Driver's license",
+            'Photos of any pets'
+        ];
+
         function addApplication() {
             const property = prompt('Property address:');
             if (!property) return;
@@ -3414,8 +3427,12 @@
                 property: property.trim(),
                 applicants: applicants.split(',').map(n => n.trim()).filter(n => n),
                 steps: applicationSteps.map(s => ({ text: s, done: false })),
+                docs: applicationDocs.map(d => ({ text: d, received: false })),
                 collapsed: true,
-                dateCreated: new Date().toLocaleDateString()
+                dateCreated: new Date().toLocaleDateString(),
+                summary: '',
+                notes: '',
+                showingAgent: ''
             });
             saveState(state);
             renderApplications();
@@ -3435,6 +3452,16 @@
             renderApplications();
         }
 
+        function toggleApplicationDoc(appId, docIdx) {
+            const app = state.applications.find(a => a.id === appId);
+            if (app) {
+                if (!app.docs) app.docs = applicationDocs.map(d => ({ text: d, received: false }));
+                app.docs[docIdx].received = !app.docs[docIdx].received;
+                saveState(state);
+                renderApplications();
+            }
+        }
+
         function removeApplication(id) {
             if (!confirm('Remove this application?')) return;
             state.applications = state.applications.filter(a => a.id !== id);
@@ -3446,6 +3473,58 @@
             const app = state.applications.find(a => a.id === appId);
             if (app) app.notes = value;
             saveState(state);
+        }
+
+        function updateApplicationSummary(appId, value) {
+            const app = state.applications.find(a => a.id === appId);
+            if (app) app.summary = value;
+            saveState(state);
+        }
+
+        function updateShowingAgent(appId, value) {
+            const app = state.applications.find(a => a.id === appId);
+            if (app) app.showingAgent = value;
+            saveState(state);
+        }
+
+        // Drag and drop reordering
+        let dragAppId = null;
+
+        function appDragStart(e, appId) {
+            dragAppId = appId;
+            e.currentTarget.style.opacity = '0.4';
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function appDragEnd(e) {
+            e.currentTarget.style.opacity = '1';
+            document.querySelectorAll('.app-card').forEach(c => c.classList.remove('drag-over'));
+        }
+
+        function appDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const card = e.currentTarget;
+            card.classList.add('drag-over');
+        }
+
+        function appDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function appDrop(e, targetId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            if (dragAppId === null || dragAppId === targetId) return;
+            const apps = state.applications;
+            const fromIdx = apps.findIndex(a => a.id === dragAppId);
+            const toIdx = apps.findIndex(a => a.id === targetId);
+            if (fromIdx === -1 || toIdx === -1) return;
+            const [moved] = apps.splice(fromIdx, 1);
+            apps.splice(toIdx, 0, moved);
+            dragAppId = null;
+            saveState(state);
+            renderApplications();
         }
 
         function renderApplications() {
@@ -3462,32 +3541,62 @@
                 const totalSteps = app.steps.length;
                 const pct = Math.round((completedSteps / totalSteps) * 100);
 
-                const stepsHtml = app.collapsed ? '' : `
-                    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
-                        ${app.steps.map((step, idx) => `
-                            <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleApplicationStep(${app.id}, ${idx})">
-                                <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
-                                <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                // Ensure docs array exists for older entries
+                if (!app.docs) app.docs = applicationDocs.map(d => ({ text: d, received: false }));
+                const docsReceived = app.docs.filter(d => d.received).length;
+
+                const expandedHtml = app.collapsed ? '' : `
+                    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                        <!-- LEFT: Process Checklist -->
+                        <div>
+                            <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Process Checklist</div>
+                            ${app.steps.map((step, idx) => `
+                                <div style="display:flex; align-items:flex-start; gap:8px; padding:5px 0; cursor:pointer;" onclick="toggleApplicationStep(${app.id}, ${idx})">
+                                    <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:15px; height:15px; pointer-events:none; flex-shrink:0;">
+                                    <span style="font-size:12px; line-height:1.4; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <!-- RIGHT: Summary + Documents -->
+                        <div>
+                            <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">🔑 Showing Agent</div>
+                            <input type="text" value="${app.showingAgent || ''}" onchange="updateShowingAgent(${app.id}, this.value)" onclick="event.stopPropagation()" placeholder="Who showed the property?" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--card); color:var(--text); margin-bottom:14px;">
+
+                            <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Application Summary</div>
+                            <textarea onchange="updateApplicationSummary(${app.id}, this.value)" onclick="event.stopPropagation()" placeholder="Paste or write the full application summary here..." style="width:100%; min-height:140px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--card); color:var(--text); resize:vertical; line-height:1.5; margin-bottom:14px;">${app.summary || ''}</textarea>
+
+                            <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">📎 Documents Required <span style="font-weight:400; color:var(--muted);">(${docsReceived}/${app.docs.length})</span></div>
+                            ${app.docs.map((doc, idx) => `
+                                <div style="display:flex; align-items:center; gap:8px; padding:4px 0; cursor:pointer;" onclick="toggleApplicationDoc(${app.id}, ${idx})">
+                                    <input type="checkbox" ${doc.received ? 'checked' : ''} style="accent-color:var(--success); width:15px; height:15px; pointer-events:none; flex-shrink:0;">
+                                    <span style="font-size:12px; ${doc.received ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${doc.text}</span>
+                                </div>
+                            `).join('')}
+
+                            <div style="margin-top:14px; padding-top:10px; border-top:1px dashed var(--border);">
+                                <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">📝 Notes</div>
+                                <textarea onchange="updateApplicationNotes(${app.id}, this.value)" onclick="event.stopPropagation()" placeholder="Status updates, follow-ups, etc." style="width:100%; min-height:60px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--card); color:var(--text); resize:vertical;">${app.notes || ''}</textarea>
                             </div>
-                        `).join('')}
-                        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
-                            <label style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">📝 Notes</label>
-                            <textarea onchange="updateApplicationNotes(${app.id}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:60px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--card); color:var(--text); resize:vertical;">${app.notes || ''}</textarea>
                         </div>
                     </div>
                 `;
 
                 return `
-                    <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid var(--accent);">
+                    <div class="app-card" draggable="true" ondragstart="appDragStart(event, ${app.id})" ondragend="appDragEnd(event)" ondragover="appDragOver(event)" ondragleave="appDragLeave(event)" ondrop="appDrop(event, ${app.id})" style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid var(--accent); transition:box-shadow 0.2s, opacity 0.2s;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleApplication(${app.id})">
-                            <div style="flex:1;">
-                                <div style="font-weight:600; font-size:14px; margin-bottom:2px;">🏠 ${app.property}</div>
-                                <div style="font-size:13px; color:var(--text-sm); margin-bottom:6px;">👤 ${app.applicants.join(', ')}</div>
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
-                                        <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : 'var(--accent)'}; border-radius:3px; transition:width 0.3s;"></div>
+                            <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
+                                <div style="cursor:grab; padding:2px 4px; color:var(--muted); font-size:16px; user-select:none;" title="Drag to reorder" onclick="event.stopPropagation()">⠿</div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:600; font-size:14px; margin-bottom:2px;">🏠 ${app.property}</div>
+                                    <div style="font-size:13px; color:var(--text-sm); margin-bottom:${app.showingAgent ? '2px' : '6px'};">👤 ${app.applicants.join(', ')}</div>
+                                    ${app.showingAgent ? `<div style="font-size:11px; color:var(--muted); margin-bottom:6px;">🔑 Shown by: <span style="color:var(--text-sm); font-weight:500;">${app.showingAgent}</span></div>` : ''}
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+                                            <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : 'var(--accent)'}; border-radius:3px; transition:width 0.3s;"></div>
+                                        </div>
+                                        <span style="font-size:11px; color:var(--muted); white-space:nowrap;">${completedSteps}/${totalSteps}</span>
+                                        <span style="font-size:11px; color:var(--muted); white-space:nowrap;">📎 ${docsReceived}/${app.docs.length}</span>
                                     </div>
-                                    <span style="font-size:11px; color:var(--muted); white-space:nowrap;">${completedSteps}/${totalSteps}</span>
                                 </div>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px; margin-left:12px;">
@@ -3495,7 +3604,7 @@
                                 <button onclick="event.stopPropagation(); removeApplication(${app.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
                             </div>
                         </div>
-                        ${stepsHtml}
+                        ${expandedHtml}
                     </div>
                 `;
             }).join('');
