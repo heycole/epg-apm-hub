@@ -2994,8 +2994,8 @@
                     if (report.notes) body += 'ADDITIONAL NOTES:\n' + report.notes + '\n\n';
 
                     const subject = 'EOD Report — ' + report.date;
-                    const mailtoLink = 'mailto:' + encodeURIComponent(eodRecipient) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-                    window.open(mailtoLink, '_blank');
+                    const gmailLink = 'https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(eodRecipient) + '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+                    window.open(gmailLink, '_blank');
 
                     ['eodDate','eodCompleted','eodInProgress','eodLearned','eodPriorities','eodBlocked','eodNotes'].forEach(id => document.getElementById(id).value = '');
                 });
