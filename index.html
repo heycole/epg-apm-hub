@@ -919,6 +919,7 @@
             <!-- OPERATIONS -->
             <div class="nav-section">
                 <div class="nav-section-label">OPERATIONS</div>
+                <div class="nav-item" data-page="sops">📚 SOPs & Video Library</div>
                 <div class="nav-item" data-page="portfolio">🏢 Property & Owner Directory</div>
                 <div class="nav-item" data-page="finance">💰 Finance</div>
                 <div class="nav-item" data-page="maintenance">🔧 Maintenance</div>
@@ -937,7 +938,6 @@
             <!-- RESOURCES -->
             <div class="nav-section">
                 <div class="nav-section-label">RESOURCES</div>
-                <div class="nav-item" data-page="sops">📚 SOPs & Docs <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
                 <div class="nav-item" data-page="compliance">⚖️ Compliance <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
                 <div class="nav-item" data-page="contacts">👥 Contacts & Links <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
                 <div class="nav-item" data-page="glossary">❓ Glossary & FAQs <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
@@ -2334,24 +2334,234 @@
                 </div>
             </div>
 
-            <!-- SOPs & DOCS PAGE -->
+            <!-- SOPs & VIDEO LIBRARY PAGE -->
             <div class="page" data-page="sops">
-                <div class="panel">
-                    <div class="panel-title">📚 SOPs & Documentation</div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <button class="btn btn-sop" onclick="expandSOP(this)">1. Leasing & Lease Renewals</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">2. Listings & Marketing</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">3. Lead Management</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">4. Maintenance & Work Orders</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">5. Onboarding</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">6. Rental License Management</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">7. Utility Management</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">8. Move-In / Move-Out Procedures</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">9. Tenant & Owner Communication</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">10. Inspection Protocol</button>
-                        <button class="btn btn-sop" onclick="expandSOP(this)">11. Finance & Billing</button>
+                <!-- MAIN SOP DIRECTORY (shown by default) -->
+                <div id="sopDirectory">
+                    <div class="panel" style="padding:0; overflow:hidden;">
+                        <div style="padding:20px 24px 16px;">
+                            <div class="panel-title" style="margin-bottom:4px;">📚 SOPs & Video Library</div>
+                            <p style="font-size:12px; color:var(--muted); margin:0;">Click any topic below to view its SOPs, videos, and resources.</p>
+                        </div>
+
+                        <!-- VISUAL WORKFLOW -->
+                        <div style="padding:0 24px 24px;">
+                            <!-- ROW 1: Tenant Acquisition -->
+                            <div style="margin-bottom:28px;">
+                                <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); margin-bottom:12px;">Tenant Acquisition</div>
+                                <div style="display:flex; align-items:center; gap:0;">
+                                    <div onclick="openSOP('listings')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:12px 10px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:20px; line-height:1;">📸</div>
+                                        <div style="font-size:11px; font-weight:600; color:var(--text); line-height:1.2;">Listings &<br>Marketing</div>
+                                    </div>
+                                    <div style="padding:0 4px; color:var(--accent); font-size:16px; flex-shrink:0;">→</div>
+                                    <div onclick="openSOP('leads')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:12px 10px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:20px; line-height:1;">📞</div>
+                                        <div style="font-size:11px; font-weight:600; color:var(--text);">Leads</div>
+                                    </div>
+                                    <div style="padding:0 4px; color:var(--accent); font-size:16px; flex-shrink:0;">→</div>
+                                    <div onclick="openSOP('showings')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:12px 10px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:20px; line-height:1;">🏠</div>
+                                        <div style="font-size:11px; font-weight:600; color:var(--text);">Showings</div>
+                                    </div>
+                                    <div style="padding:0 4px; color:var(--accent); font-size:16px; flex-shrink:0;">→</div>
+                                    <div onclick="openSOP('applications')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:12px 10px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:20px; line-height:1;">📋</div>
+                                        <div style="font-size:11px; font-weight:600; color:var(--text);">Applications</div>
+                                    </div>
+                                    <div style="padding:0 6px; display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+                                        <div style="font-size:9px; font-weight:700; color:var(--muted); white-space:nowrap; text-transform:uppercase; letter-spacing:0.5px;">Qualify &</div>
+                                        <div style="font-size:9px; font-weight:700; color:var(--muted); white-space:nowrap; text-transform:uppercase; letter-spacing:0.5px;">Approve</div>
+                                        <div style="color:var(--accent); font-size:16px; line-height:1; margin-top:1px;">→</div>
+                                    </div>
+                                    <div onclick="openSOP('leasing')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:12px 10px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:20px; line-height:1;">📝</div>
+                                        <div style="font-size:11px; font-weight:600; color:var(--text);">Leasing</div>
+                                    </div>
+                                    <div style="padding:0 4px; color:var(--accent); font-size:16px; flex-shrink:0;">→</div>
+                                    <div onclick="openSOP('movein')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:12px 10px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:20px; line-height:1;">🔑</div>
+                                        <div style="font-size:11px; font-weight:600; color:var(--text);">Move-In</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ROW 2: Tenant Lifecycle (Branching) -->
+                            <div style="margin-bottom:28px;">
+                                <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); margin-bottom:12px;">Tenant Lifecycle</div>
+                                <div style="display:flex; gap:16px;">
+                                    <!-- Left: Decision Point -->
+                                    <div style="display:flex; flex-direction:column; justify-content:center; flex-shrink:0; width:130px;">
+                                        <div style="background:linear-gradient(135deg, rgba(203,121,47,0.15) 0%, rgba(203,121,47,0.05) 100%); border:2px solid var(--accent); border-radius:12px; padding:16px 12px; text-align:center;">
+                                            <div style="font-size:24px; margin-bottom:4px;">⏳</div>
+                                            <div style="font-size:12px; font-weight:700; color:var(--text);">End of<br>Lease Term</div>
+                                        </div>
+                                    </div>
+                                    <!-- Right: Two Branches -->
+                                    <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
+                                        <!-- Branch 1: Renewal -->
+                                        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px 16px;">
+                                            <div style="display:flex; align-items:center; gap:0;">
+                                                <div style="background:rgba(76,175,80,0.12); border:1px solid rgba(76,175,80,0.3); border-radius:6px; padding:4px 10px; flex-shrink:0;">
+                                                    <span style="font-size:11px; font-weight:700; color:#4caf50;">✓ RENEWAL</span>
+                                                </div>
+                                                <div style="padding:0 8px; color:var(--accent); font-size:16px; flex-shrink:0;">→</div>
+                                                <div onclick="openSOP('renewals')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface); border-radius:8px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--surface)';this.style.borderColor='var(--border)'">
+                                                    <div style="font-size:18px; line-height:1;">🔄</div>
+                                                    <div style="font-size:11px; font-weight:600; color:var(--text);">Lease Renewals</div>
+                                                </div>
+                                                <div style="padding:0 8px; color:var(--accent); font-size:16px; flex-shrink:0;">→</div>
+                                                <div onclick="openSOP('deposits')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface); border-radius:8px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--surface)';this.style.borderColor='var(--border)'">
+                                                    <div style="font-size:18px; line-height:1;">💰</div>
+                                                    <div style="font-size:11px; font-weight:600; color:var(--text);">Security Deposits 1 & 2</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Branch 2: Non-Renewal -->
+                                        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px 16px;">
+                                            <div style="display:flex; align-items:center; gap:0;">
+                                                <div style="background:rgba(244,67,54,0.10); border:1px solid rgba(244,67,54,0.25); border-radius:6px; padding:4px 10px; flex-shrink:0;">
+                                                    <span style="font-size:11px; font-weight:700; color:#f44336;">✗ NON-RENEWAL</span>
+                                                </div>
+                                                <div style="padding:0 8px; color:var(--accent); font-size:16px; flex-shrink:0;">→</div>
+                                                <div onclick="openSOP('moveout')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface); border-radius:8px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--surface)';this.style.borderColor='var(--border)'">
+                                                    <div style="font-size:18px; line-height:1;">📦</div>
+                                                    <div style="font-size:11px; font-weight:600; color:var(--text);">Move-Out Process</div>
+                                                </div>
+                                                <div style="padding:0 8px; color:var(--accent); font-size:16px; flex-shrink:0;">→</div>
+                                                <div onclick="openSOP('deposits')" class="sop-flow-box" style="flex:1; cursor:pointer; display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface); border-radius:8px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)'" onmouseout="this.style.background='var(--surface)';this.style.borderColor='var(--border)'">
+                                                    <div style="font-size:18px; line-height:1;">💰</div>
+                                                    <div style="font-size:11px; font-weight:600; color:var(--text);">Security Deposits 1 & 2</div>
+                                                </div>
+                                                <div style="padding:0 8px; display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+                                                    <div style="font-size:9px; font-weight:600; color:var(--muted); white-space:nowrap;">Back to</div>
+                                                    <div style="color:var(--accent); font-size:14px; line-height:1; margin-top:1px;">↩</div>
+                                                </div>
+                                                <div onclick="openSOP('listings')" class="sop-flow-box" style="flex:0 0 auto; cursor:pointer; display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--surface); border-radius:8px; border:1px dashed var(--accent); opacity:0.7; transition:all 0.2s;" onmouseover="this.style.opacity='1';this.style.background='var(--accent-light)'" onmouseout="this.style.opacity='0.7';this.style.background='var(--surface)'">
+                                                    <div style="font-size:18px; line-height:1;">📸</div>
+                                                    <div style="font-size:11px; font-weight:600; color:var(--text);">Listings</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ROW 3: Ongoing Operations -->
+                            <div>
+                                <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); margin-bottom:12px;">Ongoing Operations</div>
+                                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;">
+                                    <div onclick="openSOP('onboarding')" class="sop-flow-box" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:14px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:22px; line-height:1;">🏠</div>
+                                        <div style="font-size:12px; font-weight:600; color:var(--text);">Onboarding</div>
+                                    </div>
+                                    <div onclick="openSOP('rental-licenses')" class="sop-flow-box" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:14px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:22px; line-height:1;">📋</div>
+                                        <div style="font-size:12px; font-weight:600; color:var(--text);">Rental Licenses</div>
+                                    </div>
+                                    <div onclick="openSOP('utilities')" class="sop-flow-box" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:14px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:22px; line-height:1;">⚡</div>
+                                        <div style="font-size:12px; font-weight:600; color:var(--text);">Utility Mgmt</div>
+                                    </div>
+                                    <div onclick="openSOP('distributions')" class="sop-flow-box" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:14px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:22px; line-height:1;">💵</div>
+                                        <div style="font-size:12px; font-weight:600; color:var(--text);">Owner Distributions</div>
+                                    </div>
+                                    <div onclick="openSOP('maintenance')" class="sop-flow-box" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:14px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:22px; line-height:1;">🔧</div>
+                                        <div style="font-size:12px; font-weight:600; color:var(--text);">Maintenance</div>
+                                    </div>
+                                    <div onclick="openSOP('communication')" class="sop-flow-box" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:14px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:22px; line-height:1;">💬</div>
+                                        <div style="font-size:12px; font-weight:600; color:var(--text);">Tenant & Owner Comms</div>
+                                    </div>
+                                    <div onclick="openSOP('billing')" class="sop-flow-box" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:14px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:22px; line-height:1;">🧾</div>
+                                        <div style="font-size:12px; font-weight:600; color:var(--text);">Billing</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div id="sopDetails" class="hidden"></div>
+                </div>
+
+                <!-- SOP SUB-PAGES (hidden by default, shown when a topic is clicked) -->
+                <div id="sopSubPage" style="display:none;">
+                    <!-- Back button -->
+                    <div style="margin-bottom:16px;">
+                        <button onclick="closeSOP()" class="btn" style="padding:8px 16px; font-size:12px; background:var(--surface); border:1px solid var(--border); color:var(--text-sm); display:inline-flex; align-items:center; gap:8px; border-radius:8px; font-weight:500; transition:all 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.04);" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-sm)'">
+                            <span style="font-size:16px;">←</span> Back to SOPs & Video Library
+                        </button>
+                    </div>
+
+                    <!-- Hero Header -->
+                    <div style="background:linear-gradient(135deg, #1a1a2e 0%, #0e0f12 100%); border-radius:12px; padding:28px 32px; margin-bottom:20px; position:relative; overflow:hidden;">
+                        <div style="position:absolute; top:-20px; right:-10px; font-size:120px; opacity:0.06; line-height:1;" id="sopSubIconBg"></div>
+                        <div style="position:relative; z-index:1; display:flex; align-items:center; gap:16px;">
+                            <div style="width:52px; height:52px; background:rgba(203,121,47,0.15); border:2px solid rgba(203,121,47,0.3); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+                                <span id="sopSubIcon" style="font-size:26px;"></span>
+                            </div>
+                            <div>
+                                <div id="sopSubTitle" style="font-size:20px; font-weight:700; color:#ffffff; letter-spacing:-0.3px;"></div>
+                                <div id="sopSubCategory" style="font-size:11px; color:var(--accent); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-top:3px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Cards Grid -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                        <!-- SOPs Card -->
+                        <div style="background:var(--surface); border-radius:12px; border:1px solid var(--border); overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+                            <div style="padding:16px 20px; background:linear-gradient(135deg, rgba(203,121,47,0.08) 0%, rgba(203,121,47,0.02) 100%); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px;">
+                                <div style="width:32px; height:32px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 2px 6px rgba(203,121,47,0.25);">📄</div>
+                                <div>
+                                    <div style="font-size:14px; font-weight:700; color:var(--text);">Standard Operating Procedures</div>
+                                    <div style="font-size:11px; color:var(--muted);">Step-by-step process guides</div>
+                                </div>
+                            </div>
+                            <div id="sopSubSOPs" style="padding:20px; min-height:120px;">
+                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px 0; text-align:center;">
+                                    <div style="width:48px; height:48px; background:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:10px; font-size:20px;">📋</div>
+                                    <p style="color:var(--muted); font-size:12px; font-style:italic; margin:0;">No SOPs added yet</p>
+                                    <p style="color:var(--muted); font-size:11px; margin:4px 0 0;">Content will be added here</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Videos Card -->
+                        <div style="background:var(--surface); border-radius:12px; border:1px solid var(--border); overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+                            <div style="padding:16px 20px; background:linear-gradient(135deg, rgba(203,121,47,0.08) 0%, rgba(203,121,47,0.02) 100%); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px;">
+                                <div style="width:32px; height:32px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 2px 6px rgba(203,121,47,0.25);">🎬</div>
+                                <div>
+                                    <div style="font-size:14px; font-weight:700; color:var(--text);">Training Videos</div>
+                                    <div style="font-size:11px; color:var(--muted);">Watch & learn walkthroughs</div>
+                                </div>
+                            </div>
+                            <div id="sopSubVideos" style="padding:20px; min-height:120px;">
+                                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px 0; text-align:center;">
+                                    <div style="width:48px; height:48px; background:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:10px; font-size:20px;">🎥</div>
+                                    <p style="color:var(--muted); font-size:12px; font-style:italic; margin:0;">No videos added yet</p>
+                                    <p style="color:var(--muted); font-size:11px; margin:4px 0 0;">Video links will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resources Card (full width) -->
+                    <div style="background:var(--surface); border-radius:12px; border:1px solid var(--border); overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+                        <div style="padding:16px 20px; background:linear-gradient(135deg, rgba(203,121,47,0.08) 0%, rgba(203,121,47,0.02) 100%); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px;">
+                            <div style="width:32px; height:32px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 2px 6px rgba(203,121,47,0.25);">🔗</div>
+                            <div>
+                                <div style="font-size:14px; font-weight:700; color:var(--text);">Resources & Links</div>
+                                <div style="font-size:11px; color:var(--muted);">Templates, forms, and reference materials</div>
+                            </div>
+                        </div>
+                        <div id="sopSubResources" style="padding:20px; min-height:80px;">
+                            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px 0; text-align:center;">
+                                <p style="color:var(--muted); font-size:12px; font-style:italic; margin:0;">No additional resources yet</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -3487,6 +3697,14 @@
             saveState(state);
         }
 
+        function setApplicationStatus(id, status) {
+            const app = state.applications.find(a => a.id === id);
+            if (!app) return;
+            app.status = app.status === status ? '' : status;
+            renderApplications();
+            saveState(state);
+        }
+
         // Drag and drop reordering
         let dragAppId = null;
 
@@ -3545,8 +3763,18 @@
                 if (!app.docs) app.docs = applicationDocs.map(d => ({ text: d, received: false }));
                 const docsReceived = app.docs.filter(d => d.received).length;
 
+                const statusColor = app.status === 'approved' ? '#22c55e' : app.status === 'denied' ? '#ef4444' : app.status === 'waiting' ? '#eab308' : 'var(--accent)';
+                const statusLabel = app.status === 'approved' ? 'Approved' : app.status === 'denied' ? 'Denied' : app.status === 'waiting' ? 'Waiting' : '';
+                const statusBadgeHtml = !app.status ? '' : '<div style="margin-bottom:6px;"><span style="background:' + statusColor + '; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:0.5px;">' + statusLabel + '</span></div>';
+
                 const expandedHtml = app.collapsed ? '' : `
-                    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+                        <div style="display:flex; gap:8px; margin-bottom:14px;">
+                            <button onclick="event.stopPropagation(); setApplicationStatus(${app.id}, 'approved')" style="padding:4px 14px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; border:2px solid #22c55e; ${app.status === 'approved' ? 'background:#22c55e; color:#fff;' : 'background:transparent; color:#22c55e;'} font-family:'DM Sans',sans-serif; transition:all 0.2s;">✓ APPROVED</button>
+                            <button onclick="event.stopPropagation(); setApplicationStatus(${app.id}, 'waiting')" style="padding:4px 14px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; border:2px solid #eab308; ${app.status === 'waiting' ? 'background:#eab308; color:#fff;' : 'background:transparent; color:#eab308;'} font-family:'DM Sans',sans-serif; transition:all 0.2s;">⏳ WAITING</button>
+                            <button onclick="event.stopPropagation(); setApplicationStatus(${app.id}, 'denied')" style="padding:4px 14px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; border:2px solid #ef4444; ${app.status === 'denied' ? 'background:#ef4444; color:#fff;' : 'background:transparent; color:#ef4444;'} font-family:'DM Sans',sans-serif; transition:all 0.2s;">✗ DENIED</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                         <!-- LEFT: Process Checklist -->
                         <div>
                             <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Process Checklist</div>
@@ -3560,10 +3788,10 @@
                         <!-- RIGHT: Summary + Documents -->
                         <div>
                             <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">🔑 Showing Agent</div>
-                            <input type="text" value="${app.showingAgent || ''}" onchange="updateShowingAgent(${app.id}, this.value)" onclick="event.stopPropagation()" placeholder="Who showed the property?" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--card); color:var(--text); margin-bottom:14px;">
+                            <input type="text" value="${app.showingAgent || ''}" oninput="updateShowingAgent(${app.id}, this.value)" onclick="event.stopPropagation()" placeholder="Who showed the property?" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--card); color:var(--text); margin-bottom:14px;">
 
                             <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Application Summary</div>
-                            <textarea onchange="updateApplicationSummary(${app.id}, this.value)" onclick="event.stopPropagation()" placeholder="Paste or write the full application summary here..." style="width:100%; min-height:140px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--card); color:var(--text); resize:vertical; line-height:1.5; margin-bottom:14px;">${app.summary || ''}</textarea>
+                            <textarea oninput="updateApplicationSummary(${app.id}, this.value)" onclick="event.stopPropagation()" placeholder="Paste or write the full application summary here..." style="width:100%; min-height:140px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--card); color:var(--text); resize:vertical; line-height:1.5; margin-bottom:14px;">${app.summary || ''}</textarea>
 
                             <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">📎 Documents Required <span style="font-weight:400; color:var(--muted);">(${docsReceived}/${app.docs.length})</span></div>
                             ${app.docs.map((doc, idx) => `
@@ -3575,14 +3803,15 @@
 
                             <div style="margin-top:14px; padding-top:10px; border-top:1px dashed var(--border);">
                                 <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">📝 Notes</div>
-                                <textarea onchange="updateApplicationNotes(${app.id}, this.value)" onclick="event.stopPropagation()" placeholder="Status updates, follow-ups, etc." style="width:100%; min-height:60px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--card); color:var(--text); resize:vertical;">${app.notes || ''}</textarea>
+                                <textarea oninput="updateApplicationNotes(${app.id}, this.value)" onclick="event.stopPropagation()" placeholder="Status updates, follow-ups, etc." style="width:100%; min-height:60px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:12px; background:var(--card); color:var(--text); resize:vertical;">${app.notes || ''}</textarea>
                             </div>
+                        </div>
                         </div>
                     </div>
                 `;
 
                 return `
-                    <div class="app-card" draggable="true" ondragstart="appDragStart(event, ${app.id})" ondragend="appDragEnd(event)" ondragover="appDragOver(event)" ondragleave="appDragLeave(event)" ondrop="appDrop(event, ${app.id})" style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid var(--accent); transition:box-shadow 0.2s, opacity 0.2s;">
+                    <div class="app-card" draggable="true" ondragstart="appDragStart(event, ${app.id})" ondragend="appDragEnd(event)" ondragover="appDragOver(event)" ondragleave="appDragLeave(event)" ondrop="appDrop(event, ${app.id})" style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid ${statusColor}; transition:box-shadow 0.2s, opacity 0.2s;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleApplication(${app.id})">
                             <div style="display:flex; align-items:flex-start; gap:10px; flex:1;">
                                 <div style="cursor:grab; padding:2px 4px; color:var(--muted); font-size:16px; user-select:none;" title="Drag to reorder" onclick="event.stopPropagation()">⠿</div>
@@ -3590,6 +3819,7 @@
                                     <div style="font-weight:600; font-size:14px; margin-bottom:2px;">🏠 ${app.property}</div>
                                     <div style="font-size:13px; color:var(--text-sm); margin-bottom:${app.showingAgent ? '2px' : '6px'};">👤 ${app.applicants.join(', ')}</div>
                                     ${app.showingAgent ? `<div style="font-size:11px; color:var(--muted); margin-bottom:6px;">🔑 Shown by: <span style="color:var(--text-sm); font-weight:500;">${app.showingAgent}</span></div>` : ''}
+                                    ${statusBadgeHtml}
                                     <div style="display:flex; align-items:center; gap:8px;">
                                         <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
                                             <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : 'var(--accent)'}; border-radius:3px; transition:width 0.3s;"></div>
@@ -4248,43 +4478,45 @@
         }
 
         // ============================================
-        // SOP DETAILS
+        // SOP & VIDEO LIBRARY
         // ============================================
-        const sopDetails = {
-            '1. Leasing & Lease Renewals': 'This SOP covers the full rental application and leasing workflow in AppFolio. Follow these steps: (1) Respond to inquiries within 1 hour with unit availability and application link. (2) Schedule showings and confirm 24 hours before. (3) Once application submitted, run screening (credit, criminal, eviction) same day in AppFolio. (4) Verify income at minimum 3x monthly rent. (5) Check previous landlord references. (6) Review screening results with Property Manager. (7) If approved, send lease via DocuSign. (8) Obtain signatures from both parties. (9) Schedule move-in inspection. (10) Collect move-in funds and process in accounting.',
-            '2. Listings & Marketing': 'Take high-quality photos of every unit (minimum 10 photos). Create detailed listing in AppFolio with bed/bath count, square footage, amenities, pet policy, parking, and laundry. Get rent approval from Property Manager. Syndicate listing to Zillow, Apartments.com, and other major sites. Post to social media and local Facebook groups. Set up auto-response for inquiries. Track lead source and showing conversions. Refresh listings every 30 days if vacant. Remove listing within 24 hours of lease signing.',
-            '3. Lead Management': 'Respond to phone inquiries within 1 hour during business hours. Email inquiries within 2 hours. After-hours inquiries get auto-reply confirming receipt, then response by 10 AM next business day. Log all inquiries in AppFolio. Schedule showings and confirm with prospect 24 hours in advance. Follow up within 24 hours after showing. If prospect applies, begin screening process. Track lead source and conversion rate weekly.',
-            '4. Maintenance & Work Orders': 'Open work order in AppFolio. Check if multiple items need separate vendors — create separate Service Requests. Contact tenant for discovery (photos, details, access). Determine tenant responsibility per lease. Create New Service Request: Type Internal→Resident, set priority, add description and vendor instructions. If $250+ ("big bill"), get vendor pricing immediately and submit proposal to owner via "Request Owner for Approval" button. For QueenStatus 360/Erika: $100+ needs owner approval, $500+ Elan reviews. V2 Properties go to Basecamp. Dispatch vendor via AppFolio Portal, Google Voice group chat, or schedule on behalf. 24-hour entry notice required. Follow up minimum 1x/day. Confirm completion with vendor AND tenant. Determine at-fault. Create bill: ACTION → Create Bill → Billable Items, GL 6147. Close via ACTION → Mark Job Done (never check "No Bill Needed"). Verify bill in Accounting → Payables. Payment cycle: 5th and 20th.',
-            '5. Onboarding': 'Property onboarding: Set up in AppFolio, collect existing leases and deposit records, meet tenants, confirm utilities, get rental license, file documents. Tenant onboarding: Conduct move-in inspection with photos, have tenant sign condition report, set up portal access, deliver welcome packet, deliver keys, schedule 30-day check-in. Owner onboarding: Set up portal, collect banking info, confirm reporting preferences, review property, discuss budgets, confirm insurance.',
-            '6. Rental License Management': 'Identify municipality requirements. Check current license status. Schedule required inspection. Prepare property (detectors, egress, safety). Submit application with documents and fee. Track status. File approved license in AppFolio. Set renewal reminder 90 days before expiration. Bill owner for fee per management agreement.',
-            '7. Utility Management': 'At move-in: Confirm tenant responsibility per lease. Provide utility company contact info. Set transfer deadline. Verify tenant transfer. Document in AppFolio. At move-out: Notify tenant to schedule disconnection. Transfer owner utilities back. Confirm readings. Set up vacancy service if needed. Document in AppFolio.',
-            '8. Move-In / Move-Out Procedures': 'Move-in: Verify signed lease in AppFolio. Collect all move-in funds. Conduct inspection with photos/video. Have tenant sign condition report. Set up portal access. Deliver welcome packet and keys. Confirm utilities. Update unit status to Occupied. Schedule 30-day check-in. Move-out: Confirm date. Send move-out instructions. Conduct inspection. Compare conditions. Collect keys/devices. Calculate deposit disposition. Submit to PM for approval. Send itemized statement within timeframe.',
-            '9. Tenant & Owner Communication': 'Tenant response time: 24 hours. Tone: professional, empathetic, solution-oriented. Log ALL communications in AppFolio. Escalate fair housing, legal, eviction matters to PM immediately. Owner response time: same business day. Send monthly statement via portal. Proactive notification of significant issues with photos. PM handles disputes, legal, financial discussions.',
-            '10. Inspection Protocol': 'Types: Move-in/move-out (all tenants), Annual routine (occupied units), Quarterly drive-by, Complaint-based, Pre-listing, Seasonal. Use standardized checklist. Photograph all items. Notify tenant 24-48 hours in advance. Complete report in AppFolio. Share findings. Create work orders for issues. File photos and report.',
-            '11. Finance & Billing': 'GL Code Reference — Expense (Owner Bills): 6077 Cleaning, 6147 Repairs-Other, 6173 Water, 6200 Licensing, 7010 New Appliance. Income (Tenant Charges): 4320 Water Bill, 4480 Key/Fob Replacement, 4490 Oversized Trash. Water Bill Process (3 steps): (1) Pay at phila.gov with EPG credentials, (2) Bill owner in AppFolio GL 6173, (3) Bill tenant in AppFolio GL 4320. Licensing: Accounting → Payables → Enter Bill, Payee City of Philadelphia, GL 6200, attach receipt. Vendor invoices: ACTION → Create Bill → Billable Items, GL 6147, verify in Payables, paid on 5th/20th cycle. Tenant charges: Enter Charge on tenant record. Rent Collection & Delinquency: Day 5 text (late fee warning), Day 6 text (late fee applied), Day 8-9 text (urgent/10-day notice warning), Day 10 (10-Day Notice to Quit via AppFolio or certified mail — confirm with PM), Day 15 (eviction diversion/process begins). If unsure about any GL code, review with Nicole.'
+        const sopTopics = {
+            listings:       { icon: '📸', title: 'Listings & Marketing', category: 'Tenant Acquisition' },
+            leads:          { icon: '📞', title: 'Leads', category: 'Tenant Acquisition' },
+            showings:       { icon: '🏠', title: 'Showings', category: 'Tenant Acquisition' },
+            applications:   { icon: '📋', title: 'Applications', category: 'Tenant Acquisition' },
+            leasing:        { icon: '📝', title: 'Leasing', category: 'Tenant Acquisition' },
+            movein:         { icon: '🔑', title: 'Move-In Process', category: 'Tenant Acquisition' },
+            renewals:       { icon: '🔄', title: 'Lease Renewals', category: 'Tenant Lifecycle' },
+            moveout:        { icon: '📦', title: 'Move-Out Process', category: 'Tenant Lifecycle' },
+            deposits:       { icon: '💰', title: 'Security Deposits 1 & 2', category: 'Tenant Lifecycle' },
+            onboarding:     { icon: '🏠', title: 'Onboarding', category: 'Ongoing Operations' },
+            'rental-licenses': { icon: '📋', title: 'Rental Licenses', category: 'Ongoing Operations' },
+            utilities:      { icon: '⚡', title: 'Utility Management', category: 'Ongoing Operations' },
+            distributions:  { icon: '💵', title: 'Owner Distributions', category: 'Ongoing Operations' },
+            maintenance:    { icon: '🔧', title: 'Maintenance', category: 'Ongoing Operations' },
+            communication:  { icon: '💬', title: 'Tenant & Owner Communication', category: 'Ongoing Operations' },
+            billing:        { icon: '🧾', title: 'Billing', category: 'Ongoing Operations' }
         };
 
-        function expandSOP(button) {
-            const sopName = button.textContent.trim();
-            const details = document.getElementById('sopDetails');
+        function openSOP(topicKey) {
+            const topic = sopTopics[topicKey];
+            if (!topic) return;
+            document.getElementById('sopDirectory').style.display = 'none';
+            document.getElementById('sopSubPage').style.display = 'block';
+            document.getElementById('sopSubIcon').textContent = topic.icon;
+            document.getElementById('sopSubIconBg').textContent = topic.icon;
+            document.getElementById('sopSubTitle').textContent = topic.title;
+            document.getElementById('sopSubCategory').textContent = topic.category;
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) contentArea.scrollTop = 0;
+        }
 
-            if (details.classList.contains('hidden')) {
-                details.classList.remove('hidden');
-                details.innerHTML = `
-                    <div style="padding: 20px; background: var(--bg); border-radius: var(--radius); margin-top: 16px; line-height: 1.6; color: var(--text-sm);">
-                        <div style="font-weight: 600; margin-bottom: 12px; color: var(--text);">${sopName}</div>
-                        ${sopDetails[sopName] || 'Content coming soon — check with your Property Manager.'}
-                    </div>
-                `;
-                button.style.background = 'var(--accent-hover)';
-                button.style.color = 'white';
-            } else {
-                details.classList.add('hidden');
-                document.querySelectorAll('.btn-sop').forEach(btn => {
-                    btn.style.background = '';
-                    btn.style.color = '';
-                });
-            }
+        function closeSOP() {
+            document.getElementById('sopSubPage').style.display = 'none';
+            document.getElementById('sopDirectory').style.display = 'block';
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) contentArea.scrollTop = 0;
         }
 
         // ============================================
