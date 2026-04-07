@@ -214,6 +214,10 @@
             box-shadow: 0 0 0 2px var(--accent), 0 4px 12px rgba(200,160,60,0.2);
         }
 
+        /* EOD history collapse/expand */
+        .eod-open .eod-chevron { transform: rotate(90deg); }
+        .eod-open .eod-details { max-height: 600px !important; }
+
         .panel-title {
             font-size: 16px;
             font-weight: 700;
@@ -1082,9 +1086,15 @@
                 <div class="panel">
                     <div class="panel-title">📝 End of Day Report</div>
                     <form id="eodForm" style="display: flex; flex-direction: column; gap: 14px;">
-                        <div>
-                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What's today's date?</label>
-                            <input type="text" id="eodDate" placeholder="e.g. Monday 3/31" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px;" required>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div>
+                                <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Your Name</label>
+                                <input type="text" id="eodSubmittedBy" placeholder="e.g. Sarah" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px;" required>
+                            </div>
+                            <div>
+                                <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What's today's date?</label>
+                                <input type="text" id="eodDate" placeholder="e.g. Monday 3/31" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px;" required>
+                            </div>
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What did you complete today?</label>
@@ -2971,6 +2981,7 @@
                 eodForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     const report = {
+                        submittedBy: document.getElementById('eodSubmittedBy').value,
                         date: document.getElementById('eodDate').value,
                         completed: document.getElementById('eodCompleted').value,
                         inProgress: document.getElementById('eodInProgress').value,
@@ -2985,7 +2996,8 @@
 
                     // Build email body
                     const eodRecipient = 'cole@heycolerealestate.com,elan@elkaimpropertygroup.com';
-                    let body = 'EOD REPORT — ' + report.date + '\n\n';
+                    let body = 'EOD REPORT — ' + report.date + '\n';
+                    body += 'Submitted by: ' + report.submittedBy + '\n\n';
                     body += 'COMPLETED TODAY:\n' + report.completed + '\n\n';
                     body += 'CURRENTLY IN PROGRESS:\n' + report.inProgress + '\n\n';
                     if (report.learned) body += 'WHAT I LEARNED:\n' + report.learned + '\n\n';
@@ -2993,14 +3005,26 @@
                     if (report.blocked) body += 'WAITING ON ELAN/COLE:\n' + report.blocked + '\n\n';
                     if (report.notes) body += 'ADDITIONAL NOTES:\n' + report.notes + '\n\n';
 
-                    const subject = 'EOD Report — ' + report.date;
+                    const subject = 'EOD Report — ' + report.submittedBy + ' — ' + report.date;
                     const gmailLink = 'https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(eodRecipient) + '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
                     window.open(gmailLink, '_blank');
 
+                    // Remember the name for next time
+                    localStorage.setItem('eodLastName', report.submittedBy);
                     ['eodDate','eodCompleted','eodInProgress','eodLearned','eodPriorities','eodBlocked','eodNotes'].forEach(id => document.getElementById(id).value = '');
                 });
             }
+            // Auto-fill name from last submission
+            const lastN = localStorage.getItem('eodLastName');
+            if (lastN) { const nf = document.getElementById('eodSubmittedBy'); if (nf) nf.value = lastN; }
         });
+
+        function deleteEODReport(idx) {
+            if (!confirm('Remove this EOD report?')) return;
+            state.eodReports.splice(idx, 1);
+            saveState(state);
+            renderEODHistory();
+        }
 
         function renderEODHistory() {
             const history = document.getElementById('eodHistory');
@@ -3011,31 +3035,47 @@
                 return;
             }
 
-            history.innerHTML = state.eodReports.slice().reverse().map(report => `
-                <div style="padding: 16px; background: var(--bg); border-radius: var(--radius); margin-bottom: 12px;">
-                    <div style="font-weight: 600; margin-bottom: 10px; font-size: 14px;">${report.date}</div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div>
-                            <div style="font-size:11px; font-weight:700; color:var(--success); text-transform:uppercase; margin-bottom:4px;">Completed</div>
-                            <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.completed || report.summary || ''}</div>
+            // Build compact collapsible list — most recent first
+            const reports = state.eodReports.slice().reverse();
+            history.innerHTML = reports.map((report, revIdx) => {
+                const realIdx = state.eodReports.length - 1 - revIdx;
+                const name = report.submittedBy || 'Team Member';
+                return `
+                <div style="background: var(--bg); border-radius: var(--radius); margin-bottom: 6px; overflow:hidden;">
+                    <div onclick="this.parentElement.classList.toggle('eod-open')" style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; cursor:pointer; user-select:none;">
+                        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                            <span style="font-size:16px; transition:transform .2s;" class="eod-chevron">▸</span>
+                            <span style="font-weight:600; font-size:13px; white-space:nowrap;">${report.date}</span>
+                            <span style="color:var(--text-sm); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">— ${name}</span>
                         </div>
-                        <div>
-                            <div style="font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; margin-bottom:4px;">In Progress</div>
-                            <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.inProgress || ''}</div>
-                        </div>
-                        <div>
-                            <div style="font-size:11px; font-weight:700; color:var(--primary-navy); text-transform:uppercase; margin-bottom:4px;">Learned</div>
-                            <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.learned || ''}</div>
-                        </div>
-                        <div>
-                            <div style="font-size:11px; font-weight:700; color:var(--warning); text-transform:uppercase; margin-bottom:4px;">Tomorrow's Top 3</div>
-                            <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.priorities || ''}</div>
+                        <button onclick="event.stopPropagation(); deleteEODReport(${realIdx})" title="Delete report" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px; opacity:0.5; transition:opacity .15s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.5'">✕</button>
+                    </div>
+                    <div class="eod-details" style="max-height:0; overflow:hidden; transition:max-height .25s ease;">
+                        <div style="padding:0 14px 14px 14px;">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                <div>
+                                    <div style="font-size:11px; font-weight:700; color:var(--success); text-transform:uppercase; margin-bottom:4px;">Completed</div>
+                                    <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.completed || report.summary || '—'}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; margin-bottom:4px;">In Progress</div>
+                                    <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.inProgress || '—'}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:11px; font-weight:700; color:var(--primary-navy); text-transform:uppercase; margin-bottom:4px;">Learned</div>
+                                    <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.learned || '—'}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:11px; font-weight:700; color:var(--warning); text-transform:uppercase; margin-bottom:4px;">Tomorrow's Top 3</div>
+                                    <div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">${report.priorities || '—'}</div>
+                                </div>
+                            </div>
+                            ${report.blocked ? '<div style="margin-top:10px;"><div style="font-size:11px; font-weight:700; color:var(--danger); text-transform:uppercase; margin-bottom:4px;">Waiting on Elan/Cole</div><div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">' + report.blocked + '</div></div>' : ''}
+                            ${report.notes ? '<div style="margin-top:10px;"><div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Notes</div><div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">' + report.notes + '</div></div>' : ''}
                         </div>
                     </div>
-                    ${report.blocked ? '<div style="margin-top:10px;"><div style="font-size:11px; font-weight:700; color:var(--danger); text-transform:uppercase; margin-bottom:4px;">Waiting on Elan/Cole</div><div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">' + report.blocked + '</div></div>' : ''}
-                    ${report.notes ? '<div style="margin-top:10px;"><div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Notes</div><div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">' + report.notes + '</div></div>' : ''}
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         // ============================================
