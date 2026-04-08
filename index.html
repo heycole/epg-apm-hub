@@ -218,6 +218,12 @@
         .eod-open .eod-chevron { transform: rotate(90deg); }
         .eod-open .eod-details { max-height: 600px !important; }
 
+        /* Training section collapse/expand */
+        .train-section .train-body { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+        .train-section.train-open .train-body { max-height: 2000px; }
+        .train-section .train-toggle { transition: transform .2s; }
+        .train-section.train-open .train-toggle { transform: rotate(90deg); }
+
         .panel-title {
             font-size: 16px;
             font-weight: 700;
@@ -916,7 +922,6 @@
             <div class="nav-section">
                 <div class="nav-section-label">ROLE</div>
                 <div class="nav-item" data-page="role-overview">🏠 Role Overview</div>
-                <div class="nav-item" data-page="training">🚀 Training & Onboarding</div>
                 <div class="nav-item" data-page="daily-weekly">📋 Daily & Weekly</div>
                 <div class="nav-item" data-page="monthly">📅 Monthly Calendar <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
             </div>
@@ -1628,6 +1633,7 @@
                     <div class="subtab" data-subtab="special" onclick="switchSubtab('maintenance','special')">Special Flows</div>
                     <div class="subtab" data-subtab="approvals" onclick="switchSubtab('maintenance','approvals')">Owner Approvals</div>
                     <div class="subtab" data-subtab="completion" onclick="switchSubtab('maintenance','completion')">Completion & Billing</div>
+                    <div class="subtab" data-subtab="pest-control" onclick="switchSubtab('maintenance','pest-control')">🐛 Pest Control</div>
                 </div>
 
                 <!-- TAB: MAIN (Work Orders + Priority + Checklist) -->
@@ -1790,12 +1796,101 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- TAB: PEST CONTROL -->
+                <div class="subtab-content" data-subtab="pest-control">
+                    <div class="panel">
+                        <div class="panel-title">🐛 Pest Control — Undisputed Pest Control</div>
+                        <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px; background:var(--bg); border-radius:8px; padding:16px; border-left:4px solid var(--accent);">
+                            <div>
+                                <div style="font-weight:700; font-size:15px; margin-bottom:4px;">Undisputed Pest Control</div>
+                                <div style="font-size:13px; color:var(--text-sm); line-height:1.6;">Monthly service — <strong>$75 per property</strong></div>
+                                <div style="font-size:12px; color:var(--muted); margin-top:4px;">9 properties on monthly plan</div>
+                            </div>
+                        </div>
+
+                        <div class="panel-title" style="font-size:14px;">Properties on Monthly Plan</div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; display:flex; align-items:center; gap:10px;">
+                                <div style="width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0;"></div>
+                                <div>
+                                    <div style="font-weight:600; font-size:13px;">6141 1/2 Old York Rd</div>
+                                    <div style="font-size:11px; color:var(--text-sm);">$75/mo</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; display:flex; align-items:center; gap:10px;">
+                                <div style="width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0;"></div>
+                                <div>
+                                    <div style="font-weight:600; font-size:13px;">6147 1/2 Old York Rd</div>
+                                    <div style="font-size:11px; color:var(--text-sm);">$75/mo</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; display:flex; align-items:center; gap:10px;">
+                                <div style="width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0;"></div>
+                                <div>
+                                    <div style="font-weight:600; font-size:13px;">6143 Old York Rd</div>
+                                    <div style="font-size:11px; color:var(--text-sm);">$75/mo</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; display:flex; align-items:center; gap:10px;">
+                                <div style="width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0;"></div>
+                                <div>
+                                    <div style="font-weight:600; font-size:13px;">2001 Dorrance</div>
+                                    <div style="font-size:11px; color:var(--text-sm);">$75/mo</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; display:flex; align-items:center; gap:10px;">
+                                <div style="width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0;"></div>
+                                <div>
+                                    <div style="font-weight:600; font-size:13px;">21 E Price St</div>
+                                    <div style="font-size:11px; color:var(--text-sm);">$75/mo</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; display:flex; align-items:center; gap:10px;">
+                                <div style="width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0;"></div>
+                                <div>
+                                    <div style="font-weight:600; font-size:13px;">742 N 20th St</div>
+                                    <div style="font-size:11px; color:var(--text-sm);">$75/mo</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; display:flex; align-items:center; gap:10px;">
+                                <div style="width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0;"></div>
+                                <div>
+                                    <div style="font-weight:600; font-size:13px;">4216 Westminster</div>
+                                    <div style="font-size:11px; color:var(--text-sm);">$75/mo</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; display:flex; align-items:center; gap:10px;">
+                                <div style="width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0;"></div>
+                                <div>
+                                    <div style="font-weight:600; font-size:13px;">814 N Uber St</div>
+                                    <div style="font-size:11px; color:var(--text-sm);">$75/mo</div>
+                                </div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:12px; display:flex; align-items:center; gap:10px;">
+                                <div style="width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0;"></div>
+                                <div>
+                                    <div style="font-weight:600; font-size:13px;">812 N Uber St</div>
+                                    <div style="font-size:11px; color:var(--text-sm);">$75/mo</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="background:var(--bg); border-radius:8px; padding:14px; margin-top:16px; display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-weight:700; font-size:14px;">Monthly Total</div>
+                            <div style="font-weight:700; font-size:18px; color:var(--accent);">$675/mo</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- TRAINING & ONBOARDING PAGE -->
             <div class="page" data-page="training">
                 <div class="panel">
-                    <div class="panel-title">🚀 Training & Onboarding</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                        <div class="panel-title" style="margin-bottom:0;">🚀 Training & Onboarding</div>
+                        <button class="btn btn-secondary" style="font-size:12px; padding:6px 14px;" onclick="navigateTo('role-overview')">← Back to Role Overview</button>
+                    </div>
                     <p style="margin-bottom:20px; line-height:1.6; color:var(--text-sm);">Welcome to EPG Management. This guide covers all the core systems, processes, and procedures you need to know as an Assistant Property Manager. Work through each section and check off items as you complete them.</p>
 
                     <!-- Progress Bar -->
@@ -1811,217 +1906,247 @@
                 </div>
 
                 <!-- SECTION 1: UTILITIES -->
-                <div class="panel">
-                    <div class="panel-title">💡 Section 1: Utilities</div>
-                    <p style="color:var(--text-sm); margin-bottom:16px; line-height:1.6;">Understanding utility management is critical. You'll handle gas, electric, and water accounts across all properties. Learn each provider's portal, billing cycle, and how to transfer accounts during move-ins/move-outs.</p>
-
-                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:20px;">
-                        <div style="background:var(--bg); border-radius:8px; padding:16px; border-top:3px solid #f59e0b;">
-                            <div style="font-size:20px; margin-bottom:8px;">🔥</div>
-                            <div style="font-weight:700; font-size:14px; margin-bottom:4px;">PGW</div>
-                            <div style="font-size:12px; color:var(--text-sm);">Philadelphia Gas Works</div>
-                            <a href="https://www.pgworks.com" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; display:inline-block; margin-top:8px;">Visit Portal →</a>
-                        </div>
-                        <div style="background:var(--bg); border-radius:8px; padding:16px; border-top:3px solid #3b82f6;">
-                            <div style="font-size:20px; margin-bottom:8px;">⚡</div>
-                            <div style="font-weight:700; font-size:14px; margin-bottom:4px;">PECO</div>
-                            <div style="font-size:12px; color:var(--text-sm);">Electric Company</div>
-                            <a href="https://www.peco.com" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; display:inline-block; margin-top:8px;">Visit Portal →</a>
-                        </div>
-                        <div style="background:var(--bg); border-radius:8px; padding:16px; border-top:3px solid #06b6d4;">
-                            <div style="font-size:20px; margin-bottom:8px;">💧</div>
-                            <div style="font-weight:700; font-size:14px; margin-bottom:4px;">Philadelphia Water Dept</div>
-                            <div style="font-size:12px; color:var(--text-sm);">Water Bills</div>
-                            <a href="https://water.phila.gov" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; display:inline-block; margin-top:8px;">Visit Portal →</a>
-                        </div>
+                <div class="panel train-section train-open">
+                    <div onclick="this.parentElement.classList.toggle('train-open')" style="display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;">
+                        <span class="train-toggle" style="font-size:14px; display:inline-block;">▸</span>
+                        <div class="panel-title" style="margin-bottom:0;">💡 Section 1: Utilities</div>
                     </div>
+                    <div class="train-body">
+                        <p style="color:var(--text-sm); margin:16px 0; line-height:1.6;">Understanding utility management is critical. You'll handle gas, electric, and water accounts across all properties. Learn each provider's portal, billing cycle, and how to transfer accounts during move-ins/move-outs.</p>
 
-                    <div class="checklist" style="margin-top:10px;">
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>PGW — Gas:</strong> Learn how to log in, look up accounts by property address, read billing history, and initiate service transfers</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>PECO — Electric:</strong> Learn the PECO portal, how to check balances, set up new service, and handle final bills for move-outs</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Philadelphia Water Dept:</strong> Learn how to look up water bills, understand the billing cycle, and process water bill payments</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Utility Transfers:</strong> Understand the full process of transferring utilities between tenants during move-in/move-out</div>
-                        </label>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; margin-bottom:20px;">
+                            <div style="background:var(--bg); border-radius:8px; padding:16px; border-top:3px solid #f59e0b;">
+                                <div style="font-size:20px; margin-bottom:8px;">🔥</div>
+                                <div style="font-weight:700; font-size:14px; margin-bottom:4px;">PGW</div>
+                                <div style="font-size:12px; color:var(--text-sm);">Philadelphia Gas Works</div>
+                                <a href="https://www.pgworks.com" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; display:inline-block; margin-top:8px;">Visit Portal →</a>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:16px; border-top:3px solid #3b82f6;">
+                                <div style="font-size:20px; margin-bottom:8px;">⚡</div>
+                                <div style="font-weight:700; font-size:14px; margin-bottom:4px;">PECO</div>
+                                <div style="font-size:12px; color:var(--text-sm);">Electric Company</div>
+                                <a href="https://www.peco.com" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; display:inline-block; margin-top:8px;">Visit Portal →</a>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:16px; border-top:3px solid #06b6d4;">
+                                <div style="font-size:20px; margin-bottom:8px;">💧</div>
+                                <div style="font-weight:700; font-size:14px; margin-bottom:4px;">Philadelphia Water Dept</div>
+                                <div style="font-size:12px; color:var(--text-sm);">Water Bills</div>
+                                <a href="https://water.phila.gov" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; display:inline-block; margin-top:8px;">Visit Portal →</a>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:16px; border-top:3px solid #8b5cf6;">
+                                <div style="font-size:20px; margin-bottom:8px;">🏛️</div>
+                                <div style="font-weight:700; font-size:14px; margin-bottom:4px;">PECO Landlord Account</div>
+                                <div style="font-size:12px; color:var(--text-sm);">Landlord portal for managing electric across properties</div>
+                            </div>
+                        </div>
+
+                        <div class="checklist" style="margin-top:10px;">
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>PGW — Gas:</strong> Learn how to log in, look up accounts by property address, read billing history, and initiate service transfers</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>PECO — Electric:</strong> Learn the PECO portal, how to check balances, set up new service, and handle final bills for move-outs</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Philadelphia Water Dept:</strong> Learn how to look up water bills, understand the billing cycle, and process water bill payments</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>PECO Landlord Account:</strong> Learn how to navigate the PECO landlord portal, manage accounts across properties, and handle landlord-specific billing</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Utility Transfers:</strong> Understand the full process of transferring utilities between tenants during move-in/move-out</div>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
                 <!-- SECTION 2: RENTAL LICENSING & LEASE COMPLIANCE -->
-                <div class="panel">
-                    <div class="panel-title">📄 Section 2: Rental Licensing & Lease Compliance</div>
-                    <p style="color:var(--text-sm); margin-bottom:16px; line-height:1.6;">Every rental property in Philadelphia requires an active rental license. You need to understand the renewal process, inspection requirements, and how to ensure lease compliance across the portfolio.</p>
+                <div class="panel train-section">
+                    <div onclick="this.parentElement.classList.toggle('train-open')" style="display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;">
+                        <span class="train-toggle" style="font-size:14px; display:inline-block;">▸</span>
+                        <div class="panel-title" style="margin-bottom:0;">📄 Section 2: Rental Licensing & Lease Compliance</div>
+                    </div>
+                    <div class="train-body">
+                        <p style="color:var(--text-sm); margin:16px 0; line-height:1.6;">Every rental property in Philadelphia requires an active rental license. You need to understand the renewal process, inspection requirements, and how to ensure lease compliance across the portfolio.</p>
 
-                    <div class="checklist">
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Rental License Overview:</strong> Understand which properties need licenses, renewal timelines, and the City of Philadelphia portal for managing them</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Inspection Requirements:</strong> Know when inspections are required, how to schedule them, and what to prepare for</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Lease Compliance:</strong> Review lease terms, understand common violations, and learn the notification/cure process</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Tracking in the Hub:</strong> Learn how to use the Rental Licenses page in this hub to track deadlines and status</div>
-                        </label>
+                        <div class="checklist">
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Rental License Overview:</strong> Understand which properties need licenses, renewal timelines, and the City of Philadelphia portal for managing them</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Inspection Requirements:</strong> Know when inspections are required, how to schedule them, and what to prepare for</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Lease Compliance:</strong> Review lease terms, understand common violations, and learn the notification/cure process</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Tracking in the Hub:</strong> Learn how to use the Rental Licenses page in this hub to track deadlines and status</div>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
                 <!-- SECTION 3: PLATFORM TRAINING -->
-                <div class="panel">
-                    <div class="panel-title">💻 Section 3: Platform Training</div>
-                    <p style="color:var(--text-sm); margin-bottom:16px; line-height:1.6;">You'll work primarily in AppFolio for property management and Google Drive for shared documents. Learn how these systems are set up and where to find what you need.</p>
-
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-                        <div style="background:var(--bg); border-radius:8px; padding:16px; border-left:4px solid var(--accent);">
-                            <div style="font-weight:700; font-size:14px; color:var(--accent); margin-bottom:6px;">AppFolio</div>
-                            <div style="font-size:12px; color:var(--text-sm); line-height:1.6;">Property management software — tenant records, work orders, accounting, lease management, and owner reporting all live here.</div>
-                            <a href="https://elkaim.appfolio.com" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; display:inline-block; margin-top:8px;">Open AppFolio →</a>
-                        </div>
-                        <div style="background:var(--bg); border-radius:8px; padding:16px; border-left:4px solid var(--success);">
-                            <div style="font-weight:700; font-size:14px; color:var(--success); margin-bottom:6px;">Google Drive</div>
-                            <div style="font-size:12px; color:var(--text-sm); line-height:1.6;">Shared documents, templates, lease files, vendor contracts, and internal SOPs are organized in Drive folders.</div>
-                            <a href="https://drive.google.com" target="_blank" style="font-size:11px; color:var(--success); text-decoration:none; display:inline-block; margin-top:8px;">Open Google Drive →</a>
-                        </div>
+                <div class="panel train-section">
+                    <div onclick="this.parentElement.classList.toggle('train-open')" style="display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;">
+                        <span class="train-toggle" style="font-size:14px; display:inline-block;">▸</span>
+                        <div class="panel-title" style="margin-bottom:0;">💻 Section 3: Platform Training</div>
                     </div>
+                    <div class="train-body">
+                        <p style="color:var(--text-sm); margin:16px 0; line-height:1.6;">You'll work primarily in AppFolio for property management and Google Drive for shared documents. Learn how these systems are set up and where to find what you need.</p>
 
-                    <div class="checklist">
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>AppFolio Navigation:</strong> Learn the main sections — Properties, Tenants, Owners, Maintenance, Accounting, and Reports</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>AppFolio Work Orders:</strong> Learn to create, assign, and close work orders for maintenance requests</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>AppFolio Accounting:</strong> Understand how to navigate bills, invoices, ledgers, and owner statements</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Google Drive Structure:</strong> Learn the folder organization — where lease templates, vendor docs, owner files, and SOPs are stored</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Google Drive Sharing:</strong> Understand sharing permissions and how documents flow between the team</div>
-                        </label>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+                            <div style="background:var(--bg); border-radius:8px; padding:16px; border-left:4px solid var(--accent);">
+                                <div style="font-weight:700; font-size:14px; color:var(--accent); margin-bottom:6px;">AppFolio</div>
+                                <div style="font-size:12px; color:var(--text-sm); line-height:1.6;">Property management software — tenant records, work orders, accounting, lease management, and owner reporting all live here.</div>
+                                <a href="https://elkaim.appfolio.com" target="_blank" style="font-size:11px; color:var(--accent); text-decoration:none; display:inline-block; margin-top:8px;">Open AppFolio →</a>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:16px; border-left:4px solid var(--success);">
+                                <div style="font-weight:700; font-size:14px; color:var(--success); margin-bottom:6px;">Google Drive</div>
+                                <div style="font-size:12px; color:var(--text-sm); line-height:1.6;">Shared documents, templates, lease files, vendor contracts, and internal SOPs are organized in Drive folders.</div>
+                                <a href="https://drive.google.com" target="_blank" style="font-size:11px; color:var(--success); text-decoration:none; display:inline-block; margin-top:8px;">Open Google Drive →</a>
+                            </div>
+                        </div>
+
+                        <div class="checklist">
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>AppFolio Navigation:</strong> Learn the main sections — Properties, Tenants, Owners, Maintenance, Accounting, and Reports</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>AppFolio Work Orders:</strong> Learn to create, assign, and close work orders for maintenance requests</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>AppFolio Accounting:</strong> Understand how to navigate bills, invoices, ledgers, and owner statements</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Google Drive Structure:</strong> Learn the folder organization — where lease templates, vendor docs, owner files, and SOPs are stored</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Google Drive Sharing:</strong> Understand sharing permissions and how documents flow between the team</div>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
                 <!-- SECTION 4: BILLING TRAINING -->
-                <div class="panel">
-                    <div class="panel-title">💰 Section 4: Billing & Payments</div>
-                    <p style="color:var(--text-sm); margin-bottom:16px; line-height:1.6;">A major part of the role is managing various billing processes — from water bills to maintenance invoices to utility payments. Learn each billing workflow end-to-end.</p>
+                <div class="panel train-section">
+                    <div onclick="this.parentElement.classList.toggle('train-open')" style="display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;">
+                        <span class="train-toggle" style="font-size:14px; display:inline-block;">▸</span>
+                        <div class="panel-title" style="margin-bottom:0;">💰 Section 4: Billing & Payments</div>
+                    </div>
+                    <div class="train-body">
+                        <p style="color:var(--text-sm); margin:16px 0; line-height:1.6;">A major part of the role is managing various billing processes — from water bills to maintenance invoices to utility payments. Learn each billing workflow end-to-end.</p>
 
-                    <div class="checklist">
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Water Bill Process:</strong> Learn how water bills come in, how to verify amounts, allocate to the correct property, and process payment</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Utility Payments:</strong> Understand the process for paying PGW, PECO, and water bills — who pays, when, and how it's recorded in AppFolio</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Maintenance Billing:</strong> Learn how vendor invoices are received, approved, entered in AppFolio, and paid</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>General Billing Workflow:</strong> Understand the full bill-to-payment lifecycle and how expenses are categorized and allocated</div>
-                        </label>
+                        <div class="checklist">
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Water Bill Process:</strong> Learn how water bills come in, how to verify amounts, allocate to the correct property, and process payment</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Utility Payments:</strong> Understand the process for paying PGW, PECO, and water bills — who pays, when, and how it's recorded in AppFolio</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Maintenance Billing:</strong> Learn how vendor invoices are received, approved, entered in AppFolio, and paid</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>General Billing Workflow:</strong> Understand the full bill-to-payment lifecycle and how expenses are categorized and allocated</div>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
                 <!-- SECTION 5: LAST MONTH'S RENT CREDITS (SOP) -->
-                <div class="panel">
-                    <div class="panel-title">📋 Section 5: Last Month's Rent Credits (SOP)</div>
-                    <p style="color:var(--text-sm); margin-bottom:16px; line-height:1.6;">This is a specific procedure for handling last month's rent credits. Watch the training video and review the process below.</p>
+                <div class="panel train-section">
+                    <div onclick="this.parentElement.classList.toggle('train-open')" style="display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;">
+                        <span class="train-toggle" style="font-size:14px; display:inline-block;">▸</span>
+                        <div class="panel-title" style="margin-bottom:0;">📋 Section 5: Last Month's Rent Credits (SOP)</div>
+                    </div>
+                    <div class="train-body">
+                        <p style="color:var(--text-sm); margin:16px 0; line-height:1.6;">This is a specific procedure for handling last month's rent credits. Watch the training video and review the process below.</p>
 
-                    <div style="background:var(--bg); border-radius:8px; padding:16px; margin-bottom:16px; border-left:4px solid var(--accent);">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <div style="font-size:28px;">🎬</div>
-                            <div>
-                                <div style="font-weight:700; font-size:14px; margin-bottom:2px;">Training Video: Last Month's Rent Credits</div>
-                                <div style="font-size:12px; color:var(--text-sm);">Watch the walkthrough video to understand the full process</div>
-                                <div style="margin-top:8px;">
-                                    <span style="background:var(--accent); color:white; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:600; cursor:pointer;" onclick="alert('Add your video link here — replace this alert with: window.open(YOUR_VIDEO_URL, \'_blank\')')">▶ Watch Video</span>
+                        <div style="background:var(--bg); border-radius:8px; padding:16px; margin-bottom:16px; border-left:4px solid var(--accent);">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="font-size:28px;">🎬</div>
+                                <div>
+                                    <div style="font-weight:700; font-size:14px; margin-bottom:2px;">Training Video: Last Month's Rent Credits</div>
+                                    <div style="font-size:12px; color:var(--text-sm);">Watch the walkthrough video to understand the full process</div>
+                                    <div style="margin-top:8px;">
+                                        <span style="background:var(--accent); color:white; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:600; cursor:pointer;" onclick="alert('Add your video link here — replace this alert with: window.open(YOUR_VIDEO_URL, \'_blank\')')">▶ Watch Video</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="checklist">
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Watch the Video:</strong> Complete the last month's rent credits training video</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Understand the Process:</strong> Know when last month's rent credits apply, how they're calculated, and how to apply them in AppFolio</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Practice Run:</strong> Walk through a sample scenario with Cole or Elan to confirm understanding</div>
-                        </label>
+                        <div class="checklist">
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Watch the Video:</strong> Complete the last month's rent credits training video</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Understand the Process:</strong> Know when last month's rent credits apply, how they're calculated, and how to apply them in AppFolio</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Practice Run:</strong> Walk through a sample scenario with Cole or Elan to confirm understanding</div>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
-                <!-- SECTION 6: OWNER & RENT MANAGEMENT -->
-                <div class="panel">
-                    <div class="panel-title">🏦 Section 6: Owner Contributions, Late Rent & PICO</div>
-                    <p style="color:var(--text-sm); margin-bottom:16px; line-height:1.6;">Learn how to manage owner contribution requests, track and follow up on late rent, and navigate the PICO landlord account.</p>
-
-                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:20px;">
-                        <div style="background:var(--bg); border-radius:8px; padding:14px; text-align:center;">
-                            <div style="font-size:24px; margin-bottom:6px;">📨</div>
-                            <div style="font-weight:700; font-size:13px;">Owner Contributions</div>
-                            <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">Requesting funds from owners for repairs, improvements, or shortfalls</div>
-                        </div>
-                        <div style="background:var(--bg); border-radius:8px; padding:14px; text-align:center;">
-                            <div style="font-size:24px; margin-bottom:6px;">⏰</div>
-                            <div style="font-weight:700; font-size:13px;">Late Rent</div>
-                            <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">Tracking, notices, follow-ups, and escalation procedures</div>
-                        </div>
-                        <div style="background:var(--bg); border-radius:8px; padding:14px; text-align:center;">
-                            <div style="font-size:24px; margin-bottom:6px;">🏛️</div>
-                            <div style="font-weight:700; font-size:13px;">PICO Landlord Account</div>
-                            <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">Navigating the PICO system for landlord services</div>
-                        </div>
+                <!-- SECTION 6: OWNER CONTRIBUTIONS & LATE RENT -->
+                <div class="panel train-section">
+                    <div onclick="this.parentElement.classList.toggle('train-open')" style="display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;">
+                        <span class="train-toggle" style="font-size:14px; display:inline-block;">▸</span>
+                        <div class="panel-title" style="margin-bottom:0;">🏦 Section 6: Owner Contributions & Late Rent</div>
                     </div>
+                    <div class="train-body">
+                        <p style="color:var(--text-sm); margin:16px 0; line-height:1.6;">Learn how to manage owner contribution requests and track and follow up on late rent.</p>
 
-                    <div class="checklist">
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Owner Contribution Requests:</strong> Learn when and how to request owner contributions — the process in AppFolio, email templates, and follow-up timeline</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Late Rent Process:</strong> Understand the late rent timeline — when notices go out, fee application, communication cadence, and when to escalate</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>PICO Landlord Account:</strong> Learn how to log in, navigate the PICO system, and what services/information are available</div>
-                        </label>
-                        <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
-                            <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
-                            <div><strong>Complete Review:</strong> Walk through a full scenario covering contributions, late rent, and PICO with Cole or Elan</div>
-                        </label>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+                            <div style="background:var(--bg); border-radius:8px; padding:14px; text-align:center;">
+                                <div style="font-size:24px; margin-bottom:6px;">📨</div>
+                                <div style="font-weight:700; font-size:13px;">Owner Contributions</div>
+                                <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">Requesting funds from owners for repairs, improvements, or shortfalls</div>
+                            </div>
+                            <div style="background:var(--bg); border-radius:8px; padding:14px; text-align:center;">
+                                <div style="font-size:24px; margin-bottom:6px;">⏰</div>
+                                <div style="font-weight:700; font-size:13px;">Late Rent</div>
+                                <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">Tracking, notices, follow-ups, and escalation procedures</div>
+                            </div>
+                        </div>
+
+                        <div class="checklist">
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Owner Contribution Requests:</strong> Learn when and how to request owner contributions — the process in AppFolio, email templates, and follow-up timeline</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Late Rent Process:</strong> Understand the late rent timeline — when notices go out, fee application, communication cadence, and when to escalate</div>
+                            </label>
+                            <label class="checklist-item" style="display:flex; align-items:flex-start; gap:10px; padding:10px 0;">
+                                <input type="checkbox" class="training-check" style="margin-top:3px;" onchange="updateTrainingProgress()">
+                                <div><strong>Complete Review:</strong> Walk through a full scenario covering contributions and late rent with Cole or Elan</div>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
