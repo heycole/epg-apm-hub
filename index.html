@@ -4590,8 +4590,8 @@
                 if (!app.docs) app.docs = applicationDocs.map(d => ({ text: d, received: false }));
                 const docsReceived = app.docs.filter(d => d.received).length;
 
-                const statusColor = app.status === 'approved' ? '#22c55e' : app.status === 'denied' ? '#ef4444' : app.status === 'waiting' ? '#eab308' : 'var(--accent)';
-                const statusLabel = app.status === 'approved' ? 'Approved' : app.status === 'denied' ? 'Denied' : app.status === 'waiting' ? 'Waiting' : '';
+                const statusColor = app.status === 'approved' ? '#22c55e' : app.status === 'denied' ? '#ef4444' : app.status === 'waiting' ? '#eab308' : app.status === 'cancelled' ? '#3b82f6' : 'var(--accent)';
+                const statusLabel = app.status === 'approved' ? 'Approved' : app.status === 'denied' ? 'Denied' : app.status === 'waiting' ? 'Waiting' : app.status === 'cancelled' ? 'Cancelled' : '';
                 const statusBadgeHtml = !app.status ? '' : '<div style="margin-bottom:6px;"><span style="background:' + statusColor + '; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:0.5px;">' + statusLabel + '</span></div>';
 
                 const expandedHtml = app.collapsed ? '' : `
@@ -4600,6 +4600,7 @@
                             <button onclick="event.stopPropagation(); setApplicationStatus(${app.id}, 'approved')" style="padding:4px 14px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; border:2px solid #22c55e; ${app.status === 'approved' ? 'background:#22c55e; color:#fff;' : 'background:transparent; color:#22c55e;'} font-family:'DM Sans',sans-serif; transition:all 0.2s;">✓ APPROVED</button>
                             <button onclick="event.stopPropagation(); setApplicationStatus(${app.id}, 'waiting')" style="padding:4px 14px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; border:2px solid #eab308; ${app.status === 'waiting' ? 'background:#eab308; color:#fff;' : 'background:transparent; color:#eab308;'} font-family:'DM Sans',sans-serif; transition:all 0.2s;">⏳ WAITING</button>
                             <button onclick="event.stopPropagation(); setApplicationStatus(${app.id}, 'denied')" style="padding:4px 14px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; border:2px solid #ef4444; ${app.status === 'denied' ? 'background:#ef4444; color:#fff;' : 'background:transparent; color:#ef4444;'} font-family:'DM Sans',sans-serif; transition:all 0.2s;">✗ DENIED</button>
+                            <button onclick="event.stopPropagation(); setApplicationStatus(${app.id}, 'cancelled')" style="padding:4px 14px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; border:2px solid #3b82f6; ${app.status === 'cancelled' ? 'background:#3b82f6; color:#fff;' : 'background:transparent; color:#3b82f6;'} font-family:'DM Sans',sans-serif; transition:all 0.2s;">⊘ CANCELLED</button>
                         </div>
                         <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                         <!-- LEFT: Process Checklist -->
