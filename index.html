@@ -224,6 +224,14 @@
         .train-section .train-toggle { transition: transform .2s; }
         .train-section.train-open .train-toggle { transform: rotate(90deg); }
 
+        /* Delinquency row expand/collapse */
+        .delq-open .delq-chevron { transform: rotate(90deg); }
+        .delq-open .delq-details { max-height: 600px !important; }
+
+        /* New Lease row expand/collapse */
+        .lease-open .lease-chevron { transform: rotate(90deg); }
+        .lease-open .lease-details { max-height: 900px !important; }
+
         .panel-title {
             font-size: 16px;
             font-weight: 700;
@@ -923,7 +931,6 @@
                 <div class="nav-section-label">ROLE</div>
                 <div class="nav-item" data-page="role-overview">🏠 Role Overview</div>
                 <div class="nav-item" data-page="daily-weekly">📋 Daily & Weekly</div>
-                <div class="nav-item" data-page="monthly">📅 Monthly Calendar <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
             </div>
 
             <!-- OPERATIONS -->
@@ -933,24 +940,31 @@
                 <div class="nav-item" data-page="portfolio">🏢 Property & Owner Directory</div>
                 <div class="nav-item" data-page="finance">💰 Finance</div>
                 <div class="nav-item" data-page="maintenance">🔧 Maintenance</div>
-                <div class="nav-item" data-page="leasing">📋 Rental Applications & Leasing</div>
+                <div class="nav-item" data-page="rental-applications">📋 Rental Applications</div>
+                <div class="nav-item" data-page="leasing">📝 Leasing</div>
                 <div class="nav-item" data-page="lease-renewals">🔄 Lease Renewals</div>
-                <div class="nav-item" data-page="move-in-out">🚚 Move-In / Move-Out <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
-                <div class="nav-item" data-page="relations">💬 Tenant/Owner Relations <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
-                <div class="nav-item" data-page="rental-licenses">📄 Rental Licenses <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
-                <div class="nav-item" data-page="utilities">💡 Utilities <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
-                <div class="nav-item" data-page="inspections">🔍 Inspections <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
-                <div class="nav-item" data-page="onboarding">👋 Onboarding <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
-                <div class="nav-item" data-page="leads">📞 Leads <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
-                <div class="nav-item" data-page="listings">🏘️ Listings <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
             </div>
 
-            <!-- RESOURCES -->
+            <!-- IN PROCESS (Drafts) -->
             <div class="nav-section">
-                <div class="nav-section-label">RESOURCES</div>
-                <div class="nav-item" data-page="compliance">⚖️ Compliance <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
-                <div class="nav-item" data-page="contacts">👥 Contacts & Links <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
-                <div class="nav-item" data-page="glossary">❓ Glossary & FAQs <span style="font-size:10px; color:var(--muted); font-style:italic;">(Draft)</span></div>
+                <div class="nav-section-label" id="inProcessLabel" onclick="toggleInProcess()" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none;">
+                    <span>IN PROCESS</span>
+                    <span id="inProcessChevron" style="transition:transform .2s; display:inline-block;">▸</span>
+                </div>
+                <div id="inProcessItems" style="display:none;">
+                    <div class="nav-item" data-page="monthly">📅 Monthly Calendar</div>
+                    <div class="nav-item" data-page="move-in-out">🚚 Move-In / Move-Out</div>
+                    <div class="nav-item" data-page="relations">💬 Tenant/Owner Relations</div>
+                    <div class="nav-item" data-page="rental-licenses">📄 Rental Licenses</div>
+                    <div class="nav-item" data-page="utilities">💡 Utilities</div>
+                    <div class="nav-item" data-page="inspections">🔍 Inspections</div>
+                    <div class="nav-item" data-page="onboarding">👋 Onboarding</div>
+                    <div class="nav-item" data-page="leads">📞 Leads</div>
+                    <div class="nav-item" data-page="listings">🏘️ Listings</div>
+                    <div class="nav-item" data-page="compliance">⚖️ Compliance</div>
+                    <div class="nav-item" data-page="contacts">👥 Contacts & Links</div>
+                    <div class="nav-item" data-page="glossary">❓ Glossary & FAQs</div>
+                </div>
             </div>
         </div>
 
@@ -1345,9 +1359,9 @@
             </div>
 
             <!-- LEASING & RENEWALS PAGE -->
-            <div class="page" data-page="leasing">
+            <div class="page" data-page="rental-applications">
                 <div class="panel">
-                    <div class="panel-title">📋 Rental Application & Leasing Pipeline</div>
+                    <div class="panel-title">📋 Rental Application Pipeline</div>
                     <div class="pipeline">
                         <div class="pipeline-stage">
                             <div class="pipeline-num">1</div>
@@ -1400,6 +1414,62 @@
                             <button class="btn btn-secondary" onclick="resetChecklist('newLease')">Reset Checklist</button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- LEASING PAGE -->
+            <div class="page" data-page="leasing">
+                <!-- NEW LEASES NEEDED TRACKER (top, prominent) -->
+                <div class="panel" style="border:2px solid var(--accent); background:linear-gradient(to bottom, rgba(203,121,47,0.04), rgba(255,255,255,1));">
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="display:flex; align-items:center; gap:8px;">
+                            <span style="background:var(--accent); color:white; padding:2px 10px; border-radius:4px; font-size:11px; font-weight:700; letter-spacing:0.5px;">ACTIVE</span>
+                            📝 New Leases Needed
+                        </span>
+                        <button class="btn btn-primary" style="font-size:13px; padding:8px 16px;" onclick="openAddNewLease()">+ Add Lease</button>
+                    </div>
+                    <p style="color:var(--text-sm); font-size:13px; margin-bottom:16px;">Track new leases as they're drafted, sent, and signed. Click any entry to expand — add Google Drive links to documents, update status, or log notes.</p>
+                    <div id="newLeaseList"></div>
+                </div>
+
+                <!-- LEASING PROCESS REFERENCE -->
+                <div class="panel">
+                    <div class="panel-title">📋 Leasing Process</div>
+                    <p style="color:var(--text-sm); font-size:13px; margin-bottom:14px;">Once an application is approved and the lease is prepared, it moves into leasing.</p>
+                    <div class="pipeline">
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">1</div>
+                            <div class="pipeline-label">Lease Drafted</div>
+                            <div class="pipeline-desc">Generate lease in AppFolio with correct terms, dates, and rent</div>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">2</div>
+                            <div class="pipeline-label">Sent for Signature</div>
+                            <div class="pipeline-desc">Send via DocuSign to all parties. Track signing status.</div>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">3</div>
+                            <div class="pipeline-label">Lease Signed</div>
+                            <div class="pipeline-desc">All parties signed. Collect first month's rent + security deposit.</div>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="pipeline-num">4</div>
+                            <div class="pipeline-label">Move-In Complete</div>
+                            <div class="pipeline-desc">Schedule inspection, hand over keys, update unit to Occupied in AppFolio.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LEASING TIPS -->
+                <div class="panel">
+                    <div class="panel-title">💡 Leasing Tips & Reminders</div>
+                    <ul style="margin-left:18px; color:var(--text-sm); line-height:1.9; font-size:13px;">
+                        <li><strong>Verify lease terms match the approved application</strong> — rent, start date, term length, and any special conditions</li>
+                        <li><strong>Double-check tenant name spellings and contact info</strong> before sending</li>
+                        <li><strong>Attach all addendums</strong> — pet addendum, parking, utilities, etc. depending on the unit</li>
+                        <li><strong>Collect funds BEFORE move-in</strong> — first month's rent, last month's rent if applicable, and security deposit</li>
+                        <li><strong>Save the signed lease to Google Drive</strong> in the appropriate property folder and link it in this tracker</li>
+                    </ul>
                 </div>
             </div>
 
@@ -2395,16 +2465,12 @@
             <div class="page" data-page="finance">
                 <div class="subtab-bar">
                     <div class="subtab active" data-subtab="delinquency" onclick="switchSubtab('finance','delinquency')">Rent Collection & Delinquency</div>
-                    <div class="subtab" data-subtab="owner-dist" onclick="switchSubtab('finance','owner-dist')">Owner Distribution & Reconciliation</div>
-                    <div class="subtab" data-subtab="owner-bills" onclick="switchSubtab('finance','owner-bills')">Owner Bills</div>
-                    <div class="subtab" data-subtab="tenant-charges" onclick="switchSubtab('finance','tenant-charges')">Tenant Charges</div>
-                    <div class="subtab" data-subtab="water" onclick="switchSubtab('finance','water')">Water Bills</div>
-                    <div class="subtab" data-subtab="vendor-inv" onclick="switchSubtab('finance','vendor-inv')">Vendor Invoices</div>
-                    <div class="subtab" data-subtab="gl-ref" onclick="switchSubtab('finance','gl-ref')">GL Codes</div>
+                    <div class="subtab" data-subtab="billing" onclick="switchSubtab('finance','billing')">Billing</div>
+                    <div class="subtab" data-subtab="owner-dist-recon" onclick="switchSubtab('finance','owner-dist-recon')">Owner Distribution & Reconciliation</div>
                 </div>
 
                 <!-- TAB: OWNER DISTRIBUTION & RECONCILIATION -->
-                <div class="subtab-content" data-subtab="owner-dist">
+                <div class="subtab-content" data-subtab="owner-dist-recon">
                     <div class="panel">
                         <div class="panel-title">💰 Monthly Owner Distribution & Reconciliation</div>
                         <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
@@ -2413,7 +2479,7 @@
                     </div>
 
                     <div class="panel">
-                        <div class="panel-title">1️⃣ All Bills Entered & Paid</div>
+                        <div class="panel-title">1️⃣ All Bills Entered & Paid (Reconciliation)</div>
                         <div class="checklist" id="distBillsChecklist"></div>
                         <div class="button-group">
                             <button class="btn btn-secondary" onclick="resetChecklist('distBills')">Reset</button>
@@ -2435,10 +2501,17 @@
                             <button class="btn btn-secondary" onclick="resetChecklist('distSend')">Reset</button>
                         </div>
                     </div>
+
+                    <div class="panel">
+                        <div class="panel-title">📋 Reconciliation Notes</div>
+                        <p style="color:var(--text-sm); margin-bottom:12px; font-size:13px;">Track discrepancies, open items, and follow-ups for this month's reconciliation.</p>
+                        <textarea id="reconciliationNotes" placeholder="Notes on any discrepancies, items under review, or follow-ups needed..." style="width:100%; min-height:120px; padding:12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; line-height:1.6;" oninput="state.reconciliationNotes = this.value; saveState(state)"></textarea>
+                    </div>
                 </div>
 
-                <!-- TAB: GL CODES -->
-                <div class="subtab-content" data-subtab="gl-ref">
+                <!-- TAB: BILLING -->
+                <div class="subtab-content" data-subtab="billing">
+                    <!-- GL Codes -->
                     <div class="panel">
                         <div class="panel-title">💰 AppFolio GL Code Quick Reference</div>
                         <p style="color: var(--text-sm); margin-bottom: 14px;">Use these GL codes when entering bills and charges in AppFolio. When in doubt, review with Nicole before posting.</p>
@@ -2463,10 +2536,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- TAB: OWNER BILLS -->
-                <div class="subtab-content" data-subtab="owner-bills">
+                    <!-- Owner Bills -->
                     <div class="panel" style="border:1px solid rgba(220,53,69,0.3); background:rgba(220,53,69,0.06);">
                         <div class="panel-title" style="color:var(--danger);">🚫 Critical Blackout Zones</div>
                         <div style="font-size:13px; color:var(--text); line-height:1.8;">
@@ -2504,10 +2575,8 @@
                             <li>Submit for processing</li>
                         </ol>
                     </div>
-                </div>
 
-                <!-- TAB: TENANT CHARGES -->
-                <div class="subtab-content" data-subtab="tenant-charges">
+                    <!-- Tenant Charges -->
                     <div class="panel" style="border:1px solid rgba(220,53,69,0.3); background:rgba(220,53,69,0.06);">
                         <div class="panel-title" style="color:var(--danger);">🚫 Tenant Charge Deadline</div>
                         <div style="font-size:13px; color:var(--text); line-height:1.8;">
@@ -2540,10 +2609,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- TAB: WATER BILLS -->
-                <div class="subtab-content" data-subtab="water">
+                    <!-- Water Bills -->
                     <div class="panel" style="border:1px solid rgba(220,53,69,0.3); background:rgba(220,53,69,0.06);">
                         <div class="panel-title" style="color:var(--danger);">🚫 Water Bill Blackout</div>
                         <div style="font-size:13px; color:var(--text); line-height:1.8;">
@@ -2586,10 +2653,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- TAB: VENDOR INVOICES -->
-                <div class="subtab-content" data-subtab="vendor-inv">
+                    <!-- Vendor Invoices -->
                     <div class="panel">
                         <div class="panel-title">🔧 Vendor Invoice & Maintenance Billing</div>
                         <p style="color: var(--text-sm); margin-bottom: 14px;">After a maintenance job is completed and confirmed by both vendor and tenant:</p>
@@ -2733,6 +2798,19 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- DELINQUENCY TRACKER -->
+                    <div class="panel" style="border:2px solid var(--danger); background:linear-gradient(to bottom, rgba(220,53,69,0.03), rgba(255,255,255,1));">
+                        <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="display:flex; align-items:center; gap:8px;">
+                                <span style="background:var(--danger); color:white; padding:2px 10px; border-radius:4px; font-size:11px; font-weight:700; letter-spacing:0.5px;">LIVE</span>
+                                📋 Active Delinquencies Tracker
+                            </span>
+                            <button class="btn btn-primary" style="font-size:13px; padding:8px 16px;" onclick="openAddDelinquency()">+ Add Delinquency</button>
+                        </div>
+                        <p style="color:var(--text-sm); font-size:13px; margin-bottom:16px;">Ever-changing list of delinquent tenants. Click any row to expand — log notes, update stage, adjust amount, or mark as resolved.</p>
+                        <div id="delinquencyList"></div>
                     </div>
                 </div>
             </div>
@@ -3154,6 +3232,9 @@
             checklists: {},
             eodReports: [],
             trainingChecks: [],
+            delinquencies: [],
+            reconciliationNotes: '',
+            newLeases: [],
             workOrders: [],
             applications: [],
             renewals: [],
@@ -3236,6 +3317,15 @@
         // ============================================
         // NAVIGATION
         // ============================================
+        function toggleInProcess() {
+            const items = document.getElementById('inProcessItems');
+            const chev = document.getElementById('inProcessChevron');
+            if (!items) return;
+            const isHidden = items.style.display === 'none';
+            items.style.display = isHidden ? 'block' : 'none';
+            if (chev) chev.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0deg)';
+        }
+
         function navigateTo(pageName) {
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
@@ -3252,6 +3342,11 @@
             const activeNav = document.querySelector(`.nav-item[data-page="${pageName}"]`);
             if (activeNav) {
                 activeNav.classList.add('active');
+                // Auto-expand In Process group if target is inside it
+                const ipContainer = document.getElementById('inProcessItems');
+                if (ipContainer && ipContainer.contains(activeNav) && ipContainer.style.display === 'none') {
+                    toggleInProcess();
+                }
             }
 
             // Render page-specific content
@@ -3441,6 +3536,276 @@
             state.eodReports.splice(idx, 1);
             saveState(state);
             renderEODHistory();
+        }
+
+        // ============================================
+        // DELINQUENCY TRACKER
+        // ============================================
+        function openAddDelinquency() {
+            const tenantName = prompt('Tenant name:');
+            if (!tenantName) return;
+            const property = prompt('Property address:');
+            if (!property) return;
+            const amount = prompt('Amount owed (just the number, e.g. 1500):');
+            if (!amount) return;
+            const entry = {
+                id: Date.now(),
+                tenantName: tenantName.trim(),
+                property: property.trim(),
+                amount: parseFloat(amount) || 0,
+                status: 'active',
+                currentStage: 'Day 5 - Friendly Reminder',
+                notes: '',
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            };
+            if (!state.delinquencies) state.delinquencies = [];
+            state.delinquencies.push(entry);
+            saveState(state);
+            renderDelinquencies();
+        }
+
+        function updateDelinquencyField(id, field, value) {
+            const d = state.delinquencies.find(x => x.id === id);
+            if (!d) return;
+            d[field] = value;
+            d.lastUpdated = new Date().toISOString();
+            saveState(state);
+        }
+
+        function deleteDelinquency(id) {
+            if (!confirm('Remove this delinquency from the tracker? This cannot be undone.')) return;
+            state.delinquencies = state.delinquencies.filter(x => x.id !== id);
+            saveState(state);
+            renderDelinquencies();
+        }
+
+        function toggleResolveDelinquency(id) {
+            const d = state.delinquencies.find(x => x.id === id);
+            if (!d) return;
+            d.status = d.status === 'resolved' ? 'active' : 'resolved';
+            d.lastUpdated = new Date().toISOString();
+            saveState(state);
+            renderDelinquencies();
+        }
+
+        function renderDelinquencies() {
+            const list = document.getElementById('delinquencyList');
+            if (!list) return;
+            const items = state.delinquencies || [];
+            if (items.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px; font-size:13px;">No active delinquencies. Click + Add Delinquency to track one.</p>';
+                return;
+            }
+            // Sort: active first, then by amount desc
+            const sorted = items.slice().sort((a, b) => {
+                if (a.status !== b.status) return a.status === 'active' ? -1 : 1;
+                return (b.amount || 0) - (a.amount || 0);
+            });
+            list.innerHTML = sorted.map(d => {
+                const isResolved = d.status === 'resolved';
+                const borderColor = isResolved ? 'var(--success)' : 'var(--danger)';
+                const bgColor = isResolved ? 'rgba(34,197,94,0.05)' : 'rgba(220,53,69,0.05)';
+                const lastUpd = d.lastUpdated ? new Date(d.lastUpdated).toLocaleDateString() : '';
+                return `
+                <div style="background:${bgColor}; border:1px solid ${borderColor}; border-radius:8px; margin-bottom:10px; overflow:hidden;">
+                    <div onclick="this.parentElement.classList.toggle('delq-open')" style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; cursor:pointer; user-select:none;">
+                        <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
+                            <span class="delq-chevron" style="font-size:14px; transition:transform .2s;">▸</span>
+                            <div style="min-width:0;">
+                                <div style="font-weight:700; font-size:14px; ${isResolved ? 'text-decoration:line-through; color:var(--muted);' : ''}">${d.tenantName}${isResolved ? ' ✓ Resolved' : ''}</div>
+                                <div style="font-size:12px; color:var(--text-sm);">${d.property}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:14px; flex-shrink:0;">
+                            <div style="font-weight:700; font-size:15px; color:${isResolved ? 'var(--muted)' : 'var(--danger)'};">$${(d.amount || 0).toLocaleString()}</div>
+                            <button onclick="event.stopPropagation(); toggleResolveDelinquency(${d.id})" title="${isResolved ? 'Mark as active' : 'Mark as resolved'}" style="background:none; border:1px solid ${borderColor}; color:${borderColor}; cursor:pointer; font-size:11px; padding:4px 10px; border-radius:6px; font-weight:600;">${isResolved ? '↶ Reopen' : '✓ Resolve'}</button>
+                            <button onclick="event.stopPropagation(); deleteDelinquency(${d.id})" title="Delete" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:4px 8px; border-radius:4px;">✕</button>
+                        </div>
+                    </div>
+                    <div class="delq-details" style="max-height:0; overflow:hidden; transition:max-height .3s ease;">
+                        <div style="padding:0 14px 14px 14px; border-top:1px solid var(--border);">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+                                <div>
+                                    <label style="display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Current Stage</label>
+                                    <select onchange="updateDelinquencyField(${d.id}, 'currentStage', this.value)" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:white;">
+                                        <option ${d.currentStage === 'Day 5 - Friendly Reminder' ? 'selected' : ''}>Day 5 - Friendly Reminder</option>
+                                        <option ${d.currentStage === 'Day 6 - Late Fee Applied' ? 'selected' : ''}>Day 6 - Late Fee Applied</option>
+                                        <option ${d.currentStage === 'Day 8/9 - Urgent Warning' ? 'selected' : ''}>Day 8/9 - Urgent Warning</option>
+                                        <option ${d.currentStage === 'Day 10 - 10-Day Notice to Quit' ? 'selected' : ''}>Day 10 - 10-Day Notice to Quit</option>
+                                        <option ${d.currentStage === 'Day 15 - Eviction Process' ? 'selected' : ''}>Day 15 - Eviction Process</option>
+                                        <option ${d.currentStage === 'Payment Plan in Place' ? 'selected' : ''}>Payment Plan in Place</option>
+                                        <option ${d.currentStage === 'Waiting on Tenant Response' ? 'selected' : ''}>Waiting on Tenant Response</option>
+                                        <option ${d.currentStage === 'Escalated to PM/Elan' ? 'selected' : ''}>Escalated to PM/Elan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Amount Owed</label>
+                                    <input type="number" value="${d.amount || 0}" onchange="updateDelinquencyField(${d.id}, 'amount', parseFloat(this.value) || 0); renderDelinquencies();" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px;">
+                                </div>
+                            </div>
+                            <div style="margin-top:12px;">
+                                <label style="display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Notes & Updates</label>
+                                <textarea oninput="updateDelinquencyField(${d.id}, 'notes', this.value)" placeholder="Log conversations, payment promises, excuses, follow-up dates..." style="width:100%; min-height:100px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; line-height:1.6; resize:vertical;">${d.notes || ''}</textarea>
+                            </div>
+                            <div style="margin-top:8px; font-size:11px; color:var(--muted);">Last updated: ${lastUpd}</div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function restoreReconciliationNotes() {
+            const ta = document.getElementById('reconciliationNotes');
+            if (ta && state.reconciliationNotes) ta.value = state.reconciliationNotes;
+        }
+
+        // ============================================
+        // NEW LEASES TRACKER
+        // ============================================
+        function openAddNewLease() {
+            const tenantName = prompt('Tenant name:');
+            if (!tenantName) return;
+            const property = prompt('Property address:');
+            if (!property) return;
+            const entry = {
+                id: Date.now(),
+                tenantName: tenantName.trim(),
+                property: property.trim(),
+                status: 'Draft',
+                leaseStart: '',
+                targetSendBy: '',
+                notes: '',
+                documents: [],
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            };
+            if (!state.newLeases) state.newLeases = [];
+            state.newLeases.push(entry);
+            saveState(state);
+            renderNewLeases();
+        }
+
+        function updateNewLeaseField(id, field, value) {
+            const l = state.newLeases.find(x => x.id === id);
+            if (!l) return;
+            l[field] = value;
+            l.lastUpdated = new Date().toISOString();
+            saveState(state);
+        }
+
+        function deleteNewLease(id) {
+            if (!confirm('Remove this lease from the tracker? This cannot be undone.')) return;
+            state.newLeases = state.newLeases.filter(x => x.id !== id);
+            saveState(state);
+            renderNewLeases();
+        }
+
+        function addLeaseDocument(id) {
+            const label = prompt('Document label (e.g. "Lease", "Addendum", "Move-In Inspection"):');
+            if (!label) return;
+            const url = prompt('Google Drive URL:');
+            if (!url) return;
+            const l = state.newLeases.find(x => x.id === id);
+            if (!l) return;
+            if (!l.documents) l.documents = [];
+            l.documents.push({ label: label.trim(), url: url.trim() });
+            l.lastUpdated = new Date().toISOString();
+            saveState(state);
+            renderNewLeases();
+        }
+
+        function removeLeaseDocument(leaseId, docIdx) {
+            const l = state.newLeases.find(x => x.id === leaseId);
+            if (!l || !l.documents) return;
+            if (!confirm('Remove this document link?')) return;
+            l.documents.splice(docIdx, 1);
+            l.lastUpdated = new Date().toISOString();
+            saveState(state);
+            renderNewLeases();
+        }
+
+        function renderNewLeases() {
+            const list = document.getElementById('newLeaseList');
+            if (!list) return;
+            const items = state.newLeases || [];
+            if (items.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px; font-size:13px;">No active leases. Click + Add Lease to start tracking one.</p>';
+                return;
+            }
+            // Sort: by status (Draft > Sent > Signed), then by target send-by date
+            const statusOrder = { 'Draft': 0, 'Sent': 1, 'Signed': 2 };
+            const sorted = items.slice().sort((a, b) => {
+                const sa = statusOrder[a.status] ?? 0;
+                const sb = statusOrder[b.status] ?? 0;
+                if (sa !== sb) return sa - sb;
+                return (a.targetSendBy || '').localeCompare(b.targetSendBy || '');
+            });
+            list.innerHTML = sorted.map(l => {
+                const statusColors = {
+                    'Draft': { border: 'var(--warning)', bg: 'rgba(245,158,11,0.05)', badge: 'var(--warning)' },
+                    'Sent': { border: 'var(--accent)', bg: 'rgba(203,121,47,0.05)', badge: 'var(--accent)' },
+                    'Signed': { border: 'var(--success)', bg: 'rgba(34,197,94,0.05)', badge: 'var(--success)' }
+                };
+                const c = statusColors[l.status] || statusColors['Draft'];
+                const docsHtml = (l.documents || []).map((d, idx) => `
+                    <div style="display:flex; align-items:center; gap:8px; padding:8px 10px; background:white; border:1px solid var(--border); border-radius:6px; margin-bottom:6px;">
+                        <span style="font-size:14px;">📄</span>
+                        <a href="${d.url}" target="_blank" style="flex:1; font-size:13px; color:var(--accent); text-decoration:none; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${d.label}</a>
+                        <a href="${d.url}" target="_blank" style="font-size:11px; color:var(--muted); text-decoration:none;">Open →</a>
+                        <button onclick="removeLeaseDocument(${l.id}, ${idx})" title="Remove link" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; padding:2px 6px;">✕</button>
+                    </div>
+                `).join('');
+                return `
+                <div style="background:${c.bg}; border:1px solid ${c.border}; border-radius:8px; margin-bottom:10px; overflow:hidden;">
+                    <div onclick="this.parentElement.classList.toggle('lease-open')" style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; cursor:pointer; user-select:none;">
+                        <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
+                            <span class="lease-chevron" style="font-size:14px; transition:transform .2s;">▸</span>
+                            <div style="min-width:0;">
+                                <div style="font-weight:700; font-size:14px;">${l.tenantName}</div>
+                                <div style="font-size:12px; color:var(--text-sm);">${l.property}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:14px; flex-shrink:0;">
+                            <span style="background:${c.badge}; color:white; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700;">${l.status.toUpperCase()}</span>
+                            <button onclick="event.stopPropagation(); deleteNewLease(${l.id})" title="Delete" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:4px 8px;">✕</button>
+                        </div>
+                    </div>
+                    <div class="lease-details" style="max-height:0; overflow:hidden; transition:max-height .3s ease;">
+                        <div style="padding:0 14px 14px 14px; border-top:1px solid var(--border);">
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:12px;">
+                                <div>
+                                    <label style="display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Status</label>
+                                    <select onchange="updateNewLeaseField(${l.id}, 'status', this.value); renderNewLeases();" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:white;">
+                                        <option ${l.status === 'Draft' ? 'selected' : ''}>Draft</option>
+                                        <option ${l.status === 'Sent' ? 'selected' : ''}>Sent</option>
+                                        <option ${l.status === 'Signed' ? 'selected' : ''}>Signed</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Target Send-By</label>
+                                    <input type="date" value="${l.targetSendBy || ''}" onchange="updateNewLeaseField(${l.id}, 'targetSendBy', this.value)" style="width:100%; padding:7px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Lease Start Date</label>
+                                    <input type="date" value="${l.leaseStart || ''}" onchange="updateNewLeaseField(${l.id}, 'leaseStart', this.value)" style="width:100%; padding:7px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px;">
+                                </div>
+                            </div>
+                            <div style="margin-top:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    <label style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;">Documents (Google Drive)</label>
+                                    <button onclick="addLeaseDocument(${l.id})" style="background:var(--accent); color:white; border:none; padding:5px 12px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">+ Add Link</button>
+                                </div>
+                                ${docsHtml || '<div style="color:var(--muted); font-size:12px; padding:8px; text-align:center;">No documents linked yet. Click + Add Link to attach a Google Drive URL.</div>'}
+                            </div>
+                            <div style="margin-top:12px;">
+                                <label style="display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Notes</label>
+                                <textarea oninput="updateNewLeaseField(${l.id}, 'notes', this.value)" placeholder="Special terms, conditions, follow-ups..." style="width:100%; min-height:80px; padding:10px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; line-height:1.6; resize:vertical;">${l.notes || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         function renderEODHistory() {
@@ -4991,6 +5356,9 @@
             renderDashboard();
             renderEODHistory();
             restoreTrainingProgress();
+            renderDelinquencies();
+            renderNewLeases();
+            restoreReconciliationNotes();
             renderWorkOrders();
             renderApplications();
             renderRenewals();
