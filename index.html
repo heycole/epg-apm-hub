@@ -1038,7 +1038,7 @@
                     <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Quick Actions</div>
                     <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px;">
                         <button onclick="navigateTo('maintenance')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">🔧</span>Work Orders</button>
-                        <button onclick="navigateTo('leasing')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">📄</span>Applications</button>
+                        <button onclick="navigateTo('rental-applications')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">📄</span>Applications</button>
                         <button onclick="navigateTo('lease-renewals')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">🔄</span>Lease Renewals</button>
                         <button onclick="navigateTo('finance')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">💰</span>Finance</button>
                         <button onclick="window.open('https://elkaim.appfolio.com','_blank')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><img src="https://www.appfolio.com/favicon.ico" alt="AppFolio" style="height:20px; width:20px; object-fit:contain;">AppFolio</button>
@@ -1403,10 +1403,23 @@
 
                 <div class="panel">
                     <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-                        📂 Application Tracker
+                        📂 Active Application Tracker
                         <button class="btn" onclick="addApplication()">+ Add Application</button>
                     </div>
+                    <p style="color:var(--text-sm); font-size:12px; margin-bottom:14px;">Applications marked <strong>Denied</strong> or <strong>Cancelled</strong> automatically move to the Archive section below.</p>
                     <div id="applicationList"></div>
+                </div>
+
+                <!-- ARCHIVED APPLICATIONS (collapsible) -->
+                <div class="panel" style="padding-bottom:0;">
+                    <div class="panel-title" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="document.getElementById('archivedAppsBody').classList.toggle('hidden'); this.querySelector('.chevron').textContent = document.getElementById('archivedAppsBody').classList.contains('hidden') ? '▸' : '▾';">
+                        <span>🗄️ Archived Applications <span style="font-size:12px; font-weight:500; color:var(--muted); margin-left:6px;">(<span id="archivedCount">0</span> — Denied / Cancelled)</span></span>
+                        <span class="chevron" style="font-size:14px; color:var(--muted);">▸</span>
+                    </div>
+                    <div id="archivedAppsBody" class="hidden" style="padding-bottom:16px; padding-top:8px;">
+                        <p style="color:var(--text-sm); font-size:12px; margin-bottom:12px;">Historical record of denied and cancelled applications. Change status back to Approved / Waiting to move an app back to active.</p>
+                        <div id="archivedApplicationList"></div>
+                    </div>
                 </div>
 
                 <div class="panel" style="padding-bottom:0;">
@@ -3938,7 +3951,7 @@
                 overdueEl.style.display = 'none';
                 woCard.style.borderLeftColor = 'var(--accent)';
             }
-            document.getElementById('stat-applications').textContent = (state.applications || []).length;
+            document.getElementById('stat-applications').textContent = (state.applications || []).filter(a => a.status !== 'denied' && a.status !== 'cancelled').length;
 
             // EOD nudge — show after 5pm on weekdays
             const eodNudge = document.getElementById('eodNudge');
@@ -4529,6 +4542,7 @@
             if (!app) return;
             app.status = app.status === status ? '' : status;
             renderApplications();
+            if (typeof renderDashboard === 'function') renderDashboard();
             saveState(state);
         }
 
@@ -4574,14 +4588,33 @@
 
         function renderApplications() {
             const container = document.getElementById('applicationList');
+            const archivedContainer = document.getElementById('archivedApplicationList');
+            const archivedCountEl = document.getElementById('archivedCount');
             if (!container) return;
 
-            if (!state.applications || state.applications.length === 0) {
+            const allApps = state.applications || [];
+            const activeApps = allApps.filter(a => a.status !== 'denied' && a.status !== 'cancelled');
+            const archivedApps = allApps.filter(a => a.status === 'denied' || a.status === 'cancelled');
+
+            if (archivedCountEl) archivedCountEl.textContent = archivedApps.length;
+
+            if (activeApps.length === 0) {
                 container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No active applications. Click + Add Application to add one.</p>';
-                return;
+            } else {
+                container.innerHTML = renderApplicationCards(activeApps);
             }
 
-            container.innerHTML = state.applications.map(app => {
+            if (archivedContainer) {
+                if (archivedApps.length === 0) {
+                    archivedContainer.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px; font-size:13px;">No archived applications yet. Denied and cancelled apps will appear here automatically.</p>';
+                } else {
+                    archivedContainer.innerHTML = renderApplicationCards(archivedApps);
+                }
+            }
+        }
+
+        function renderApplicationCards(apps) {
+            return apps.map(app => {
                 const completedSteps = app.steps.filter(s => s.done).length;
                 const totalSteps = app.steps.length;
                 const pct = Math.round((completedSteps / totalSteps) * 100);
