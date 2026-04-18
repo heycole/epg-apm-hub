@@ -3315,8 +3315,13 @@
                 console.log('State loaded from DB');
             } catch (err) {
                 console.error('Load failed, using defaults:', err);
-                // Still mark as loaded if it was a network issue (not RLS)
-                stateLoadedFromDB = true;
+                // Only mark as loaded if we're on a real server (not file://)
+                // This prevents local previews from overwriting real data
+                if (window.location.protocol !== 'file:') {
+                    stateLoadedFromDB = true;
+                } else {
+                    console.warn('Running from file:// — saves disabled to protect DB data');
+                }
             }
             // Ensure all arrays exist
             if (!state.urgent) state.urgent = [];
