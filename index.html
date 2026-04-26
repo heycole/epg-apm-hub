@@ -3364,26 +3364,54 @@
             document.getElementById('loginOverlay').classList.remove('hidden');
         }
 
+        // Hydrate the page once we have an authenticated session. Idempotent:
+        // safe to call again on visibility change or after a stale render.
+        async function hydrateAfterAuth() {
+            stateLoadedFromDB = false;
+            await loadState();
+            // If loadState couldn't resolve a user, force re-show login.
+            if (!currentUser) {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('loginOverlay').classList.add('hidden');
+            applyUserChrome();
+            await initApp();
+            renderDashboard();
+            if (typeof renderEODHistory === 'function') renderEODHistory();
+            if (typeof renderWorkOrders === 'function') renderWorkOrders();
+            if (typeof renderApplications === 'function') renderApplications();
+            if (typeof renderRenewals === 'function') renderRenewals();
+            if (typeof renderPortfolio === 'function') renderPortfolio();
+            if (typeof renderOnboarding === 'function') renderOnboarding();
+        }
+
         // Listen for auth state changes
         sb.auth.onAuthStateChange(async (event, session) => {
             if (session) {
                 document.getElementById('loginOverlay').classList.add('hidden');
-                // Always reload state on sign-in so we re-fetch the right user's personal data
-                stateLoadedFromDB = false;
-                await loadState();
-                applyUserChrome();
-                await initApp();
-                renderDashboard();
-                if (typeof renderEODHistory === 'function') renderEODHistory();
-                if (typeof renderWorkOrders === 'function') renderWorkOrders();
-                if (typeof renderApplications === 'function') renderApplications();
-                if (typeof renderRenewals === 'function') renderRenewals();
-                if (typeof renderPortfolio === 'function') renderPortfolio();
-                if (typeof renderOnboarding === 'function') renderOnboarding();
+                await hydrateAfterAuth();
             } else {
                 currentUser = null;
                 currentProfile = null;
                 document.getElementById('loginOverlay').classList.remove('hidden');
+            }
+        });
+
+        // If the tab was hidden while loading and the auth handler stalled,
+        // rerun hydration the moment the tab becomes visible again. This
+        // prevents the "Welcome Back / APM" ghost dashboard state.
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState !== 'visible') return;
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                if (session && !stateLoadedFromDB) {
+                    await hydrateAfterAuth();
+                } else if (!session) {
+                    document.getElementById('loginOverlay').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.warn('visibilitychange auth recheck failed:', err);
             }
         });
 
