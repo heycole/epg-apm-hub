@@ -942,6 +942,7 @@
                 <div class="nav-item" data-page="team-calendar">📅 Team Calendar</div>
                 <div class="nav-item" data-page="tasks">✓ Tasks</div>
                 <div class="nav-item" data-page="eod">📝 End of Day</div>
+                <div class="nav-item" data-page="team-overview" data-admin-only style="display:none;">👥 Team Overview</div>
             </div>
 
             <!-- ROLE -->
@@ -1160,6 +1161,22 @@
                 <p style="font-size:12px; color:var(--text-sm); margin-top:10px; line-height:1.5;">
                     👉 If the calendar appears empty or asks employees to sign in, the EPGMGMT calendar's sharing settings need to be set to <strong>"Make available to public"</strong> in Google Calendar settings, or each employee's Google account must be granted access. To change: <a href="https://calendar.google.com/calendar/u/0/r/settings/calendar/c_q2pjqh2jr9mjmlgeqob1k1814c@group.calendar.google.com" target="_blank" rel="noopener" style="color:var(--accent);">open EPGMGMT settings</a>.
                 </p>
+            </div>
+
+            <!-- TEAM OVERVIEW PAGE (admin-only) -->
+            <div class="page" data-page="team-overview">
+                <div class="panel" style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <div class="panel-title" style="margin-bottom:4px;">👥 Team Overview</div>
+                            <p style="margin:0; color:var(--text-sm); font-size:13px;">Admin view: each team member's tasks, urgent items, EOD report status, and scratchpad. Refresh to pull the latest snapshot.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="renderTeamOverview()">↻ Refresh</button>
+                    </div>
+                </div>
+                <div id="teamOverviewList">
+                    <p style="color:var(--text-sm); text-align:center; padding:24px;">Loading…</p>
+                </div>
             </div>
 
             <!-- TASKS PAGE -->
@@ -3677,6 +3694,7 @@
 
             // Render page-specific content
             if (pageName === 'tasks') renderAllTasksPage();
+            if (pageName === 'team-overview') renderTeamOverview();
 
             // Scroll content to top
             const contentArea = document.querySelector('.content-area');
@@ -3716,6 +3734,140 @@
                 navigateTo(pageName);
             });
         });
+
+        // ============================================
+        // TEAM OVERVIEW (admin-only)
+        // ============================================
+        async function renderTeamOverview() {
+            const container = document.getElementById('teamOverviewList');
+            if (!container) return;
+
+            if (!isAdmin()) {
+                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:24px;">This view is for admins only.</p>';
+                return;
+            }
+
+            container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:24px;">Loading team data…</p>';
+
+            const { data, error } = await sbData.rpc('get_team_personal_state');
+            if (error) {
+                container.innerHTML = `<p style="color:var(--danger); padding:16px;">Error loading team data: ${error.message}</p>`;
+                console.error('Team overview error:', error);
+                return;
+            }
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:24px;">No team members yet.</p>';
+                return;
+            }
+
+            const today = todayIsoDate();
+            const todayKey = new Date().toLocaleDateString();
+            const fmtDate = (iso) => {
+                if (!iso) return '—';
+                try { return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' }); }
+                catch (e) { return '—'; }
+            };
+            const daysAgo = (iso) => {
+                if (!iso) return null;
+                try {
+                    const d = new Date(iso);
+                    return Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24));
+                } catch (e) { return null; }
+            };
+
+            container.innerHTML = data.map(member => {
+                const sd = member.state_data || {};
+                const tasks = sd.tasks || [];
+                const urgent = sd.urgent || [];
+                const eod = sd.eodReports || [];
+                const scratchpad = sd.scratchpad || '';
+
+                // Task stats
+                const openTasks = tasks.filter(t => !t.completed);
+                const completedTasks = tasks.filter(t => t.completed);
+                const overdueTasks = openTasks.filter(t => t.dueDate && t.dueDate < today);
+                const dueTodayTasks = openTasks.filter(t => t.today || t.dueDate === today);
+                const completionPct = tasks.length ? Math.round((completedTasks.length / tasks.length) * 100) : 0;
+
+                // EOD freshness
+                const lastEod = eod.length ? eod[eod.length - 1] : null;
+                let eodLabel = 'No EOD reports';
+                let eodColor = 'var(--muted)';
+                if (lastEod) {
+                    const ago = lastEod.date ? daysAgo(new Date(lastEod.date).toISOString()) : null;
+                    if (lastEod.date === todayKey) { eodLabel = 'Submitted today ✓'; eodColor = 'var(--success)'; }
+                    else if (ago !== null && ago <= 1) { eodLabel = 'Yesterday'; eodColor = 'var(--text-sm)'; }
+                    else if (ago !== null && ago <= 2) { eodLabel = `${ago} days ago`; eodColor = 'var(--warning)'; }
+                    else if (ago !== null) { eodLabel = `${ago} days ago`; eodColor = 'var(--danger)'; }
+                    else { eodLabel = 'Last: ' + (lastEod.date || '—'); eodColor = 'var(--text-sm)'; }
+                }
+
+                // Scratchpad excerpt
+                const scratchExcerpt = scratchpad
+                    ? scratchpad.split('\n').slice(0, 3).join('\n').slice(0, 220) + (scratchpad.length > 220 ? '…' : '')
+                    : '(empty)';
+
+                const initials = (member.name || member.user_id || '??').split(/\s+/).map(p => p[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+                const roleBadge = member.role === 'admin'
+                    ? '<span style="font-size:10px; font-weight:700; background:var(--accent); color:#fff; padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:0.5px;">Admin</span>'
+                    : '<span style="font-size:10px; font-weight:700; background:transparent; color:var(--text-sm); border:1px solid var(--border); padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:0.5px;">Member</span>';
+
+                const urgentHtml = urgent.length === 0
+                    ? '<div style="font-size:12px; color:var(--text-sm);">No urgent items</div>'
+                    : urgent.slice(0, 5).map(u => `<div style="font-size:12px; color:var(--text); padding:3px 0; border-left:3px solid var(--danger); padding-left:8px; margin-bottom:3px;">🔴 ${u.title}</div>`).join('') + (urgent.length > 5 ? `<div style="font-size:11px; color:var(--text-sm); margin-top:4px;">+${urgent.length - 5} more</div>` : '');
+
+                const overdueHtml = overdueTasks.length
+                    ? overdueTasks.slice(0, 3).map(t => `<div style="font-size:12px; color:var(--danger); padding:2px 0;">⏰ ${t.title} <span style="color:var(--text-sm); font-size:11px;">(due ${t.dueDate})</span></div>`).join('') + (overdueTasks.length > 3 ? `<div style="font-size:11px; color:var(--muted); margin-top:2px;">+${overdueTasks.length - 3} more overdue</div>` : '')
+                    : '<div style="font-size:12px; color:var(--text-sm);">None overdue</div>';
+
+                return `
+                    <div class="panel" style="margin-bottom:14px; padding:16px;">
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--border);">
+                            <div style="width:38px; height:38px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">${initials}</div>
+                            <div style="flex:1;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div style="font-weight:700; font-size:15px;">${member.name || '(no name)'}</div>
+                                    ${roleBadge}
+                                </div>
+                                <div style="font-size:11px; color:var(--text-sm);">Last activity: ${fmtDate(member.updated_at)}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:11px; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.5px;">EOD Status</div>
+                                <div style="font-size:13px; font-weight:600; color:${eodColor};">${eodLabel}</div>
+                            </div>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px;">
+                            <div>
+                                <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">📋 Tasks</div>
+                                <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:6px;">
+                                    <span style="font-size:24px; font-weight:700;">${openTasks.length}</span>
+                                    <span style="font-size:12px; color:var(--text-sm);">open · ${completedTasks.length} done</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
+                                    ${overdueTasks.length ? `<span style="color:var(--danger); font-weight:600;">⏰ ${overdueTasks.length} overdue</span>` : ''}
+                                    ${dueTodayTasks.length ? `<span style="color:var(--warning); font-weight:600;">📅 ${dueTodayTasks.length} due today</span>` : ''}
+                                </div>
+                                <div style="margin-top:10px; height:5px; background:var(--border); border-radius:3px; overflow:hidden;">
+                                    <div style="height:100%; width:${completionPct}%; background:${completionPct === 100 ? 'var(--success)' : 'var(--accent)'};"></div>
+                                </div>
+                                <div style="margin-top:10px;">${overdueHtml}</div>
+                            </div>
+
+                            <div>
+                                <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">🔴 Urgent</div>
+                                ${urgentHtml}
+                            </div>
+
+                            <div>
+                                <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">📌 Scratchpad</div>
+                                <div style="font-size:12px; color:var(--text-sm); white-space:pre-wrap; background:var(--bg); padding:10px; border-radius:6px; border:1px solid var(--border); max-height:150px; overflow:auto; line-height:1.5;">${scratchExcerpt || '(empty)'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
         // ============================================
         // TASK MANAGEMENT
