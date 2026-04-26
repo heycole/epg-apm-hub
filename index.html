@@ -285,10 +285,27 @@
         /* STATS GRID */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 12px;
             margin-bottom: 16px;
         }
+
+        /* TASK DUE PILLS */
+        .task-pill {
+            flex-shrink: 0;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .task-pill-today { background: var(--danger); color: #fff; }
+        .task-pill-overdue { background: var(--danger); color: #fff; }
+        .task-pill-due-today { background: var(--warning); color: #fff; }
+        .task-pill-due-future { background: transparent; color: var(--text-sm); border: 1px solid var(--border); }
 
         .stat-card {
             background: var(--surface);
@@ -773,7 +790,7 @@
             }
 
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
 
             .content-area {
@@ -922,6 +939,7 @@
             <div class="nav-section">
                 <div class="nav-section-label">DAILY</div>
                 <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
+                <div class="nav-item" data-page="team-calendar">📅 Team Calendar</div>
                 <div class="nav-item" data-page="tasks">✓ Tasks</div>
                 <div class="nav-item" data-page="eod">📝 End of Day</div>
             </div>
@@ -1009,6 +1027,10 @@
                         <div class="stat-label">ACTIVE APPLICATIONS</div>
                         <div class="stat-value" id="stat-applications">0</div>
                     </div>
+                    <div class="stat-card" id="stat-delinquencies-card" style="border-left-color:var(--danger); cursor:pointer;" onclick="navigateTo('finance'); setTimeout(() => switchSubtab('finance','delinquency'), 50);" title="Go to Finance → Delinquency tracker">
+                        <div class="stat-label">DELINQUENCIES</div>
+                        <div class="stat-value" id="stat-delinquencies">0</div>
+                    </div>
                 </div>
 
                 <!-- URGENCY SECTION -->
@@ -1019,6 +1041,28 @@
                     </div>
                     <div id="urgency-list">
                         <div class="urgency-empty">No urgent items — you're clear.</div>
+                    </div>
+                </div>
+
+                <!-- TODAY'S CALENDAR + UPCOMING RENEWALS -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                    <div class="panel" style="margin-bottom:0; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">📅 Today's Calendar</div>
+                            <button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo('team-calendar')">Week view →</button>
+                        </div>
+                        <iframe
+                            src="https://calendar.google.com/calendar/embed?src=c_q2pjqh2jr9mjmlgeqob1k1814c%40group.calendar.google.com&ctz=America%2FNew_York&mode=AGENDA&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&showNav=0&showDate=0"
+                            style="border:0; width:100%; height:280px; border-radius:6px; display:block;"
+                            frameborder="0"
+                            scrolling="auto"></iframe>
+                    </div>
+                    <div class="panel" style="margin-bottom:0; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">🔄 Upcoming Lease Renewals</div>
+                            <span style="font-size:11px; color:var(--text-sm);">Next 120 days</span>
+                        </div>
+                        <div id="dashboard-renewals" style="max-height:280px; overflow-y:auto;"></div>
                     </div>
                 </div>
 
@@ -1088,6 +1132,34 @@
                     <textarea id="scratchpad" placeholder="Quick notes, reminders, things to remember..." style="width:100%; min-height:120px; padding:12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); background:var(--bg); resize:vertical; line-height:1.6;" oninput="saveScratchpad()"></textarea>
                 </div>
 
+            </div>
+
+            <!-- TEAM CALENDAR PAGE -->
+            <div class="page" data-page="team-calendar">
+                <div class="panel" style="margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <div class="panel-title" style="margin-bottom:4px;">📅 EPG Team Calendar</div>
+                            <p style="margin:0; color:var(--text-sm); font-size:13px;">Live week view of the EPGMGMT calendar. Edits made here sync directly to Google Calendar.</p>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn" onclick="setTeamCalendarMode('WEEK')">Week</button>
+                            <button class="btn" onclick="setTeamCalendarMode('AGENDA')">Agenda</button>
+                            <button class="btn" onclick="setTeamCalendarMode('MONTH')">Month</button>
+                            <a class="btn btn-primary" href="https://calendar.google.com/calendar/u/0/r?cid=c_q2pjqh2jr9mjmlgeqob1k1814c%40group.calendar.google.com" target="_blank" rel="noopener" style="text-decoration:none;">Open in Google ↗</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel" style="padding:0; overflow:hidden;">
+                    <iframe id="team-calendar-iframe"
+                        src="https://calendar.google.com/calendar/embed?src=c_q2pjqh2jr9mjmlgeqob1k1814c%40group.calendar.google.com&ctz=America%2FNew_York&mode=WEEK&wkst=2&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0"
+                        style="border:0; width:100%; height:78vh; min-height:600px; display:block;"
+                        frameborder="0"
+                        scrolling="no"></iframe>
+                </div>
+                <p style="font-size:12px; color:var(--text-sm); margin-top:10px; line-height:1.5;">
+                    👉 If the calendar appears empty or asks employees to sign in, the EPGMGMT calendar's sharing settings need to be set to <strong>"Make available to public"</strong> in Google Calendar settings, or each employee's Google account must be granted access. To change: <a href="https://calendar.google.com/calendar/u/0/r/settings/calendar/c_q2pjqh2jr9mjmlgeqob1k1814c@group.calendar.google.com" target="_blank" rel="noopener" style="color:var(--accent);">open EPGMGMT settings</a>.
+                </p>
             </div>
 
             <!-- TASKS PAGE -->
@@ -3278,32 +3350,66 @@
         // Listen for auth state changes
         sb.auth.onAuthStateChange(async (event, session) => {
             if (session) {
-                // User is logged in — show app
                 document.getElementById('loginOverlay').classList.add('hidden');
-                const email = session.user.email || '';
-                document.getElementById('userAvatar').textContent = 'APM';
-                document.getElementById('userName').textContent = 'Assistant Property Manager';
+                // Always reload state on sign-in so we re-fetch the right user's personal data
+                stateLoadedFromDB = false;
+                await loadState();
+                applyUserChrome();
                 await initApp();
-                // If state wasn't loaded yet (RLS blocked before auth), retry now
-                if (!stateLoadedFromDB) {
-                    console.log('Retrying state load after auth...');
-                    await loadState();
-                    renderDashboard();
-                    renderEODHistory();
-                    renderWorkOrders();
-                    renderApplications();
-                    renderRenewals();
-                    renderPortfolio();
-                    renderOnboarding();
-                }
+                renderDashboard();
+                if (typeof renderEODHistory === 'function') renderEODHistory();
+                if (typeof renderWorkOrders === 'function') renderWorkOrders();
+                if (typeof renderApplications === 'function') renderApplications();
+                if (typeof renderRenewals === 'function') renderRenewals();
+                if (typeof renderPortfolio === 'function') renderPortfolio();
+                if (typeof renderOnboarding === 'function') renderOnboarding();
             } else {
+                currentUser = null;
+                currentProfile = null;
                 document.getElementById('loginOverlay').classList.remove('hidden');
             }
         });
 
+        // Updates sidebar avatar / name / greeting based on the loaded profile.
+        function applyUserChrome() {
+            const name = displayName();
+            const role = (currentProfile && currentProfile.role) || 'member';
+            const avatar = document.getElementById('userAvatar');
+            const userNameEl = document.getElementById('userName');
+            if (avatar) {
+                const initials = name.split(/\s+/).map(p => p[0]).filter(Boolean).slice(0,2).join('').toUpperCase() || 'M';
+                avatar.textContent = initials;
+            }
+            if (userNameEl) {
+                userNameEl.textContent = name + (role === 'admin' ? ' · Admin' : '');
+            }
+            const greetTextEl = document.querySelector('.greeting-banner .greeting-text');
+            if (greetTextEl) greetTextEl.textContent = 'Welcome back, ' + (name.split(' ')[0] || name);
+            document.querySelectorAll('[data-admin-only]').forEach(el => {
+                el.style.display = role === 'admin' ? '' : 'none';
+            });
+        }
+
         // ============================================
-        // STATE MANAGEMENT (Supabase)
+        // STATE MANAGEMENT (Supabase, multi-user)
         // ============================================
+        // Personal keys = scoped to the logged-in user (personal_state table).
+        // Shared keys   = team-wide (team_state row id='main').
+        // Anything not in either set is held in-memory only (e.g., portfolioNotes).
+        const PERSONAL_KEYS = new Set([
+            'tasks', 'urgent', 'scratchpad',
+            'approvals', 'waiting', 'eodReports'
+        ]);
+        const SHARED_KEYS = new Set([
+            'workOrders', 'applications', 'renewals', 'delinquencies',
+            'properties', 'owners', 'portfolioNotes', 'newLeases',
+            'onboardingProperties', 'onboardingTenants', 'onboardingOwners',
+            'checklists', 'trainingChecks', 'meetings', 'reconciliationNotes'
+        ]);
+
+        let currentUser = null;     // auth.users row
+        let currentProfile = null;  // profiles row { user_id, name, role }
+
         let state = {
             tasks: [],
             approvals: [],
@@ -3329,45 +3435,43 @@
         let saveTimeout = null;
         let stateLoadedFromDB = false;
 
+        // saveState(newState) — kept for backward-compat. Splits the new state
+        // by key category and patches each table atomically. Personal keys go
+        // to the calling user's personal_state row; shared keys go to the
+        // single team_state row. Unknown keys are kept in-memory only.
         function saveState(newState) {
-            // Safety: never save if we haven't successfully loaded from DB yet
             if (!stateLoadedFromDB) {
                 console.warn('Save blocked — state not yet loaded from DB');
                 return;
             }
             state = newState;
-            // Debounce saves to avoid hammering the database
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(async () => {
-                try {
-                    const { error } = await sbData.from('hub_state').upsert({
-                        id: 'epg_main',
-                        state_data: state,
-                        updated_at: new Date().toISOString()
-                    });
-                    if (error) {
-                        console.error('Save error:', error);
-                    } else {
-                        console.log('State saved successfully');
-                    }
-                } catch (err) {
-                    console.error('Save failed:', err);
+            Object.keys(newState).forEach(key => {
+                if (PERSONAL_KEYS.has(key) || SHARED_KEYS.has(key)) {
+                    saveStateKey(key, newState[key]);
                 }
-            }, 400);
+            });
         }
 
-        // Atomic single-key patch — avoids overwriting concurrent changes by other users
+        // Atomic single-key patch routed to the correct table.
         const keyTimeouts = {};
         function saveStateKey(key, value) {
             if (!stateLoadedFromDB) return;
+            // Keep in-memory state in sync immediately
+            state[key] = value;
             if (keyTimeouts[key]) clearTimeout(keyTimeouts[key]);
             keyTimeouts[key] = setTimeout(async () => {
+                const rpc = PERSONAL_KEYS.has(key)
+                    ? 'patch_personal_state_key'
+                    : SHARED_KEYS.has(key)
+                        ? 'patch_team_state_key'
+                        : null;
+                if (!rpc) {
+                    console.warn('saveStateKey: unknown key (kept in-memory only):', key);
+                    return;
+                }
                 try {
-                    const { error } = await sbData.rpc('patch_hub_state_key', {
-                        p_key: key,
-                        p_value: value
-                    });
-                    if (error) console.error('Key save error:', key, error);
+                    const { error } = await sbData.rpc(rpc, { p_key: key, p_value: value });
+                    if (error) console.error(`Key save error (${rpc}, ${key}):`, error);
                 } catch (err) {
                     console.error('Key save failed:', key, err);
                 }
@@ -3376,28 +3480,47 @@
 
         async function loadState() {
             try {
-                const { data, error } = await sbData
-                    .from('hub_state')
-                    .select('state_data')
-                    .eq('id', 'epg_main')
-                    .single();
-                if (error) {
-                    console.error('Load error:', error);
-                    // If RLS blocks us, don't mark as loaded — prevents overwriting
-                    if (error.code === '42501') {
-                        console.warn('RLS blocked read — waiting for auth');
-                        return;
-                    }
+                // 1. Resolve current auth user
+                const { data: { user }, error: userErr } = await sb.auth.getUser();
+                if (userErr || !user) {
+                    console.warn('Not authenticated — load skipped');
+                    return;
                 }
-                if (data && data.state_data) {
-                    state = { ...state, ...data.state_data };
+                currentUser = user;
+
+                // 2. Resolve / auto-create profile row
+                let { data: profileRow } = await sbData
+                    .from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+                if (!profileRow) {
+                    const fallbackName = (user.email || '').split('@')[0] || 'Member';
+                    const { error: insErr } = await sbData
+                        .from('profiles')
+                        .insert({ user_id: user.id, name: fallbackName, role: 'member' });
+                    if (insErr) console.warn('Profile insert error:', insErr);
+                    const { data: newRow } = await sbData
+                        .from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+                    profileRow = newRow;
                 }
+                currentProfile = profileRow;
+
+                // 3. Fetch team_state (shared)
+                const { data: teamRow, error: teamErr } = await sbData
+                    .from('team_state').select('state_data').eq('id', 'main').maybeSingle();
+                if (teamErr) console.error('Team state load error:', teamErr);
+                const teamState = (teamRow && teamRow.state_data) || {};
+
+                // 4. Fetch personal_state for current user
+                const { data: personalRow, error: personalErr } = await sbData
+                    .from('personal_state').select('state_data').eq('user_id', user.id).maybeSingle();
+                if (personalErr) console.error('Personal state load error:', personalErr);
+                const personalState = (personalRow && personalRow.state_data) || {};
+
+                // 5. Merge (personal wins for any overlapping key — shouldn't happen)
+                state = { ...state, ...teamState, ...personalState };
                 stateLoadedFromDB = true;
-                console.log('State loaded from DB');
+                console.log('State loaded — role:', currentProfile && currentProfile.role);
             } catch (err) {
                 console.error('Load failed, using defaults:', err);
-                // Only mark as loaded if we're on a real server (not file://)
-                // This prevents local previews from overwriting real data
                 if (window.location.protocol !== 'file:') {
                     stateLoadedFromDB = true;
                 } else {
@@ -3406,6 +3529,10 @@
             }
             // Ensure all arrays exist
             if (!state.urgent) state.urgent = [];
+            if (!state.tasks) state.tasks = [];
+            if (!state.approvals) state.approvals = [];
+            if (!state.waiting) state.waiting = [];
+            if (!state.eodReports) state.eodReports = [];
             if (!state.workOrders) state.workOrders = [];
             if (!state.onboardingProperties) state.onboardingProperties = [];
             if (!state.onboardingTenants) state.onboardingTenants = [];
@@ -3415,7 +3542,53 @@
             if (!state.properties) state.properties = [];
             if (!state.owners) state.owners = [];
             if (!state.portfolioNotes) state.portfolioNotes = {};
-            if (!state.scratchpad) state.scratchpad = '';
+            if (!state.delinquencies) state.delinquencies = [];
+            if (typeof state.scratchpad !== 'string') state.scratchpad = '';
+        }
+
+        function isAdmin() {
+            return currentProfile && currentProfile.role === 'admin';
+        }
+
+        // Friendly display name from the loaded profile, or a clean fallback
+        // derived from the email prefix (capitalized) so we never surface the
+        // raw email address in the UI.
+        function displayName() {
+            if (currentProfile && currentProfile.name && currentProfile.name.trim()) {
+                return currentProfile.name.trim();
+            }
+            const email = (currentUser && currentUser.email) || '';
+            const prefix = email.split('@')[0] || 'Member';
+            return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+        }
+
+        // Stamp a new shared-item with author + creation time. Idempotent —
+        // if the item already has createdBy, we leave it alone so editors
+        // never overwrite the original author.
+        function attributeItem(item) {
+            if (!item || typeof item !== 'object') return item;
+            if (!item.createdBy) {
+                item.createdBy = (currentUser && currentUser.id) || null;
+                item.createdByName = displayName();
+                item.createdAt = item.createdAt || new Date().toISOString();
+            }
+            return item;
+        }
+
+        // Compact "Added by X · MMM D" badge for shared cards.
+        function attributionBadgeHtml(item) {
+            if (!item) return '';
+            const who = item.createdByName || 'Shared (Legacy)';
+            let when = '';
+            if (item.createdAt) {
+                try {
+                    const d = new Date(item.createdAt);
+                    if (!isNaN(d.getTime())) {
+                        when = ' · ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                    }
+                } catch (e) { /* ignore */ }
+            }
+            return `<span style="font-size:11px; color:var(--text-sm); background:rgba(200,160,60,0.08); border:1px solid rgba(200,160,60,0.2); border-radius:10px; padding:2px 8px; white-space:nowrap;" title="Added by ${who}${when}">👤 ${who}${when}</span>`;
         }
 
         // ============================================
@@ -3504,23 +3677,46 @@
                 return;
             }
 
-            container.innerHTML = tasks.map((task, idx) => `
+            container.innerHTML = tasks.map((task, idx) => {
+                const pill = taskPillHtml(task);
+                return `
                 <div style="padding: 10px 12px; background: ${task.completed ? 'rgba(34,197,94,0.06)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${task.completed ? 'opacity:0.6;' : ''}">
                     <button onclick="toggleCompleteTask('${type}', ${idx})" title="${task.completed ? 'Mark incomplete' : 'Mark complete'}" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid ${task.completed ? 'var(--success)' : 'var(--border)'}; background:${task.completed ? 'var(--success)' : 'transparent'}; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.2s;">
                         ${task.completed ? '<span style="color:white; font-size:11px; line-height:1;">✓</span>' : ''}
                     </button>
                     <span style="font-size: 13px; color: var(--text); flex: 1; ${task.completed ? 'text-decoration: line-through; color: var(--text-sm);' : ''}">${task.title}</span>
+                    ${pill}
                     <div style="display:flex; gap:4px; flex-shrink:0;">
                         <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="editTask('${type}', ${idx})" title="Edit">✏️</button>
                         <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeTask('${type}', ${idx})" title="Remove">✕</button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        function todayIsoDate() {
+            const d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+
+        function taskPillHtml(task) {
+            if (task.today) return '<span class="task-pill task-pill-today">🔴 Today</span>';
+            if (!task.dueDate) return '';
+            const today = todayIsoDate();
+            if (task.dueDate < today) return '<span class="task-pill task-pill-overdue">Overdue</span>';
+            if (task.dueDate === today) return '<span class="task-pill task-pill-due-today">Due today</span>';
+            const [y, m, d] = task.dueDate.split('-');
+            return `<span class="task-pill task-pill-due-future">Due ${m}/${d}</span>`;
         }
 
         function openAddTaskModal(type) {
             type = type || 'tasks';
-            const labels = { tasks: 'task', approvals: 'item awaiting approval', waiting: 'item you\'re waiting on' };
+            if (type === 'tasks') {
+                openAddTaskModalRich();
+                return;
+            }
+            const labels = { approvals: 'item awaiting approval', waiting: 'item you\'re waiting on' };
             const title = prompt('Enter ' + (labels[type] || 'task') + ':');
             if (title) {
                 if (!state[type]) state[type] = [];
@@ -3528,6 +3724,65 @@
                 saveState(state);
                 renderDashboard();
             }
+        }
+
+        function openAddTaskModalRich() {
+            const existing = document.getElementById('add-task-modal');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'add-task-modal';
+            overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(12,18,50,0.55); z-index:9500; display:flex; align-items:center; justify-content:center; padding:20px;';
+            overlay.innerHTML = `
+                <div style="background:var(--surface); border-radius:12px; padding:22px; width:100%; max-width:440px; box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+                    <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:14px;">Add Task</div>
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Task</label>
+                    <input type="text" id="new-task-title" placeholder="What needs to be done?" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:12px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Due date (optional)</label>
+                    <input type="date" id="new-task-due" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:12px;">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text); margin-bottom:18px; cursor:pointer;">
+                        <input type="checkbox" id="new-task-today" style="accent-color:var(--danger); width:16px; height:16px;">
+                        <span>🔴 Must-do today (auto-appears in Urgent)</span>
+                    </label>
+                    <div style="display:flex; justify-content:flex-end; gap:8px;">
+                        <button class="btn" onclick="closeAddTaskModal()" style="font-size:13px; padding:8px 14px;">Cancel</button>
+                        <button class="btn btn-primary" onclick="submitAddTaskModal()" style="font-size:13px; padding:8px 14px;">Add Task</button>
+                    </div>
+                </div>
+            `;
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeAddTaskModal();
+            });
+            document.body.appendChild(overlay);
+            setTimeout(() => {
+                const t = document.getElementById('new-task-title');
+                if (t) {
+                    t.focus();
+                    t.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') { e.preventDefault(); submitAddTaskModal(); }
+                    });
+                }
+            }, 0);
+        }
+
+        function closeAddTaskModal() {
+            const m = document.getElementById('add-task-modal');
+            if (m) m.remove();
+        }
+
+        function submitAddTaskModal() {
+            const title = (document.getElementById('new-task-title').value || '').trim();
+            if (!title) { document.getElementById('new-task-title').focus(); return; }
+            const dueDate = document.getElementById('new-task-due').value || '';
+            const today = document.getElementById('new-task-today').checked;
+            const entry = { title, completed: false };
+            if (dueDate) entry.dueDate = dueDate;
+            if (today) entry.today = true;
+            if (!state.tasks) state.tasks = [];
+            state.tasks.push(entry);
+            saveStateKey('tasks', state.tasks);
+            closeAddTaskModal();
+            renderDashboard();
         }
 
         function toggleCompleteTask(type, idx) {
@@ -3664,7 +3919,7 @@
                 lastUpdated: new Date().toISOString()
             };
             if (!state.delinquencies) state.delinquencies = [];
-            state.delinquencies.push(entry);
+            state.delinquencies.push(attributeItem(entry));
             saveState(state);
             renderDelinquencies();
         }
@@ -3722,6 +3977,7 @@
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:14px; flex-shrink:0;">
+                            ${attributionBadgeHtml(d)}
                             <div style="font-weight:700; font-size:15px; color:${isResolved ? 'var(--muted)' : 'var(--danger)'};">$${(d.amount || 0).toLocaleString()}</div>
                             <button onclick="event.stopPropagation(); toggleResolveDelinquency(${d.id})" title="${isResolved ? 'Mark as active' : 'Mark as resolved'}" style="background:none; border:1px solid ${borderColor}; color:${borderColor}; cursor:pointer; font-size:11px; padding:4px 10px; border-radius:6px; font-weight:600;">${isResolved ? '↶ Reopen' : '✓ Resolve'}</button>
                             <button onclick="event.stopPropagation(); deleteDelinquency(${d.id})" title="Delete" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:4px 8px; border-radius:4px;">✕</button>
@@ -3785,7 +4041,7 @@
                 lastUpdated: new Date().toISOString()
             };
             if (!state.newLeases) state.newLeases = [];
-            state.newLeases.push(entry);
+            state.newLeases.push(attributeItem(entry));
             saveState(state);
             renderNewLeases();
         }
@@ -3986,17 +4242,101 @@
         function renderUrgentList() {
             const container = document.getElementById('urgency-list');
             if (!container) return;
-            if (!state.urgent || state.urgent.length === 0) {
+
+            // Auto-feed: tasks with today flag OR due on/before today, not completed
+            const today = todayIsoDate();
+            const autoItems = (state.tasks || [])
+                .filter(t => !t.completed && (t.today || (t.dueDate && t.dueDate <= today)))
+                .map(t => {
+                    const overdue = t.dueDate && t.dueDate < today;
+                    return {
+                        title: t.title,
+                        priority: overdue ? 'emergency' : 'today',
+                        autoTag: overdue ? '⏰ OVERDUE' : (t.today ? '🔴 TODAY' : '🟡 DUE TODAY'),
+                        auto: true
+                    };
+                });
+
+            const autoTitles = new Set(autoItems.map(a => a.title));
+            const manualWithIdx = (state.urgent || [])
+                .map((item, idx) => ({ item, idx }))
+                .filter(({ item }) => !autoTitles.has(item.title))
+                .map(({ item, idx }) => ({ title: item.title, priority: item.priority, auto: false, manualIdx: idx }));
+
+            const combined = [...autoItems, ...manualWithIdx];
+
+            if (combined.length === 0) {
                 container.innerHTML = '<div class="urgency-empty">No urgent items — you\'re clear.</div>';
                 return;
             }
-            container.innerHTML = state.urgent.map((item, idx) => `
-                <div class="urgency-item ${item.priority === 'today' ? 'warning-item' : ''}">
-                    <span class="urgency-tag ${item.priority === 'today' ? 'warning' : ''}">${item.priority === 'emergency' ? '🔴 EMERGENCY' : '🟡 TODAY'}</span>
-                    <span style="flex:1; font-size:13px;">${item.title}</span>
-                    <button onclick="removeUrgent(${idx})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
-                </div>
-            `).join('');
+
+            container.innerHTML = combined.map(item => {
+                const tagLabel = item.auto
+                    ? item.autoTag
+                    : (item.priority === 'emergency' ? '🔴 EMERGENCY' : '🟡 TODAY');
+                const removeBtn = item.auto
+                    ? '<span style="color:var(--text-sm); font-size:11px; font-style:italic; padding-right:4px;" title="From Tasks">from tasks</span>'
+                    : `<button onclick="removeUrgent(${item.manualIdx})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>`;
+                return `
+                    <div class="urgency-item ${item.priority === 'today' ? 'warning-item' : ''}">
+                        <span class="urgency-tag ${item.priority === 'today' ? 'warning' : ''}">${tagLabel}</span>
+                        <span style="flex:1; font-size:13px;">${item.title}</span>
+                        ${removeBtn}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDashboardRenewals() {
+            const container = document.getElementById('dashboard-renewals');
+            if (!container) return;
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const horizon = new Date(today.getTime() + 120 * 24 * 60 * 60 * 1000);
+            const rows = (state.renewals || [])
+                .filter(r => r.type !== 'notRenewing' && r.leaseExp)
+                .map(r => {
+                    const exp = new Date(r.leaseExp);
+                    if (isNaN(exp.getTime())) return null;
+                    const days = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+                    return { r, exp, days };
+                })
+                .filter(x => x && x.exp <= horizon)
+                .sort((a, b) => a.exp - b.exp);
+
+            if (rows.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-sm); padding:16px; text-align:center; font-size:13px;">No renewals in the next 120 days.</p>';
+                return;
+            }
+
+            container.innerHTML = rows.map(({ r, days }) => {
+                const completedSteps = (r.steps || []).filter(s => s.done).length;
+                const totalSteps = (r.steps || []).length;
+                const pct = totalSteps ? Math.round((completedSteps / totalSteps) * 100) : 0;
+                let color, label;
+                if (days < 0) { color = 'var(--danger)'; label = `Expired ${Math.abs(days)}d ago`; }
+                else if (days <= 30) { color = 'var(--danger)'; label = `${days}d left`; }
+                else if (days <= 60) { color = 'var(--warning)'; label = `${days}d left`; }
+                else { color = 'var(--text-sm)'; label = `${days}d left`; }
+                const typeLabel = r.type === 'pending' ? 'Pending' : 'Renewing';
+                const typeColor = r.type === 'pending' ? 'var(--accent)' : 'var(--success)';
+                return `
+                    <div style="padding:10px 12px; background:var(--bg); border-radius:6px; margin-bottom:6px; cursor:pointer; border-left:3px solid ${color};" onclick="navigateTo('lease-renewals')">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px;">
+                            <div style="font-weight:600; font-size:13px; color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏠 ${r.property || '(no property)'}</div>
+                            <span class="task-pill" style="background:${typeColor}; color:#fff;">${typeLabel}</span>
+                            <span style="font-size:11px; font-weight:700; color:${color}; white-space:nowrap;">${label}</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-sm); margin-bottom:6px;">👤 ${r.tenant || ''}</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="flex:1; height:5px; background:var(--border); border-radius:3px; overflow:hidden;">
+                                <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : typeColor}; border-radius:3px;"></div>
+                            </div>
+                            <span style="font-size:11px; color:var(--muted); white-space:nowrap;">${completedSteps}/${totalSteps}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         // ============================================
@@ -4039,6 +4379,12 @@
             }
             document.getElementById('stat-applications').textContent = (state.applications || []).filter(a => a.status !== 'denied' && a.status !== 'cancelled').length;
 
+            const delinqEl = document.getElementById('stat-delinquencies');
+            if (delinqEl) {
+                const activeDelinq = (state.delinquencies || []).filter(d => (d.status || '').toLowerCase() !== 'resolved').length;
+                delinqEl.textContent = activeDelinq;
+            }
+
             // EOD nudge — show after 5pm on weekdays
             const eodNudge = document.getElementById('eodNudge');
             if (eodNudge) {
@@ -4051,6 +4397,7 @@
             }
 
             renderUrgentList();
+            renderDashboardRenewals();
             renderTaskList(document.getElementById('dashboard-tasks'), state.tasks, 'Task');
             renderTaskList(document.getElementById('dashboard-approvals'), state.approvals, 'Approval');
             renderTaskList(document.getElementById('dashboard-waiting'), state.waiting, 'Waiting');
@@ -4070,8 +4417,7 @@
             if (statusEl) statusEl.textContent = 'Saving...';
             clearTimeout(scratchpadTimer);
             scratchpadTimer = setTimeout(() => {
-                state.scratchpad = el.value;
-                saveState(state);
+                saveStateKey('scratchpad', el.value);
                 if (statusEl) statusEl.textContent = 'Auto-saved';
             }, 600);
         }
@@ -4414,7 +4760,7 @@
                 steps: workOrderSteps.map(s => ({ text: s, done: false })),
                 collapsed: true
             };
-            state.workOrders.push(wo);
+            state.workOrders.push(attributeItem(wo));
             saveState(state);
             renderWorkOrders();
         }
@@ -4512,6 +4858,7 @@
                                 </div>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px; margin-left:12px;">
+                                ${attributionBadgeHtml(wo)}
                                 <span style="font-size:11px; color:var(--muted);">${wo.dateCreated}</span>
                                 <button onclick="event.stopPropagation(); removeWorkOrder(${wo.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
                             </div>
@@ -4558,7 +4905,7 @@
             const applicants = prompt('Applicant name(s) — separate multiple with commas:');
             if (!applicants) return;
             if (!state.applications) state.applications = [];
-            state.applications.push({
+            state.applications.push(attributeItem({
                 id: Date.now(),
                 property: property.trim(),
                 applicants: applicants.split(',').map(n => n.trim()).filter(n => n),
@@ -4569,7 +4916,7 @@
                 summary: '',
                 notes: '',
                 showingAgent: ''
-            });
+            }));
             saveState(state);
             renderApplications();
         }
@@ -4777,6 +5124,7 @@
                                 </div>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px; margin-left:12px;">
+                                ${attributionBadgeHtml(app)}
                                 <span style="font-size:11px; color:var(--muted);">${app.dateCreated}</span>
                                 <button onclick="event.stopPropagation(); removeApplication(${app.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
                             </div>
@@ -4822,7 +5170,7 @@
             if (!tenant) return;
             const leaseExp = type === 'pending' ? (prompt('Lease expiration date (e.g. 8/31/2026):') || '') : '';
             if (!state.renewals) state.renewals = [];
-            state.renewals.push({
+            state.renewals.push(attributeItem({
                 id: Date.now(),
                 property: property.trim(),
                 tenant: tenant.trim(),
@@ -4831,7 +5179,7 @@
                 steps: renewalSteps[type].map(s => ({ text: s, done: false })),
                 collapsed: true,
                 dateCreated: new Date().toLocaleDateString()
-            });
+            }));
             saveState(state);
             renderRenewals();
         }
@@ -4918,6 +5266,7 @@
                                 </div>
                             </div>
                             <div style="display:flex; align-items:center; gap:6px; margin-left:12px;">
+                                ${attributionBadgeHtml(r)}
                                 <span style="font-size:11px; color:var(--muted);">${r.dateCreated}</span>
                                 <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
                             </div>
@@ -5306,13 +5655,13 @@
             const address = prompt('Property address:');
             if (!address) return;
             if (!state.onboardingProperties) state.onboardingProperties = [];
-            state.onboardingProperties.push({
+            state.onboardingProperties.push(attributeItem({
                 id: Date.now(),
                 name: address,
                 type: 'property',
                 steps: onboardingTemplates.property.map(s => ({ text: s, done: false })),
                 collapsed: true
-            });
+            }));
             saveState(state);
             renderOnboarding();
         }
@@ -5323,13 +5672,13 @@
             const address = prompt('Property address:');
             if (!address) return;
             if (!state.onboardingTenants) state.onboardingTenants = [];
-            state.onboardingTenants.push({
+            state.onboardingTenants.push(attributeItem({
                 id: Date.now(),
                 name: name + ' — ' + address,
                 type: 'tenant',
                 steps: onboardingTemplates.tenant.map(s => ({ text: s, done: false })),
                 collapsed: true
-            });
+            }));
             saveState(state);
             renderOnboarding();
         }
@@ -5338,13 +5687,13 @@
             const name = prompt('Owner name:');
             if (!name) return;
             if (!state.onboardingOwners) state.onboardingOwners = [];
-            state.onboardingOwners.push({
+            state.onboardingOwners.push(attributeItem({
                 id: Date.now(),
                 name: name,
                 type: 'owner',
                 steps: onboardingTemplates.owner.map(s => ({ text: s, done: false })),
                 collapsed: true
-            });
+            }));
             saveState(state);
             renderOnboarding();
         }
