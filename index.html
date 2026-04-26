@@ -3489,9 +3489,23 @@
                 currentUser = user;
 
                 // 2. Resolve / auto-create profile row
-                let { data: profileRow } = await sbData
-                    .from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+                let profileRow = null;
+                let profileErr = null;
+                {
+                    const r = await sbData.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+                    profileRow = r.data;
+                    profileErr = r.error;
+                    console.log('Profile fetch:', { user_id: user.id, email: user.email, profileRow, profileErr });
+                }
+                // Retry once if the first call returned nothing but we know the row should exist
+                if (!profileRow && !profileErr) {
+                    await new Promise(r => setTimeout(r, 250));
+                    const r = await sbData.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+                    profileRow = r.data;
+                    if (profileRow) console.log('Profile fetch (retry) succeeded:', profileRow);
+                }
                 if (!profileRow) {
+                    // Truly missing — auto-create as member
                     const fallbackName = (user.email || '').split('@')[0] || 'Member';
                     const { error: insErr } = await sbData
                         .from('profiles')
@@ -3573,6 +3587,41 @@
                 item.createdAt = item.createdAt || new Date().toISOString();
             }
             return item;
+        }
+
+        // Mark a checklist item as done/received and stamp who did it + when.
+        // Used for work-order steps, application steps + docs, renewal steps,
+        // onboarding steps, etc. Pass the field name ('done' or 'received').
+        function markChecklistItem(item, fieldName, value) {
+            if (!item) return;
+            item[fieldName] = value;
+            if (value) {
+                item.doneBy = (currentUser && currentUser.id) || null;
+                item.doneByName = displayName();
+                item.doneAt = new Date().toISOString();
+            } else {
+                delete item.doneBy;
+                delete item.doneByName;
+                delete item.doneAt;
+            }
+        }
+
+        // Small inline "✓ Name · time" badge to render next to a checked step.
+        function stepDoneByHtml(step) {
+            if (!step || !step.doneByName) return '';
+            let when = '';
+            if (step.doneAt) {
+                try {
+                    const d = new Date(step.doneAt);
+                    if (!isNaN(d.getTime())) {
+                        const sameDay = d.toDateString() === new Date().toDateString();
+                        when = ' · ' + (sameDay
+                            ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                            : d.toLocaleDateString([], { month: 'short', day: 'numeric' }));
+                    }
+                } catch(e) { /* ignore */ }
+            }
+            return `<span style="font-size:10px; color:var(--text-sm); margin-left:8px; font-style:italic; white-space:nowrap;" title="Checked by ${step.doneByName}${when}">✓ ${step.doneByName}${when}</span>`;
         }
 
         // Compact "Added by X · MMM D" badge for shared cards.
@@ -4777,8 +4826,8 @@
         function toggleWorkOrderStep(woId, stepIdx) {
             const wo = state.workOrders.find(w => w.id === woId);
             if (wo) {
-                wo.steps[stepIdx].done = !wo.steps[stepIdx].done;
-                saveState(state);
+                markChecklistItem(wo.steps[stepIdx], 'done', !wo.steps[stepIdx].done);
+                saveStateKey('workOrders', state.workOrders);
                 renderWorkOrders();
             }
         }
@@ -4831,6 +4880,7 @@
                             <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleWorkOrderStep(${wo.id}, ${idx})">
                                 <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
                                 <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                                ${stepDoneByHtml(step)}
                             </div>
                         `).join('')}
                         <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
@@ -4930,7 +4980,7 @@
 
         function toggleApplicationStep(appId, stepIdx) {
             const app = state.applications.find(a => a.id === appId);
-            if (app) app.steps[stepIdx].done = !app.steps[stepIdx].done;
+            if (app) markChecklistItem(app.steps[stepIdx], 'done', !app.steps[stepIdx].done);
             saveStateKey('applications', state.applications);
             renderApplications();
         }
@@ -4939,7 +4989,7 @@
             const app = state.applications.find(a => a.id === appId);
             if (app) {
                 if (!app.docs) app.docs = applicationDocs.map(d => ({ text: d, received: false }));
-                app.docs[docIdx].received = !app.docs[docIdx].received;
+                markChecklistItem(app.docs[docIdx], 'received', !app.docs[docIdx].received);
                 saveStateKey('applications', state.applications);
                 renderApplications();
             }
@@ -5076,6 +5126,7 @@
                                 <div style="display:flex; align-items:flex-start; gap:8px; padding:5px 0; cursor:pointer;" onclick="toggleApplicationStep(${app.id}, ${idx})">
                                     <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:15px; height:15px; pointer-events:none; flex-shrink:0;">
                                     <span style="font-size:12px; line-height:1.4; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                                    ${stepDoneByHtml(step)}
                                 </div>
                             `).join('')}
                         </div>
@@ -5092,6 +5143,7 @@
                                 <div style="display:flex; align-items:center; gap:8px; padding:4px 0; cursor:pointer;" onclick="toggleApplicationDoc(${app.id}, ${idx})">
                                     <input type="checkbox" ${doc.received ? 'checked' : ''} style="accent-color:var(--success); width:15px; height:15px; pointer-events:none; flex-shrink:0;">
                                     <span style="font-size:12px; ${doc.received ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${doc.text}</span>
+                                    ${stepDoneByHtml(doc)}
                                 </div>
                             `).join('')}
 
@@ -5193,8 +5245,8 @@
 
         function toggleRenewalStep(rId, stepIdx) {
             const r = state.renewals.find(r => r.id === rId);
-            if (r) r.steps[stepIdx].done = !r.steps[stepIdx].done;
-            saveState(state);
+            if (r) markChecklistItem(r.steps[stepIdx], 'done', !r.steps[stepIdx].done);
+            saveStateKey('renewals', state.renewals);
             renderRenewals();
         }
 
@@ -5242,6 +5294,7 @@
                             <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleRenewalStep(${r.id}, ${idx})">
                                 <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
                                 <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                                ${stepDoneByHtml(step)}
                             </div>
                         `).join('')}
                         <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
@@ -5710,10 +5763,11 @@
 
         function toggleOnboardingStep(type, itemId, stepIdx) {
             const list = type === 'property' ? state.onboardingProperties : type === 'tenant' ? state.onboardingTenants : state.onboardingOwners;
+            const key = type === 'property' ? 'onboardingProperties' : type === 'tenant' ? 'onboardingTenants' : 'onboardingOwners';
             const item = list.find(i => i.id === itemId);
             if (item) {
-                item.steps[stepIdx].done = !item.steps[stepIdx].done;
-                saveState(state);
+                markChecklistItem(item.steps[stepIdx], 'done', !item.steps[stepIdx].done);
+                saveStateKey(key, list);
                 renderOnboarding();
             }
         }
@@ -5748,6 +5802,7 @@
                             <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleOnboardingStep('${type}', ${item.id}, ${idx})">
                                 <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
                                 <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                                ${stepDoneByHtml(step)}
                             </div>
                         `).join('')}
                     </div>
