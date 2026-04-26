@@ -3287,12 +3287,12 @@
         // ============================================
         const SUPABASE_URL = 'https://woyhzbnlkhmfuagryhis.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndveWh6Ym5sa2htZnVhZ3J5aGlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NTAwNjIsImV4cCI6MjA5MjUyNjA2Mn0.E6Wmbgmx7-rDiCQ7dkKoIuo2orj6rddJnyRuCSVluq4';
-        // Auth client — handles login/logout only
+        // Single Supabase client used for both auth and data so that queries
+        // and RPCs are sent with the user's JWT. (Earlier the data client was
+        // a separate anonymous instance — that broke RLS-protected reads
+        // and SECURITY DEFINER RPCs that check auth.uid().)
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        // Data client — handles all read/write operations (no auth lock)
-        const sbData = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: false, autoRefreshToken: false }
-        });
+        const sbData = sb;
 
         // ============================================
         // AUTH
