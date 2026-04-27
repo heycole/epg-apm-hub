@@ -1223,11 +1223,17 @@
                 <!-- MAIN CONTENT: 60/40 split -->
                 <div style="display:grid; grid-template-columns:3fr 2fr; gap:16px; align-items:start;">
 
-                    <!-- LEFT: My Tasks (60%) -->
+                    <!-- LEFT: My Tasks snapshot (60%) -->
                     <div class="panel" style="margin-bottom:0; min-height:280px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">📋 My Tasks</div>
-                            <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="openAddTaskModal('tasks')">+ Add Task</button>
+                            <div style="display:flex; align-items:baseline; gap:10px;">
+                                <div class="panel-title" style="margin-bottom:0; font-size:15px;">📋 My Tasks</div>
+                                <span id="dashboard-tasks-count" style="font-size:11px; color:var(--text-sm);"></span>
+                            </div>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <button class="btn" style="font-size:11px; padding:4px 10px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="navigateTo('tasks')">View all →</button>
+                                <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="openAddTaskModal('tasks')">+ Add Task</button>
+                            </div>
                         </div>
                         <div id="dashboard-tasks"></div>
                     </div>
@@ -4230,6 +4236,62 @@
             }).join('');
         }
 
+        // Dashboard 'My Tasks' panel: compact snapshot of the top 5
+        // incomplete tasks (urgent first) with a count + overflow link to
+        // the full My Tasks page.
+        function renderDashboardTasksSnapshot() {
+            const container = document.getElementById('dashboard-tasks');
+            const countEl = document.getElementById('dashboard-tasks-count');
+            if (!container) return;
+
+            const all = (state.tasks || []).map((t, i) => ({ task: t, idx: i }));
+            const incomplete = all.filter(({ task }) => !task.completed);
+            const today = todayIsoDate();
+            incomplete.sort((a, b) => {
+                const at = a.task, bt = b.task;
+                if (!!at.urgent !== !!bt.urgent) return at.urgent ? -1 : 1;
+                const aDue = (at.dueDate && at.dueDate <= today) || at.today;
+                const bDue = (bt.dueDate && bt.dueDate <= today) || bt.today;
+                if (aDue !== bDue) return aDue ? -1 : 1;
+                if (at.dueDate && bt.dueDate) return at.dueDate.localeCompare(bt.dueDate);
+                if (at.dueDate) return -1;
+                if (bt.dueDate) return 1;
+                return 0;
+            });
+
+            if (countEl) {
+                const total = incomplete.length;
+                countEl.textContent = total === 0 ? '' : `${total} open`;
+            }
+
+            if (incomplete.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-sm); padding: 16px; text-align: center; font-size:13px;">No tasks yet — click + Add Task to start.</p>';
+                return;
+            }
+
+            const limit = 5;
+            const top = incomplete.slice(0, limit);
+            const remaining = incomplete.length - top.length;
+
+            container.innerHTML = top.map(({ task, idx }) => {
+                const pill = taskPillHtml(task);
+                const dotStyle = task.urgent
+                    ? 'background:var(--danger); border-color:var(--danger); box-shadow:0 0 0 3px rgba(184,50,50,0.18);'
+                    : 'background:transparent; border-color:var(--border);';
+                return `
+                <div style="padding: 10px 12px; background: ${task.urgent ? 'rgba(184,50,50,0.04)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${task.urgent ? 'border-left:3px solid var(--danger);' : ''}">
+                    <button onclick="toggleCompleteTask('Task', ${idx})" title="Mark complete" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid var(--border); background:transparent; cursor:pointer; padding:0;"></button>
+                    <button onclick="toggleTaskUrgent('Task', ${idx})" title="${task.urgent ? 'Remove urgent' : 'Mark urgent'}" style="flex-shrink:0; width:14px; height:14px; border-radius:50%; border:2px solid; cursor:pointer; padding:0; transition:all 0.15s; ${dotStyle}"></button>
+                    <span style="font-size: 13px; color: var(--text); flex: 1;">${task.title}</span>
+                    ${pill}
+                    <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger); flex-shrink:0;" onclick="removeTask('Task', ${idx})" title="Remove">✕</button>
+                </div>
+                `;
+            }).join('') + (remaining > 0
+                ? `<div style="padding:8px 12px; text-align:center;"><a href="#" onclick="event.preventDefault(); navigateTo('tasks');" style="font-size:12px; color:var(--accent); text-decoration:none; font-weight:600;">+ ${remaining} more · view all →</a></div>`
+                : '');
+        }
+
         function todayIsoDate() {
             const d = new Date();
             return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -5044,7 +5106,7 @@
             renderUrgentList();
             renderDashboardCalendarTasks();
             renderDashboardRenewals();
-            renderTaskList(document.getElementById('dashboard-tasks'), state.tasks, 'Task');
+            renderDashboardTasksSnapshot();
             renderTaskList(document.getElementById('dashboard-approvals'), state.approvals, 'Approval');
             renderTaskList(document.getElementById('dashboard-waiting'), state.waiting, 'Waiting');
 
