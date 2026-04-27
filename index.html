@@ -295,16 +295,27 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            gap: 10px;
-            padding: 12px 14px;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 10px;
             background: var(--bg);
             border-radius: 10px;
             border: 1px solid var(--border);
             transition: all 0.2s;
-            text-align: left;
+            text-align: center;
             min-height: 48px;
         }
+        /* Narrow stack used by Tenant Acquisition + Ongoing Operations
+           so the bars match the width of one branch in Tenant Lifecycle. */
+        .sop-vert-narrow {
+            width: calc(50% - 5px);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0;
+        }
+        .sop-vert-narrow.list { gap: 8px; }
         .sop-vert-box:hover {
             background: var(--accent-light);
             border-color: var(--accent);
@@ -3178,7 +3189,7 @@
                                 <!-- COL 1: TENANT ACQUISITION -->
                                 <div>
                                     <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); text-align:center; margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid var(--accent);">Tenant Acquisition</div>
-                                    <div style="display:flex; flex-direction:column; align-items:stretch; gap:0;">
+                                    <div class="sop-vert-narrow">
                                         <div onclick="openSOP('listings')" class="sop-vert-box">
                                             <div style="font-size:18px;">📸</div>
                                             <div style="font-size:12px; font-weight:600;">Listings & Marketing</div>
@@ -3261,7 +3272,7 @@
                                 <!-- COL 3: ONGOING OPERATIONS -->
                                 <div>
                                     <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); text-align:center; margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid var(--accent);">Ongoing Operations</div>
-                                    <div style="display:flex; flex-direction:column; gap:8px;">
+                                    <div class="sop-vert-narrow list">
                                         <div onclick="openSOP('maintenance')" class="sop-vert-box"><div style="font-size:18px;">🔧</div><div style="font-size:12px; font-weight:600;">Maintenance</div></div>
                                         <div onclick="openSOP('onboarding')" class="sop-vert-box"><div style="font-size:18px;">🏠</div><div style="font-size:12px; font-weight:600;">Onboarding</div></div>
                                         <div onclick="openSOP('rental-licenses')" class="sop-vert-box"><div style="font-size:18px;">📋</div><div style="font-size:12px; font-weight:600;">Rental Licenses</div></div>
