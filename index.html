@@ -3359,9 +3359,16 @@
             }
         }
 
+        // Bulletproof sign-out — clears every Supabase token from storage
+        // and reloads. Does not depend on the Supabase JS client (which can
+        // get stuck in background-tab throttling).
         async function handleLogout() {
-            await sb.auth.signOut();
-            document.getElementById('loginOverlay').classList.remove('hidden');
+            try { await Promise.race([sb.auth.signOut(), new Promise(r => setTimeout(r, 1500))]); } catch(e) {}
+            try {
+                Object.keys(localStorage).filter(k => k.startsWith('sb-')).forEach(k => localStorage.removeItem(k));
+                Object.keys(sessionStorage).filter(k => k.startsWith('sb-')).forEach(k => sessionStorage.removeItem(k));
+            } catch(e) {}
+            location.reload();
         }
 
         // Hydrate the page once we have an authenticated session. Idempotent:
@@ -3498,10 +3505,10 @@
         }
 
         // Atomic single-key patch routed to the correct table.
+        // Uses lock-free restRpc to avoid Supabase JS client deadlocks.
         const keyTimeouts = {};
         function saveStateKey(key, value) {
             if (!stateLoadedFromDB) return;
-            // Keep in-memory state in sync immediately
             state[key] = value;
             if (keyTimeouts[key]) clearTimeout(keyTimeouts[key]);
             keyTimeouts[key] = setTimeout(async () => {
@@ -3515,7 +3522,7 @@
                     return;
                 }
                 try {
-                    const { error } = await sbData.rpc(rpc, { p_key: key, p_value: value });
+                    const { error } = await restRpc(rpc, { p_key: key, p_value: value });
                     if (error) console.error(`Key save error (${rpc}, ${key}):`, error);
                 } catch (err) {
                     console.error('Key save failed:', key, err);
@@ -3523,68 +3530,87 @@
             }, 400);
         }
 
+        // Helper: read user + JWT directly from localStorage without going
+        // through sb.auth.getUser() which can deadlock on background tabs.
+        function getStoredAuth() {
+            try {
+                const raw = localStorage.getItem('sb-woyhzbnlkhmfuagryhis-auth-token');
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (!parsed || !parsed.access_token || !parsed.user) return null;
+                return { user: parsed.user, accessToken: parsed.access_token };
+            } catch (e) { return null; }
+        }
+
+        // Lock-free PostgREST helper — bypasses the Supabase JS client.
+        async function restGet(path) {
+            const auth = getStoredAuth();
+            if (!auth) return { data: null, error: { message: 'no auth' } };
+            const r = await fetch(SUPABASE_URL + '/rest/v1' + path, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + auth.accessToken }
+            });
+            if (!r.ok) return { data: null, error: { status: r.status, message: await r.text() } };
+            return { data: await r.json(), error: null };
+        }
+        async function restPost(path, body) {
+            const auth = getStoredAuth();
+            if (!auth) return { data: null, error: { message: 'no auth' } };
+            const r = await fetch(SUPABASE_URL + '/rest/v1' + path, {
+                method: 'POST',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + auth.accessToken, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                body: JSON.stringify(body)
+            });
+            if (!r.ok) return { data: null, error: { status: r.status, message: await r.text() } };
+            return { data: await r.json(), error: null };
+        }
+        async function restRpc(fn, params) {
+            const auth = getStoredAuth();
+            if (!auth) return { data: null, error: { message: 'no auth' } };
+            const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+                method: 'POST',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + auth.accessToken, 'Content-Type': 'application/json' },
+                body: JSON.stringify(params || {})
+            });
+            if (!r.ok) return { data: null, error: { status: r.status, message: await r.text() } };
+            const text = await r.text();
+            return { data: text ? JSON.parse(text) : null, error: null };
+        }
+
         async function loadState() {
             try {
-                // 1. Resolve current auth user
-                const { data: { user }, error: userErr } = await sb.auth.getUser();
-                if (userErr || !user) {
-                    console.warn('Not authenticated — load skipped');
+                // 1. Resolve user from localStorage — sync, no lock
+                const auth = getStoredAuth();
+                if (!auth) {
+                    console.warn('No stored auth — load skipped');
                     return;
                 }
-                currentUser = user;
+                currentUser = auth.user;
 
-                // 2. Resolve / auto-create profile row
-                let profileRow = null;
-                let profileErr = null;
-                {
-                    const r = await sbData.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
-                    profileRow = r.data;
-                    profileErr = r.error;
-                    console.log('Profile fetch:', { user_id: user.id, email: user.email, profileRow, profileErr });
-                }
-                // Retry once if the first call returned nothing but we know the row should exist
-                if (!profileRow && !profileErr) {
-                    await new Promise(r => setTimeout(r, 250));
-                    const r = await sbData.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
-                    profileRow = r.data;
-                    if (profileRow) console.log('Profile fetch (retry) succeeded:', profileRow);
-                }
+                // 2. Profile (or auto-create)
+                const profRes = await restGet('/profiles?select=*&user_id=eq.' + encodeURIComponent(auth.user.id));
+                let profileRow = (profRes.data && profRes.data[0]) || null;
                 if (!profileRow) {
-                    // Truly missing — auto-create as member
-                    const fallbackName = (user.email || '').split('@')[0] || 'Member';
-                    const { error: insErr } = await sbData
-                        .from('profiles')
-                        .insert({ user_id: user.id, name: fallbackName, role: 'member' });
-                    if (insErr) console.warn('Profile insert error:', insErr);
-                    const { data: newRow } = await sbData
-                        .from('profiles').select('*').eq('user_id', user.id).maybeSingle();
-                    profileRow = newRow;
+                    const fallbackName = (auth.user.email || '').split('@')[0] || 'Member';
+                    await restPost('/profiles', [{ user_id: auth.user.id, name: fallbackName, role: 'member' }]);
+                    const r2 = await restGet('/profiles?select=*&user_id=eq.' + encodeURIComponent(auth.user.id));
+                    profileRow = (r2.data && r2.data[0]) || null;
                 }
                 currentProfile = profileRow;
 
-                // 3. Fetch team_state (shared)
-                const { data: teamRow, error: teamErr } = await sbData
-                    .from('team_state').select('state_data').eq('id', 'main').maybeSingle();
-                if (teamErr) console.error('Team state load error:', teamErr);
-                const teamState = (teamRow && teamRow.state_data) || {};
+                // 3. Team state
+                const teamRes = await restGet('/team_state?select=state_data&id=eq.main');
+                const teamState = ((teamRes.data && teamRes.data[0]) || {}).state_data || {};
 
-                // 4. Fetch personal_state for current user
-                const { data: personalRow, error: personalErr } = await sbData
-                    .from('personal_state').select('state_data').eq('user_id', user.id).maybeSingle();
-                if (personalErr) console.error('Personal state load error:', personalErr);
-                const personalState = (personalRow && personalRow.state_data) || {};
+                // 4. Personal state
+                const persRes = await restGet('/personal_state?select=state_data&user_id=eq.' + encodeURIComponent(auth.user.id));
+                const personalState = ((persRes.data && persRes.data[0]) || {}).state_data || {};
 
-                // 5. Merge (personal wins for any overlapping key — shouldn't happen)
                 state = { ...state, ...teamState, ...personalState };
                 stateLoadedFromDB = true;
                 console.log('State loaded — role:', currentProfile && currentProfile.role);
             } catch (err) {
                 console.error('Load failed, using defaults:', err);
-                if (window.location.protocol !== 'file:') {
-                    stateLoadedFromDB = true;
-                } else {
-                    console.warn('Running from file:// — saves disabled to protect DB data');
-                }
+                if (window.location.protocol !== 'file:') stateLoadedFromDB = true;
             }
             // Ensure all arrays exist
             if (!state.urgent) state.urgent = [];
