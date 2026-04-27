@@ -4020,9 +4020,11 @@
                 ...state.waiting.map((t, i) => ({ ...t, type: 'Waiting', idx: i }))
             ];
 
-            // Sort: urgent first, then incomplete-with-today/overdue, then incomplete, then completed.
-            allItems.sort((a, b) => {
-                if (!!a.completed !== !!b.completed) return a.completed ? 1 : -1;
+            const activeItems = allItems.filter(item => !item.completed);
+            const completedItems = allItems.filter(item => item.completed);
+
+            // Sort active: urgent first, then overdue/today, then by due date
+            activeItems.sort((a, b) => {
                 if (!!a.urgent !== !!b.urgent) return a.urgent ? -1 : 1;
                 const aDue = (a.dueDate && a.dueDate <= today) || a.today;
                 const bDue = (b.dueDate && b.dueDate <= today) || b.today;
@@ -4033,32 +4035,83 @@
                 return 0;
             });
 
-            if (allItems.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-sm); padding: 16px; text-align: center;">No tasks yet — add one above!</p>';
-                return;
-            }
-            container.innerHTML = allItems.map(item => {
+            // Sort completed: most recently completed first
+            completedItems.sort((a, b) => {
+                if (a.completedAt && b.completedAt) return b.completedAt.localeCompare(a.completedAt);
+                if (a.completedAt) return -1;
+                if (b.completedAt) return 1;
+                return 0;
+            });
+
+            function renderTaskRow(item) {
                 const pill = taskPillHtml(item);
                 const dotTitle = item.urgent ? 'Click to remove urgent flag' : 'Click to mark urgent (sorts to top)';
                 const dotStyle = item.urgent
                     ? 'background:var(--danger); border-color:var(--danger); box-shadow:0 0 0 3px rgba(184,50,50,0.18);'
                     : 'background:transparent; border-color:var(--border);';
                 return `
-                <div style="padding: 10px 12px; background: ${item.completed ? 'rgba(34,197,94,0.06)' : item.urgent ? 'rgba(184,50,50,0.04)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${item.completed ? 'opacity:0.6;' : ''} ${item.urgent && !item.completed ? 'border-left:3px solid var(--danger);' : ''}">
-                    <button onclick="toggleCompleteTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="${item.completed ? 'Mark incomplete' : 'Mark complete'}" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid ${item.completed ? 'var(--success)' : 'var(--border)'}; background:${item.completed ? 'var(--success)' : 'transparent'}; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.2s;">
-                        ${item.completed ? '<span style="color:white; font-size:11px; line-height:1;">✓</span>' : ''}
-                    </button>
+                <div style="padding: 10px 12px; background: ${item.urgent ? 'rgba(184,50,50,0.04)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${item.urgent ? 'border-left:3px solid var(--danger);' : ''}">
+                    <button onclick="toggleCompleteTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="Mark complete" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid var(--border); background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.2s;"></button>
                     <button onclick="toggleTaskUrgent('${item.type}', ${item.idx})" title="${dotTitle}" style="flex-shrink:0; width:14px; height:14px; border-radius:50%; border:2px solid; cursor:pointer; padding:0; transition:all 0.15s; ${dotStyle}"></button>
                     <span style="font-size: 12px; color: var(--accent); font-weight: 600; background: rgba(201,151,81,0.1); padding: 2px 6px; border-radius: 4px;">${item.type}</span>
-                    <span style="font-size: 13px; color: var(--text); flex: 1; ${item.completed ? 'text-decoration: line-through; color: var(--text-sm);' : ''}">${item.title}${taskCompletedByHtml(item)}</span>
+                    <span style="font-size: 13px; color: var(--text); flex: 1;">${item.title}</span>
                     ${pill}
                     <div style="display:flex; gap:4px; flex-shrink:0;">
                         <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="editTask('${item.type}', ${item.idx})" title="Edit">✏️</button>
                         <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="Remove">✕</button>
                     </div>
-                </div>
-                `;
-            }).join('');
+                </div>`;
+            }
+
+            function renderCompletedRow(item) {
+                const pill = taskPillHtml(item);
+                return `
+                <div style="padding: 10px 12px; background: rgba(34,197,94,0.04); border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; opacity:0.75;">
+                    <button onclick="toggleCompleteTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="Mark incomplete" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid var(--success); background:var(--success); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.2s;">
+                        <span style="color:white; font-size:11px; line-height:1;">✓</span>
+                    </button>
+                    <span style="flex-shrink:0; width:14px; height:14px;"></span>
+                    <span style="font-size: 12px; color: var(--accent); font-weight: 600; background: rgba(201,151,81,0.1); padding: 2px 6px; border-radius: 4px;">${item.type}</span>
+                    <span style="font-size: 13px; color: var(--text-sm); flex: 1; text-decoration: line-through;">${item.title}${taskCompletedByHtml(item)}</span>
+                    ${pill}
+                    <div style="display:flex; gap:4px; flex-shrink:0;">
+                        <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="Remove">✕</button>
+                    </div>
+                </div>`;
+            }
+
+            if (activeItems.length === 0 && completedItems.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-sm); padding: 16px; text-align: center;">No tasks yet — add one above!</p>';
+                return;
+            }
+
+            let html = '';
+
+            if (activeItems.length === 0) {
+                html += '<p style="color:var(--text-sm); padding:12px; text-align:center; font-size:13px;">All tasks completed! 🎉</p>';
+            } else {
+                html += activeItems.map(renderTaskRow).join('');
+            }
+
+            if (completedItems.length > 0) {
+                html += `
+                <div style="margin-top:18px; border-top:1px solid var(--border); padding-top:14px;">
+                    <div style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding:6px 0; user-select:none;" onclick="
+                        const body = document.getElementById('completedTasksBody');
+                        const chevron = document.getElementById('completedTasksChevron');
+                        const hidden = body.classList.toggle('hidden');
+                        chevron.textContent = hidden ? '▸' : '▾';
+                    ">
+                        <span style="font-size:13px; font-weight:600; color:var(--text-sm);">🗄️ Completed &nbsp;<span style="font-size:12px; font-weight:500; color:var(--muted);">(${completedItems.length})</span></span>
+                        <span id="completedTasksChevron" style="color:var(--text-sm); font-size:12px;">▸</span>
+                    </div>
+                    <div id="completedTasksBody" class="hidden" style="padding-top:8px;">
+                        ${completedItems.map(renderCompletedRow).join('')}
+                    </div>
+                </div>`;
+            }
+
+            container.innerHTML = html;
         }
 
         document.querySelectorAll('.nav-item').forEach(item => {
