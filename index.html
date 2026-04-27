@@ -290,6 +290,90 @@
             margin-bottom: 16px;
         }
 
+        /* SCRATCHPAD — floating button + slide-out drawer */
+        #scratchpadFab {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            border: 0;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9000;
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+        #scratchpadFab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(203,121,47,0.32);
+        }
+        #scratchpadBackdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(12,18,50,0.35);
+            z-index: 9100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        #scratchpadBackdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #scratchpadDrawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 380px;
+            max-width: 90vw;
+            background: var(--surface);
+            box-shadow: -8px 0 32px rgba(0,0,0,0.18);
+            z-index: 9200;
+            transform: translateX(105%);
+            transition: transform 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        #scratchpadDrawer.open { transform: translateX(0); }
+
+        /* QUICK ACTIONS — compact horizontal row */
+        .quick-actions-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+        }
+        .qa-btn {
+            padding: 7px 10px;
+            background: linear-gradient(135deg, rgba(200,160,60,0.06), rgba(200,160,60,0.02));
+            border: 1px solid rgba(200,160,60,0.18);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .qa-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(200,160,60,0.12);
+            border-color: var(--accent);
+        }
+        .qa-ico { font-size: 14px; line-height: 1; flex-shrink: 0; }
+
         /* SOP LIFECYCLE VIEW */
         .sop-vert-box {
             cursor: pointer;
@@ -351,25 +435,32 @@
 
         .stat-card {
             background: var(--surface);
-            padding: 12px 16px;
+            padding: 8px 12px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            border-left: 4px solid var(--accent);
+            border-left: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-height: 44px;
         }
 
         .stat-label {
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
             color: var(--text-sm);
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            margin-bottom: 0;
+            line-height: 1.1;
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--text);
+            line-height: 1;
         }
 
         /* URGENCY SECTION */
@@ -982,7 +1073,7 @@
                 <div class="nav-section-label">DAILY</div>
                 <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
                 <div class="nav-item" data-page="team-calendar">📅 Team Calendar</div>
-                <div class="nav-item" data-page="tasks">✓ Tasks</div>
+                <div class="nav-item" data-page="tasks">✓ My Tasks</div>
                 <div class="nav-item" data-page="eod">📝 End of Day</div>
                 <div class="nav-item" data-page="team-overview" data-admin-only style="display:none;">👥 Team Overview</div>
             </div>
@@ -1120,16 +1211,13 @@
                 </div>
 
                 <!-- QUICK ACTIONS -->
-                <div style="margin-bottom:16px;">
-                    <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Quick Actions</div>
-                    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px;">
-                        <button onclick="navigateTo('maintenance')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">🔧</span>Work Orders</button>
-                        <button onclick="navigateTo('rental-applications')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">📄</span>Applications</button>
-                        <button onclick="navigateTo('lease-renewals')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">🔄</span>Lease Renewals</button>
-                        <button onclick="navigateTo('finance')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">💰</span>Finance</button>
-                        <button onclick="window.open('https://elkaim.appfolio.com','_blank')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><img src="https://www.appfolio.com/favicon.ico" alt="AppFolio" style="height:20px; width:20px; object-fit:contain;">AppFolio</button>
-                        <button onclick="navigateTo('eod')" style="padding:10px 8px; background:linear-gradient(135deg, rgba(200,160,60,0.08), rgba(200,160,60,0.02)); border:1px solid rgba(200,160,60,0.2); border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(200,160,60,0.15)'" onmouseout="this.style.transform='';this.style.boxShadow=''"><span style="font-size:20px;">📝</span>End of Day Report</button>
-                    </div>
+                <div class="quick-actions-row" style="margin-bottom:14px;">
+                    <button class="qa-btn" onclick="navigateTo('maintenance')"><span class="qa-ico">🔧</span>Work Orders</button>
+                    <button class="qa-btn" onclick="navigateTo('rental-applications')"><span class="qa-ico">📄</span>Applications</button>
+                    <button class="qa-btn" onclick="navigateTo('lease-renewals')"><span class="qa-ico">🔄</span>Lease Renewals</button>
+                    <button class="qa-btn" onclick="navigateTo('finance')"><span class="qa-ico">💰</span>Finance</button>
+                    <button class="qa-btn" onclick="window.open('https://elkaim.appfolio.com','_blank')"><img src="https://www.appfolio.com/favicon.ico" alt="" class="qa-ico" style="height:14px; width:14px; object-fit:contain; margin-bottom:0;">AppFolio</button>
+                    <button class="qa-btn" onclick="navigateTo('eod')"><span class="qa-ico">📝</span>End of Day</button>
                 </div>
 
                 <!-- MAIN CONTENT: 60/40 split -->
@@ -1163,15 +1251,6 @@
                         </div>
                     </div>
 
-                </div>
-
-                <!-- SCRATCHPAD -->
-                <div class="panel" style="margin-top:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <div class="panel-title" style="margin-bottom:0; font-size:15px;">📌 Scratchpad</div>
-                        <span style="font-size:11px; color:var(--text-sm);" id="scratchpad-status">Auto-saved</span>
-                    </div>
-                    <textarea id="scratchpad" placeholder="Quick notes, reminders, things to remember..." style="width:100%; min-height:120px; padding:12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text); background:var(--bg); resize:vertical; line-height:1.6;" oninput="saveScratchpad()"></textarea>
                 </div>
 
             </div>
@@ -1223,7 +1302,7 @@
             <!-- TASKS PAGE -->
             <div class="page" data-page="tasks">
                 <div class="panel">
-                    <div class="panel-title">✓ All Tasks</div>
+                    <div class="panel-title">✓ My Tasks</div>
                     <div id="all-tasks"></div>
                     <div class="button-group">
                         <button class="btn btn-primary" onclick="openAddTaskModal()">+ Add Task</button>
@@ -3908,31 +3987,65 @@
             if (contentArea) contentArea.scrollTop = 0;
         }
 
+        // Toggle a task's urgent flag (shows a red dot + sorts it to the top).
+        function toggleTaskUrgent(type, idx) {
+            const key = type === 'Task' ? 'tasks' : type === 'Approval' ? 'approvals' : type === 'Waiting' ? 'waiting' : type;
+            if (!state[key] || !state[key][idx]) return;
+            state[key][idx].urgent = !state[key][idx].urgent;
+            saveStateKey(key, state[key]);
+            renderAllTasksPage();
+            renderDashboard();
+        }
+
         function renderAllTasksPage() {
             const container = document.getElementById('all-tasks');
             if (!container) return;
+            const today = todayIsoDate();
             const allItems = [
                 ...state.tasks.map((t, i) => ({ ...t, type: 'Task', idx: i })),
                 ...state.approvals.map((t, i) => ({ ...t, type: 'Approval', idx: i })),
                 ...state.waiting.map((t, i) => ({ ...t, type: 'Waiting', idx: i }))
             ];
+
+            // Sort: urgent first, then incomplete-with-today/overdue, then incomplete, then completed.
+            allItems.sort((a, b) => {
+                if (!!a.completed !== !!b.completed) return a.completed ? 1 : -1;
+                if (!!a.urgent !== !!b.urgent) return a.urgent ? -1 : 1;
+                const aDue = (a.dueDate && a.dueDate <= today) || a.today;
+                const bDue = (b.dueDate && b.dueDate <= today) || b.today;
+                if (aDue !== bDue) return aDue ? -1 : 1;
+                if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+                if (a.dueDate) return -1;
+                if (b.dueDate) return 1;
+                return 0;
+            });
+
             if (allItems.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-sm); padding: 16px; text-align: center;">No tasks yet — add one above!</p>';
                 return;
             }
-            container.innerHTML = allItems.map(item => `
-                <div style="padding: 10px 12px; background: ${item.completed ? 'rgba(34,197,94,0.06)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${item.completed ? 'opacity:0.6;' : ''}">
+            container.innerHTML = allItems.map(item => {
+                const pill = taskPillHtml(item);
+                const dotTitle = item.urgent ? 'Click to remove urgent flag' : 'Click to mark urgent (sorts to top)';
+                const dotStyle = item.urgent
+                    ? 'background:var(--danger); border-color:var(--danger); box-shadow:0 0 0 3px rgba(184,50,50,0.18);'
+                    : 'background:transparent; border-color:var(--border);';
+                return `
+                <div style="padding: 10px 12px; background: ${item.completed ? 'rgba(34,197,94,0.06)' : item.urgent ? 'rgba(184,50,50,0.04)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${item.completed ? 'opacity:0.6;' : ''} ${item.urgent && !item.completed ? 'border-left:3px solid var(--danger);' : ''}">
                     <button onclick="toggleCompleteTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="${item.completed ? 'Mark incomplete' : 'Mark complete'}" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid ${item.completed ? 'var(--success)' : 'var(--border)'}; background:${item.completed ? 'var(--success)' : 'transparent'}; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.2s;">
                         ${item.completed ? '<span style="color:white; font-size:11px; line-height:1;">✓</span>' : ''}
                     </button>
+                    <button onclick="toggleTaskUrgent('${item.type}', ${item.idx})" title="${dotTitle}" style="flex-shrink:0; width:14px; height:14px; border-radius:50%; border:2px solid; cursor:pointer; padding:0; transition:all 0.15s; ${dotStyle}"></button>
                     <span style="font-size: 12px; color: var(--accent); font-weight: 600; background: rgba(201,151,81,0.1); padding: 2px 6px; border-radius: 4px;">${item.type}</span>
                     <span style="font-size: 13px; color: var(--text); flex: 1; ${item.completed ? 'text-decoration: line-through; color: var(--text-sm);' : ''}">${item.title}</span>
+                    ${pill}
                     <div style="display:flex; gap:4px; flex-shrink:0;">
                         <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="editTask('${item.type}', ${item.idx})" title="Edit">✏️</button>
                         <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="Remove">✕</button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -4085,13 +4198,27 @@
                 return;
             }
 
-            container.innerHTML = tasks.map((task, idx) => {
+            // Pair each task with its original index so the action buttons
+            // still target the right state position after sorting.
+            const sorted = tasks.map((t, i) => ({ task: t, idx: i }))
+                .sort((a, b) => {
+                    const at = a.task, bt = b.task;
+                    if (!!at.completed !== !!bt.completed) return at.completed ? 1 : -1;
+                    if (!!at.urgent !== !!bt.urgent) return at.urgent ? -1 : 1;
+                    return 0;
+                });
+
+            container.innerHTML = sorted.map(({ task, idx }) => {
                 const pill = taskPillHtml(task);
+                const dotStyle = task.urgent
+                    ? 'background:var(--danger); border-color:var(--danger); box-shadow:0 0 0 3px rgba(184,50,50,0.18);'
+                    : 'background:transparent; border-color:var(--border);';
                 return `
-                <div style="padding: 10px 12px; background: ${task.completed ? 'rgba(34,197,94,0.06)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${task.completed ? 'opacity:0.6;' : ''}">
+                <div style="padding: 10px 12px; background: ${task.completed ? 'rgba(34,197,94,0.06)' : task.urgent ? 'rgba(184,50,50,0.04)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${task.completed ? 'opacity:0.6;' : ''} ${task.urgent && !task.completed ? 'border-left:3px solid var(--danger);' : ''}">
                     <button onclick="toggleCompleteTask('${type}', ${idx})" title="${task.completed ? 'Mark incomplete' : 'Mark complete'}" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid ${task.completed ? 'var(--success)' : 'var(--border)'}; background:${task.completed ? 'var(--success)' : 'transparent'}; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.2s;">
                         ${task.completed ? '<span style="color:white; font-size:11px; line-height:1;">✓</span>' : ''}
                     </button>
+                    <button onclick="toggleTaskUrgent('${type}', ${idx})" title="${task.urgent ? 'Remove urgent flag' : 'Mark urgent (sorts to top)'}" style="flex-shrink:0; width:14px; height:14px; border-radius:50%; border:2px solid; cursor:pointer; padding:0; transition:all 0.15s; ${dotStyle}"></button>
                     <span style="font-size: 13px; color: var(--text); flex: 1; ${task.completed ? 'text-decoration: line-through; color: var(--text-sm);' : ''}">${task.title}</span>
                     ${pill}
                     <div style="display:flex; gap:4px; flex-shrink:0;">
@@ -4899,15 +5026,19 @@
                 delinqEl.textContent = activeDelinq;
             }
 
-            // EOD nudge — show after 5pm on weekdays
+            // EOD nudge — show 4:30pm to 6pm on weekdays only
             const eodNudge = document.getElementById('eodNudge');
             if (eodNudge) {
                 const hour = now.getHours();
+                const minute = now.getMinutes();
                 const day = now.getDay();
                 const isWeekday = day >= 1 && day <= 5;
+                const afterStart = (hour > 16) || (hour === 16 && minute >= 30);
+                const beforeEnd = hour < 18;
+                const inWindow = afterStart && beforeEnd;
                 const todayKey = now.toLocaleDateString();
                 const hasSubmittedToday = (state.eodReports || []).some(r => r.date === todayKey);
-                eodNudge.style.display = (isWeekday && hour >= 17 && !hasSubmittedToday) ? 'flex' : 'none';
+                eodNudge.style.display = (isWeekday && inWindow && !hasSubmittedToday) ? 'flex' : 'none';
             }
 
             renderUrgentList();
@@ -6608,6 +6739,47 @@
             renderRentalLicenses();
             renderOnboarding();
         }
+    </script>
+
+    <!-- SCRATCHPAD: floating button + slide-out drawer -->
+    <button id="scratchpadFab" onclick="toggleScratchpadDrawer()" title="Scratchpad" aria-label="Open scratchpad">
+        <span style="font-size:18px;">📌</span>
+    </button>
+    <div id="scratchpadBackdrop" onclick="toggleScratchpadDrawer(false)"></div>
+    <aside id="scratchpadDrawer" aria-hidden="true">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border);">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:18px;">📌</span>
+                <strong style="font-size:14px; color:var(--text);">Scratchpad</strong>
+                <span id="scratchpad-status" style="font-size:11px; color:var(--text-sm); margin-left:8px;">Auto-saved</span>
+            </div>
+            <button onclick="toggleScratchpadDrawer(false)" style="background:none; border:none; cursor:pointer; font-size:20px; color:var(--muted); padding:4px 8px;" aria-label="Close scratchpad">✕</button>
+        </div>
+        <textarea id="scratchpad" placeholder="Quick notes, reminders, things to remember..." oninput="saveScratchpad()" style="flex:1; width:100%; padding:14px 16px; border:0; outline:none; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--surface); resize:none; line-height:1.6;"></textarea>
+    </aside>
+    <script>
+        function toggleScratchpadDrawer(forceState) {
+            const drawer = document.getElementById('scratchpadDrawer');
+            const backdrop = document.getElementById('scratchpadBackdrop');
+            if (!drawer || !backdrop) return;
+            const open = typeof forceState === 'boolean' ? forceState : !drawer.classList.contains('open');
+            drawer.classList.toggle('open', open);
+            backdrop.classList.toggle('open', open);
+            drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+            if (open) {
+                // Make sure the textarea reflects the latest scratchpad value
+                const ta = document.getElementById('scratchpad');
+                if (ta) ta.value = state.scratchpad || '';
+                setTimeout(() => ta && ta.focus(), 200);
+            }
+        }
+        // Close drawer on Escape
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                const d = document.getElementById('scratchpadDrawer');
+                if (d && d.classList.contains('open')) toggleScratchpadDrawer(false);
+            }
+        });
     </script>
 </body>
 </html>
