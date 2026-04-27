@@ -1091,14 +1091,13 @@
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
                     <div class="panel" style="margin-bottom:0; padding:14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">📅 Today's Calendar</div>
-                            <button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo('team-calendar')">Week view →</button>
+                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">✅ Today's Tasks</div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span id="dashboard-calendar-synced" style="font-size:11px; color:var(--text-sm);"></span>
+                                <button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo('team-calendar')">Week view →</button>
+                            </div>
                         </div>
-                        <iframe
-                            src="https://calendar.google.com/calendar/embed?src=c_q2pjqh2jr9mjmlgeqob1k1814c%40group.calendar.google.com&ctz=America%2FNew_York&mode=AGENDA&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&showNav=0&showDate=0"
-                            style="border:0; width:100%; height:280px; border-radius:6px; display:block;"
-                            frameborder="0"
-                            scrolling="auto"></iframe>
+                        <div id="dashboard-calendar-tasks" style="max-height:340px; overflow-y:auto;"></div>
                     </div>
                     <div class="panel" style="margin-bottom:0; padding:14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -3602,7 +3601,8 @@
         // Anything not in either set is held in-memory only (e.g., portfolioNotes).
         const PERSONAL_KEYS = new Set([
             'tasks', 'urgent', 'scratchpad',
-            'approvals', 'waiting', 'eodReports'
+            'approvals', 'waiting', 'eodReports',
+            'calendarChecks'
         ]);
         const SHARED_KEYS = new Set([
             'workOrders', 'applications', 'renewals', 'delinquencies',
@@ -3781,6 +3781,7 @@
             if (!state.portfolioNotes) state.portfolioNotes = {};
             if (!state.delinquencies) state.delinquencies = [];
             if (typeof state.scratchpad !== 'string') state.scratchpad = '';
+            if (!state.calendarChecks || typeof state.calendarChecks !== 'object') state.calendarChecks = {};
         }
 
         function isAdmin() {
@@ -4694,6 +4695,112 @@
             }).join('');
         }
 
+        // Parse a calendar event title for a "ROLE: rest of title" prefix.
+        // Returns { role, label } where role is uppercased ('FINANCE') or
+        // 'GENERAL' if no role prefix is present.
+        function parseCalendarTask(title) {
+            const t = (title || '').trim();
+            const m = t.match(/^([A-Z][A-Z\s&\/-]{2,40}):\s*(.+)$/);
+            if (m) return { role: m[1].trim(), label: m[2].trim() };
+            return { role: 'GENERAL', label: t };
+        }
+
+        function calendarTaskKey(role, label) {
+            return role + '|' + label;
+        }
+
+        function isCalendarTaskChecked(role, label) {
+            const today = todayIsoDate();
+            const day = state.calendarChecks && state.calendarChecks[today];
+            return !!(day && day[calendarTaskKey(role, label)]);
+        }
+
+        function toggleCalendarTask(role, label) {
+            const today = todayIsoDate();
+            if (!state.calendarChecks) state.calendarChecks = {};
+            if (!state.calendarChecks[today]) state.calendarChecks[today] = {};
+            const k = calendarTaskKey(role, label);
+            state.calendarChecks[today][k] = !state.calendarChecks[today][k];
+            // Trim entries older than 14 days to keep the object small
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - 14);
+            const cutoffIso = cutoff.toISOString().slice(0, 10);
+            for (const d of Object.keys(state.calendarChecks)) {
+                if (d < cutoffIso) delete state.calendarChecks[d];
+            }
+            saveStateKey('calendarChecks', state.calendarChecks);
+            renderDashboardCalendarTasks();
+        }
+
+        function renderDashboardCalendarTasks() {
+            const container = document.getElementById('dashboard-calendar-tasks');
+            const synced = document.getElementById('dashboard-calendar-synced');
+            if (!container) return;
+            const events = (state.todayCalendar || []).filter(e => e && e.title);
+
+            // Sync timestamp
+            if (synced) {
+                if (state.todayCalendarSyncedAt) {
+                    try {
+                        const d = new Date(state.todayCalendarSyncedAt);
+                        if (!isNaN(d.getTime())) {
+                            const sameDay = d.toDateString() === new Date().toDateString();
+                            synced.textContent = sameDay
+                                ? 'Synced ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                                : 'Synced ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                        }
+                    } catch(e) {}
+                } else {
+                    synced.textContent = 'Not synced yet';
+                }
+            }
+
+            if (events.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-sm); padding:18px 12px; text-align:center; font-size:13px;">No tasks on the EPGMGMT calendar today.</p>';
+                return;
+            }
+
+            // Group by role
+            const groups = {};
+            for (const ev of events) {
+                const { role, label } = parseCalendarTask(ev.title);
+                if (!groups[role]) groups[role] = [];
+                groups[role].push(label);
+            }
+
+            // Stable role order: anything role-prefixed first (alphabetical), GENERAL last
+            const roleOrder = Object.keys(groups).filter(r => r !== 'GENERAL').sort();
+            if (groups['GENERAL']) roleOrder.push('GENERAL');
+
+            container.innerHTML = roleOrder.map(role => {
+                const items = groups[role];
+                const total = items.length;
+                const done = items.filter(l => isCalendarTaskChecked(role, l)).length;
+                const roleLabel = role === 'GENERAL' ? 'General' : role;
+                return `
+                    <div style="margin-bottom:14px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; padding:0 4px;">
+                            <div style="font-size:11px; font-weight:700; letter-spacing:0.6px; color:var(--accent); text-transform:uppercase;">${roleLabel}</div>
+                            <div style="font-size:10px; color:var(--text-sm);">${done}/${total}</div>
+                        </div>
+                        ${items.map(label => {
+                            const checked = isCalendarTaskChecked(role, label);
+                            const safeRole = role.replace(/'/g, "\\'");
+                            const safeLabel = label.replace(/'/g, "\\'");
+                            return `
+                                <div onclick="toggleCalendarTask('${safeRole}', '${safeLabel}')" style="display:flex; align-items:flex-start; gap:8px; padding:7px 10px; margin-bottom:4px; background:${checked ? 'rgba(34,197,94,0.06)' : 'var(--bg)'}; border-radius:6px; cursor:pointer; ${checked ? 'opacity:0.7;' : ''}">
+                                    <div style="flex-shrink:0; width:16px; height:16px; border-radius:4px; border:2px solid ${checked ? 'var(--success)' : 'var(--border)'}; background:${checked ? 'var(--success)' : 'transparent'}; display:flex; align-items:center; justify-content:center; margin-top:1px;">
+                                        ${checked ? '<span style="color:white; font-size:10px; line-height:1;">✓</span>' : ''}
+                                    </div>
+                                    <span style="font-size:13px; color:var(--text); ${checked ? 'text-decoration:line-through; color:var(--text-sm);' : ''} flex:1; line-height:1.35;">${label}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }).join('');
+        }
+
         function renderDashboardRenewals() {
             const container = document.getElementById('dashboard-renewals');
             if (!container) return;
@@ -4804,6 +4911,7 @@
             }
 
             renderUrgentList();
+            renderDashboardCalendarTasks();
             renderDashboardRenewals();
             renderTaskList(document.getElementById('dashboard-tasks'), state.tasks, 'Task');
             renderTaskList(document.getElementById('dashboard-approvals'), state.approvals, 'Approval');
