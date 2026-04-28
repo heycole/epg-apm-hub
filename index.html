@@ -3591,8 +3591,10 @@
             if (typeof renderWorkOrders === 'function') renderWorkOrders();
             if (typeof renderApplications === 'function') renderApplications();
             if (typeof renderRenewals === 'function') renderRenewals();
-            if (typeof renderPortfolio === 'function') renderPortfolio();
             if (typeof renderOnboarding === 'function') renderOnboarding();
+            // Always re-fetch these on every hydration (not guarded by appInitialized)
+            fetchPortfolio().then(() => { if (typeof renderPortfolio === 'function') renderPortfolio(); });
+            fetchRentalLicenses().then(() => { if (typeof renderRentalLicenses === 'function') renderRentalLicenses(); });
         }
 
         // Listen for auth state changes
@@ -6833,10 +6835,6 @@
             renderWorkOrders();
             renderApplications();
             renderRenewals();
-            await fetchPortfolio();
-            renderPortfolio();
-            await fetchRentalLicenses();
-            renderRentalLicenses();
             renderOnboarding();
         }
     </script>
