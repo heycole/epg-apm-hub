@@ -1175,12 +1175,19 @@
                         </div>
                         <div id="dashboard-calendar-tasks" style="max-height:340px; overflow-y:auto;"></div>
                     </div>
-                    <div class="panel" style="margin-bottom:0; padding:14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">🔄 Upcoming Lease Renewals</div>
-                            <span style="font-size:11px; color:var(--text-sm);">Next 120 days</span>
+                    <!-- RIGHT: My Tasks snapshot -->
+                    <div class="panel" style="margin-bottom:0; padding:14px; min-height:280px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <div style="display:flex; align-items:baseline; gap:10px;">
+                                <div class="panel-title" style="margin-bottom:0; font-size:15px;">📋 My Tasks</div>
+                                <span id="dashboard-tasks-count" style="font-size:11px; color:var(--text-sm);"></span>
+                            </div>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <button class="btn" style="font-size:11px; padding:4px 10px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="navigateTo('tasks')">View all →</button>
+                                <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="openAddTaskModal('tasks')">+ Add Task</button>
+                            </div>
                         </div>
-                        <div id="dashboard-renewals" style="max-height:280px; overflow-y:auto;"></div>
+                        <div id="dashboard-tasks"></div>
                     </div>
                 </div>
 
@@ -1203,43 +1210,23 @@
                     </a>
                 </div>
 
-                <!-- MAIN CONTENT: 60/40 split -->
-                <div style="display:grid; grid-template-columns:3fr 2fr; gap:16px; align-items:start;">
-
-                    <!-- LEFT: My Tasks snapshot (60%) -->
-                    <div class="panel" style="margin-bottom:0; min-height:280px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <div style="display:flex; align-items:baseline; gap:10px;">
-                                <div class="panel-title" style="margin-bottom:0; font-size:15px;">📋 My Tasks</div>
-                                <span id="dashboard-tasks-count" style="font-size:11px; color:var(--text-sm);"></span>
-                            </div>
-                            <div style="display:flex; gap:6px; align-items:center;">
-                                <button class="btn" style="font-size:11px; padding:4px 10px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="navigateTo('tasks')">View all →</button>
-                                <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="openAddTaskModal('tasks')">+ Add Task</button>
-                            </div>
+                <!-- APPROVALS + WAITING ON: side by side -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;">
+                    <div class="panel" style="margin-bottom:0; border-left:4px solid var(--warning);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div class="panel-title" style="margin-bottom:0; font-size:14px;">⏳ Awaiting Approval</div>
+                            <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('approvals')">+ Add</button>
                         </div>
-                        <div id="dashboard-tasks"></div>
+                        <div id="dashboard-approvals"></div>
                     </div>
 
-                    <!-- RIGHT: Approvals + Waiting On stacked (40%) -->
-                    <div style="display:flex; flex-direction:column; gap:16px;">
-                        <div class="panel" style="margin-bottom:0; border-left:4px solid var(--warning);">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                <div class="panel-title" style="margin-bottom:0; font-size:14px;">⏳ Awaiting Approval</div>
-                                <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('approvals')">+ Add</button>
-                            </div>
-                            <div id="dashboard-approvals"></div>
+                    <div class="panel" style="margin-bottom:0; border-left:4px solid #6c8ebf;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div class="panel-title" style="margin-bottom:0; font-size:14px;">⌛ Waiting On</div>
+                            <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('waiting')">+ Add</button>
                         </div>
-
-                        <div class="panel" style="margin-bottom:0; border-left:4px solid #6c8ebf;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                <div class="panel-title" style="margin-bottom:0; font-size:14px;">⌛ Waiting On</div>
-                                <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('waiting')">+ Add</button>
-                            </div>
-                            <div id="dashboard-waiting"></div>
-                        </div>
+                        <div id="dashboard-waiting"></div>
                     </div>
-
                 </div>
 
             </div>
@@ -5167,7 +5154,6 @@
             }
 
             renderDashboardCalendarTasks();
-            renderDashboardRenewals();
             renderDashboardTasksSnapshot();
             renderTaskList(document.getElementById('dashboard-approvals'), state.approvals, 'Approval');
             renderTaskList(document.getElementById('dashboard-waiting'), state.waiting, 'Waiting');
