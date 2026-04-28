@@ -3110,14 +3110,10 @@
                                 <div class="panel-title" style="margin-bottom:4px;">📚 SOPs & Video Library</div>
                                 <p style="font-size:12px; color:var(--muted); margin:0;">Click any topic to view its SOPs, videos, and resources.</p>
                             </div>
-                            <div style="display:flex; gap:0; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
-                                <button id="sopBtnHorizontal" onclick="setSopView('horizontal')" style="padding:6px 14px; font-size:12px; font-weight:600; background:var(--accent); color:#fff; border:none; cursor:pointer; font-family:inherit;">📊 Workflow</button>
-                                <button id="sopBtnLifecycle" onclick="setSopView('lifecycle')" style="padding:6px 14px; font-size:12px; font-weight:600; background:transparent; color:var(--text); border:none; cursor:pointer; font-family:inherit;">🌳 Lifecycle</button>
-                            </div>
                         </div>
 
-                        <!-- VISUAL WORKFLOW (default view) -->
-                        <div id="sopViewHorizontal" style="padding:0 24px 24px;">
+                        <!-- VISUAL WORKFLOW (removed) -->
+                        <div id="sopViewHorizontal" style="display:none;">
                             <!-- ROW 1: Tenant Acquisition -->
                             <div style="margin-bottom:28px;">
                                 <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); margin-bottom:12px;">Tenant Acquisition</div>
@@ -3255,8 +3251,8 @@
                             </div>
                         </div>
 
-                        <!-- LIFECYCLE VIEW (alternate layout) -->
-                        <div id="sopViewLifecycle" style="display:none; padding:0 24px 28px;">
+                        <!-- LIFECYCLE VIEW -->
+                        <div id="sopViewLifecycle" style="padding:0 24px 28px;">
                             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; align-items:flex-start;">
 
                                 <!-- COL 1: TENANT ACQUISITION -->
@@ -6829,28 +6825,6 @@
         }
 
         // Toggle between the horizontal workflow and the lifecycle (vertical) view
-        function setSopView(mode) {
-            const horiz = document.getElementById('sopViewHorizontal');
-            const life = document.getElementById('sopViewLifecycle');
-            const btnH = document.getElementById('sopBtnHorizontal');
-            const btnL = document.getElementById('sopBtnLifecycle');
-            if (!horiz || !life || !btnH || !btnL) return;
-            const isLifecycle = mode === 'lifecycle';
-            horiz.style.display = isLifecycle ? 'none' : 'block';
-            life.style.display = isLifecycle ? 'block' : 'none';
-            btnH.style.background = isLifecycle ? 'transparent' : 'var(--accent)';
-            btnH.style.color = isLifecycle ? 'var(--text)' : '#fff';
-            btnL.style.background = isLifecycle ? 'var(--accent)' : 'transparent';
-            btnL.style.color = isLifecycle ? '#fff' : 'var(--text)';
-            try { localStorage.setItem('sopViewPref', mode); } catch(e) {}
-        }
-        // Restore preferred view on load
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                const saved = localStorage.getItem('sopViewPref');
-                if (saved === 'lifecycle') setSopView('lifecycle');
-            } catch(e) {}
-        });
 
         function closeSOP() {
             document.getElementById('sopSubPage').style.display = 'none';
