@@ -3994,6 +3994,8 @@
             // Render page-specific content
             if (pageName === 'tasks') renderAllTasksPage();
             if (pageName === 'team-overview') renderTeamOverview();
+            if (pageName === 'portfolio') fetchPortfolio().then(renderPortfolio);
+            if (pageName === 'rental-licenses') fetchRentalLicenses().then(renderRentalLicenses);
 
             // Scroll content to top
             const contentArea = document.querySelector('.content-area');
@@ -6067,8 +6069,14 @@
         let propertyModalEditId = null;
 
         async function fetchPortfolio() {
-            const { data, error } = await sbData.from('properties').select('*').order('sort_order').order('address');
-            if (!error && data) portfolioData = data;
+            const { data, error } = await sbData.from('properties').select('*').order('address');
+            if (error) {
+                console.error('[fetchPortfolio] error:', error);
+                const c = document.getElementById('portfolioDirectory');
+                if (c) c.innerHTML = `<p style="color:var(--danger);padding:16px;">Failed to load properties: ${error.message}</p>`;
+            } else if (data) {
+                portfolioData = data;
+            }
         }
 
         function togglePortfolioExpand(id) {
@@ -6222,8 +6230,14 @@
         let rlModalEditId = null;
 
         async function fetchRentalLicenses() {
-            const { data, error } = await sbData.from('rental_licenses').select('*').order('sort_order').order('address');
-            if (!error && data) rentalLicensesData = data;
+            const { data, error } = await sbData.from('rental_licenses').select('*').order('address');
+            if (error) {
+                console.error('[fetchRentalLicenses] error:', error);
+                const c2 = document.getElementById('rentalLicensesTable');
+                if (c2) c2.innerHTML = `<p style="color:var(--danger);padding:16px;">Failed to load rental licenses: ${error.message}</p>`;
+            } else if (data) {
+                rentalLicensesData = data;
+            }
         }
 
         function openRLModal(id) {
