@@ -1141,10 +1141,6 @@
 
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-label">TASKS</div>
-                        <div class="stat-value" id="stat-tasks">0</div>
-                    </div>
-                    <div class="stat-card">
                         <div class="stat-label">APPROVALS</div>
                         <div class="stat-value" id="stat-approvals">0</div>
                     </div>
@@ -1171,7 +1167,7 @@
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
                     <div class="panel" style="margin-bottom:0; padding:14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">✅ EPG Management Daily Operations</div>
+                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">✅ EPG Daily Schedule</div>
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span id="dashboard-calendar-synced" style="font-size:11px; color:var(--text-sm);"></span>
                                 <button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo('team-calendar')">Week view →</button>
@@ -1199,14 +1195,12 @@
                     <button class="btn" style="font-size:12px; padding:6px 14px; white-space:nowrap;" onclick="navigateTo('eod')">Go to EOD →</button>
                 </div>
 
-                <!-- QUICK ACTIONS -->
-                <div class="quick-actions-row" style="margin-bottom:14px;">
-                    <button class="qa-btn" onclick="navigateTo('maintenance')"><span class="qa-ico">🔧</span>Work Orders</button>
-                    <button class="qa-btn" onclick="navigateTo('rental-applications')"><span class="qa-ico">📄</span>Applications</button>
-                    <button class="qa-btn" onclick="navigateTo('lease-renewals')"><span class="qa-ico">🔄</span>Lease Renewals</button>
-                    <button class="qa-btn" onclick="navigateTo('finance')"><span class="qa-ico">💰</span>Finance</button>
-                    <button class="qa-btn" onclick="window.open('https://elkaim.appfolio.com','_blank')"><img src="https://www.appfolio.com/favicon.ico" alt="" class="qa-ico" style="height:14px; width:14px; object-fit:contain; margin-bottom:0;">AppFolio</button>
-                    <button class="qa-btn" onclick="navigateTo('eod')"><span class="qa-ico">📝</span>End of Day</button>
+                <!-- APPFOLIO LINK -->
+                <div style="margin-bottom:14px; display:flex; justify-content:flex-end;">
+                    <a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:7px; padding:7px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px; font-size:12px; font-weight:600; color:var(--text); text-decoration:none; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'">
+                        <img src="https://www.appfolio.com/favicon.ico" alt="" style="height:13px; width:13px; object-fit:contain;">
+                        Open AppFolio ↗
+                    </a>
                 </div>
 
                 <!-- MAIN CONTENT: 60/40 split -->
@@ -5124,7 +5118,6 @@
                 dateEl.textContent = now.toLocaleDateString('en-US', options);
             }
 
-            document.getElementById('stat-tasks').textContent = state.tasks.length;
             document.getElementById('stat-approvals').textContent = state.approvals.length;
             document.getElementById('stat-waiting').textContent = state.waiting.length;
 
