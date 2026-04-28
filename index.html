@@ -2728,6 +2728,7 @@
                     <div class="subtab active" data-subtab="delinquency" onclick="switchSubtab('finance','delinquency')">Rent Collection & Delinquency</div>
                     <div class="subtab" data-subtab="billing" onclick="switchSubtab('finance','billing')">Billing</div>
                     <div class="subtab" data-subtab="owner-dist-recon" onclick="switchSubtab('finance','owner-dist-recon')">Owner Distribution & Reconciliation</div>
+                    <div class="subtab" data-subtab="banking" onclick="switchSubtab('finance','banking')">Banking</div>
                 </div>
 
                 <!-- TAB: OWNER DISTRIBUTION & RECONCILIATION -->
@@ -2767,6 +2768,57 @@
                         <div class="panel-title">📋 Reconciliation Notes</div>
                         <p style="color:var(--text-sm); margin-bottom:12px; font-size:13px;">Track discrepancies, open items, and follow-ups for this month's reconciliation.</p>
                         <textarea id="reconciliationNotes" placeholder="Notes on any discrepancies, items under review, or follow-ups needed..." style="width:100%; min-height:120px; padding:12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:13px; line-height:1.6;" oninput="state.reconciliationNotes = this.value; saveState(state)"></textarea>
+                    </div>
+                </div>
+
+                <!-- TAB: BANKING -->
+                <div class="subtab-content" data-subtab="banking">
+                    <div class="panel">
+                        <div class="panel-title">🏦 Banking</div>
+                        <p style="color:var(--text-sm); font-size:13px; margin-bottom:20px;">All EPG Management accounts are held at <strong>Wells Fargo</strong>. Each account has a specific purpose — use the correct account for every transaction.</p>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+
+                            <!-- Rent Money Account -->
+                            <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:18px; border-top:3px solid var(--success);">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                                    <div style="font-size:15px; font-weight:700; color:var(--text);">Rent Money Account</div>
+                                    <div style="font-size:12px; font-weight:700; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap;">···· 9389</div>
+                                </div>
+                                <p style="font-size:13px; color:var(--text-sm); line-height:1.6; margin:0;">Used to collect all rent payments. Also the account used to pay property-related expenses and bills.</p>
+                                <div style="margin-top:12px; display:flex; flex-direction:column; gap:5px;">
+                                    <div style="font-size:12px; color:var(--text-sm);"><span style="color:var(--success); font-weight:600;">↓ IN</span> &nbsp;Rent payments</div>
+                                    <div style="font-size:12px; color:var(--text-sm);"><span style="color:var(--danger); font-weight:600;">↑ OUT</span> &nbsp;Property expenses & bills</div>
+                                </div>
+                            </div>
+
+                            <!-- Security Deposit Account -->
+                            <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:18px; border-top:3px solid #6c8ebf;">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                                    <div style="font-size:15px; font-weight:700; color:var(--text);">Security Deposit Account</div>
+                                    <div style="font-size:12px; font-weight:700; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap;">···· 9824</div>
+                                </div>
+                                <p style="font-size:13px; color:var(--text-sm); line-height:1.6; margin:0;">Holds all security deposits — Security Deposit #1 and Security Deposit #2 (formerly last month's rent). Funds are transferred in when received and disbursed when issuing credits or returning deposits.</p>
+                                <div style="margin-top:12px; display:flex; flex-direction:column; gap:5px;">
+                                    <div style="font-size:12px; color:var(--text-sm);"><span style="color:var(--success); font-weight:600;">↓ IN</span> &nbsp;Security deposits received</div>
+                                    <div style="font-size:12px; color:var(--text-sm);"><span style="color:var(--danger); font-weight:600;">↑ OUT</span> &nbsp;Credits & deposit returns</div>
+                                </div>
+                            </div>
+
+                            <!-- Operations Account -->
+                            <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:18px; border-top:3px solid var(--accent);">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                                    <div style="font-size:15px; font-weight:700; color:var(--text);">Operations Account</div>
+                                    <div style="font-size:12px; font-weight:700; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap;">···· 1652</div>
+                                </div>
+                                <p style="font-size:13px; color:var(--text-sm); line-height:1.6; margin:0;">Used for all company-related transactions for EPG Management. All management fees should be deposited here, and all company expenses should be paid from this account.</p>
+                                <div style="margin-top:12px; display:flex; flex-direction:column; gap:5px;">
+                                    <div style="font-size:12px; color:var(--text-sm);"><span style="color:var(--success); font-weight:600;">↓ IN</span> &nbsp;Management fees</div>
+                                    <div style="font-size:12px; color:var(--text-sm);"><span style="color:var(--danger); font-weight:600;">↑ OUT</span> &nbsp;Company expenses</div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
 
