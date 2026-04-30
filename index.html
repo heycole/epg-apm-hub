@@ -1705,18 +1705,42 @@
                             <div class="pipeline-stage"><div class="pipeline-num">4</div><div class="pipeline-label">Post-Decision</div><div class="pipeline-desc">Follow the appropriate path below based on tenant's decision</div></div>
                         </div>
                     </div>
-                    <div class="panel">
-                        <div class="panel-title">⏳ Pending Response</div>
-                        <p style="font-size:12px; color:var(--text-sm); margin:0 0 12px;">Tenants who haven't confirmed — click ✅ or 🚪 to move them once decided.</p>
-                        <div id="pendingRenewalList"></div>
+                    <div class="panel" id="rlPanel-pending">
+                        <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="toggleRenewalPanel('pending')">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span class="panel-title" style="margin:0;">⏳ Pending Response</span>
+                                <span id="rlCount-pending" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(203,121,47,0.12); color:var(--accent);">0</span>
+                            </div>
+                            <span id="rlChevron-pending" style="font-size:13px; color:var(--muted); transition:transform 0.2s;">▾</span>
+                        </div>
+                        <div id="rlBody-pending">
+                            <p style="font-size:12px; color:var(--text-sm); margin:12px 0 12px;">Tenants who haven't confirmed — click ✅ or 🚪 to move them once decided.</p>
+                            <div id="pendingRenewalList"></div>
+                        </div>
                     </div>
-                    <div class="panel">
-                        <div class="panel-title">✅ Tenant is Renewing</div>
-                        <div id="renewingList"></div>
+                    <div class="panel" id="rlPanel-renewing">
+                        <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="toggleRenewalPanel('renewing')">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span class="panel-title" style="margin:0;">✅ Tenant is Renewing</span>
+                                <span id="rlCount-renewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(45,122,79,0.12); color:var(--success);">0</span>
+                            </div>
+                            <span id="rlChevron-renewing" style="font-size:13px; color:var(--muted); transition:transform 0.2s;">▾</span>
+                        </div>
+                        <div id="rlBody-renewing">
+                            <div style="margin-top:12px;" id="renewingList"></div>
+                        </div>
                     </div>
-                    <div class="panel">
-                        <div class="panel-title">🚪 Tenant is Not Renewing</div>
-                        <div id="notRenewingList"></div>
+                    <div class="panel" id="rlPanel-notRenewing">
+                        <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="toggleRenewalPanel('notRenewing')">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <span class="panel-title" style="margin:0;">🚪 Tenant is Not Renewing</span>
+                                <span id="rlCount-notRenewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(217,119,6,0.12); color:var(--warning);">0</span>
+                            </div>
+                            <span id="rlChevron-notRenewing" style="font-size:13px; color:var(--muted); transition:transform 0.2s;">▾</span>
+                        </div>
+                        <div id="rlBody-notRenewing">
+                            <div style="margin-top:12px;" id="notRenewingList"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -6025,6 +6049,20 @@
             renderRenewalList('pending', document.getElementById('pendingRenewalList'));
             renderRenewalList('renewing', document.getElementById('renewingList'));
             renderRenewalList('notRenewing', document.getElementById('notRenewingList'));
+            // Update count badges
+            ['pending', 'renewing', 'notRenewing'].forEach(type => {
+                const countEl = document.getElementById('rlCount-' + type);
+                if (countEl) {
+                    const n = (state.renewals || []).filter(r => r.type === type).length;
+                    countEl.textContent = n;
+                }
+                // Restore collapsed state from localStorage
+                const collapsed = localStorage.getItem('epg_rl_collapsed_' + type) === 'true';
+                const body = document.getElementById('rlBody-' + type);
+                const chevron = document.getElementById('rlChevron-' + type);
+                if (body) body.style.display = collapsed ? 'none' : '';
+                if (chevron) chevron.style.transform = collapsed ? 'rotate(-90deg)' : '';
+            });
             // Also refresh timeline if it's currently visible
             const tl = document.getElementById('rlTimelineView');
             if (tl && tl.style.display !== 'none') renderRenewalTimeline();
@@ -6118,6 +6156,16 @@
                 if (btnTimeline) { btnTimeline.style.background = 'transparent'; btnTimeline.style.color = 'var(--text)'; }
             }
             localStorage.setItem('epg_renewal_view', mode);
+        }
+
+        function toggleRenewalPanel(type) {
+            const body    = document.getElementById('rlBody-' + type);
+            const chevron = document.getElementById('rlChevron-' + type);
+            if (!body) return;
+            const isCollapsed = body.style.display === 'none';
+            body.style.display    = isCollapsed ? '' : 'none';
+            if (chevron) chevron.style.transform = isCollapsed ? '' : 'rotate(-90deg)';
+            localStorage.setItem('epg_rl_collapsed_' + type, isCollapsed ? 'false' : 'true');
         }
 
         function moveRenewal(id, newType) {
