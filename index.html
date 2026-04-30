@@ -1678,58 +1678,51 @@
 
             <!-- LEASE RENEWALS PAGE -->
             <div class="page" data-page="lease-renewals">
-                <div class="panel">
-                    <div class="panel-title">🔄 Lease Renewal Process</div>
-                    <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
-                        <strong style="color:var(--accent);">Key Rules:</strong> All leases automatically renew with a <strong>4% increase</strong>. We do <strong>not</strong> do month-to-month. Tenants must provide notice by <strong>90 days</strong> before lease expiration.
+                <!-- View toggle + actions -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex; gap:0; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                        <button id="rlViewBtnCards" onclick="setRenewalView('cards')" style="padding:7px 16px; font-size:12px; font-weight:600; background:var(--accent); color:#fff; border:none; cursor:pointer; font-family:inherit;">📋 Cards</button>
+                        <button id="rlViewBtnTimeline" onclick="setRenewalView('timeline')" style="padding:7px 16px; font-size:12px; font-weight:600; background:transparent; color:var(--text); border:none; cursor:pointer; font-family:inherit;">📅 Timeline</button>
                     </div>
-                    <div class="pipeline">
-                        <div class="pipeline-stage">
-                            <div class="pipeline-num">1</div>
-                            <div class="pipeline-label">120 Days Out</div>
-                            <div class="pipeline-desc">Pull expiring leases report from AppFolio — reach out to owners to confirm they are interested in renewing the lease</div>
-                        </div>
-                        <div class="pipeline-stage">
-                            <div class="pipeline-num">2</div>
-                            <div class="pipeline-label">105 Days Out</div>
-                            <div class="pipeline-desc">Follow up with owners if there is no decision</div>
-                        </div>
-                        <div class="pipeline-stage">
-                            <div class="pipeline-num">3</div>
-                            <div class="pipeline-label">90 Days Out</div>
-                            <div class="pipeline-desc">Tenant notice deadline — must confirm renewing or not renewing</div>
-                        </div>
-                        <div class="pipeline-stage">
-                            <div class="pipeline-num">4</div>
-                            <div class="pipeline-label">Post-Decision</div>
-                            <div class="pipeline-desc">Follow the appropriate path below based on tenant's decision</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-                        ⏳ Pending Response
+                    <div style="display:flex; gap:8px;">
                         <button class="btn" onclick="addRenewal('pending')">+ Add Pending</button>
-                    </div>
-                    <p style="font-size:12px; color:var(--text-sm); margin:0 0 12px;">Tenants who haven't confirmed whether they're renewing or not — don't let these slip through the cracks.</p>
-                    <div id="pendingRenewalList"></div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-                        ✅ Tenant is Renewing
                         <button class="btn" onclick="addRenewal('renewing')">+ Add Renewal</button>
-                    </div>
-                    <div id="renewingList"></div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-                        🚪 Tenant is Not Renewing
                         <button class="btn" onclick="addRenewal('notRenewing')">+ Add Non-Renewal</button>
                     </div>
-                    <div id="notRenewingList"></div>
+                </div>
+
+                <!-- CARDS VIEW -->
+                <div id="rlCardsView">
+                    <div class="panel">
+                        <div class="panel-title">🔄 Lease Renewal Process</div>
+                        <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
+                            <strong style="color:var(--accent);">Key Rules:</strong> All leases automatically renew with a <strong>4% increase</strong>. We do <strong>not</strong> do month-to-month. Tenants must provide notice by <strong>90 days</strong> before lease expiration.
+                        </div>
+                        <div class="pipeline">
+                            <div class="pipeline-stage"><div class="pipeline-num">1</div><div class="pipeline-label">120 Days Out</div><div class="pipeline-desc">Pull expiring leases from AppFolio — reach out to owners to confirm interest in renewing</div></div>
+                            <div class="pipeline-stage"><div class="pipeline-num">2</div><div class="pipeline-label">105 Days Out</div><div class="pipeline-desc">Follow up with owners if no decision yet</div></div>
+                            <div class="pipeline-stage"><div class="pipeline-num">3</div><div class="pipeline-label">90 Days Out</div><div class="pipeline-desc">Tenant notice deadline — must confirm renewing or not renewing</div></div>
+                            <div class="pipeline-stage"><div class="pipeline-num">4</div><div class="pipeline-label">Post-Decision</div><div class="pipeline-desc">Follow the appropriate path below based on tenant's decision</div></div>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">⏳ Pending Response</div>
+                        <p style="font-size:12px; color:var(--text-sm); margin:0 0 12px;">Tenants who haven't confirmed — click ✅ or 🚪 to move them once decided.</p>
+                        <div id="pendingRenewalList"></div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">✅ Tenant is Renewing</div>
+                        <div id="renewingList"></div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-title">🚪 Tenant is Not Renewing</div>
+                        <div id="notRenewingList"></div>
+                    </div>
+                </div>
+
+                <!-- TIMELINE VIEW -->
+                <div id="rlTimelineView" style="display:none;">
+                    <div id="renewalTimeline"></div>
                 </div>
             </div>
 
@@ -4027,6 +4020,10 @@
             if (pageName === 'team-overview') renderTeamOverview();
             if (pageName === 'portfolio') fetchPortfolio().then(renderPortfolio);
             if (pageName === 'rental-licenses') fetchRentalLicenses().then(renderRentalLicenses);
+            if (pageName === 'lease-renewals') {
+                const savedView = localStorage.getItem('epg_renewal_view') || 'cards';
+                setRenewalView(savedView);
+            }
 
             // Scroll content to top
             const contentArea = document.querySelector('.content-area');
@@ -6028,6 +6025,9 @@
             renderRenewalList('pending', document.getElementById('pendingRenewalList'));
             renderRenewalList('renewing', document.getElementById('renewingList'));
             renderRenewalList('notRenewing', document.getElementById('notRenewingList'));
+            // Also refresh timeline if it's currently visible
+            const tl = document.getElementById('rlTimelineView');
+            if (tl && tl.style.display !== 'none') renderRenewalTimeline();
         }
 
         function renderRenewalList(type, container) {
@@ -6065,6 +6065,11 @@
                     </div>
                 `;
 
+                const moveButtons = type === 'pending'
+                    ? `<button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'renewing')" style="background:var(--success-light); border:1px solid var(--success); color:var(--success); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">✅ Renewing</button>
+                       <button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'notRenewing')" style="background:var(--warning-light); border:1px solid var(--warning); color:var(--warning); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">🚪 Not Renewing</button>`
+                    : `<button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'pending')" style="background:var(--bg); border:1px solid var(--border); color:var(--text-sm); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">← Pending</button>`;
+
                 return `
                     <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid ${statusColor};">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleRenewal(${r.id})">
@@ -6080,16 +6085,185 @@
                                     <span style="font-size:11px; color:var(--muted); white-space:nowrap;">${completedSteps}/${totalSteps}</span>
                                 </div>
                             </div>
-                            <div style="display:flex; align-items:center; gap:6px; margin-left:12px;">
+                            <div style="display:flex; align-items:flex-start; gap:6px; margin-left:12px; flex-wrap:wrap; justify-content:flex-end;">
+                                ${moveButtons}
                                 ${attributionBadgeHtml(r)}
-                                <span style="font-size:11px; color:var(--muted);">${r.dateCreated}</span>
-                                <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px;" title="Remove">×</button>
+                                <span style="font-size:11px; color:var(--muted); align-self:center;">${r.dateCreated}</span>
+                                <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px; align-self:center;" title="Remove">×</button>
                             </div>
                         </div>
                         ${stepsHtml}
                     </div>
                 `;
             }).join('');
+        }
+
+        function setRenewalView(mode) {
+            const cardsView = document.getElementById('rlCardsView');
+            const timelineView = document.getElementById('rlTimelineView');
+            const btnCards = document.getElementById('rlViewBtnCards');
+            const btnTimeline = document.getElementById('rlViewBtnTimeline');
+            if (!cardsView || !timelineView) return;
+
+            if (mode === 'timeline') {
+                cardsView.style.display = 'none';
+                timelineView.style.display = '';
+                if (btnCards) { btnCards.style.background = 'transparent'; btnCards.style.color = 'var(--text)'; }
+                if (btnTimeline) { btnTimeline.style.background = 'var(--accent)'; btnTimeline.style.color = '#fff'; }
+                renderRenewalTimeline();
+            } else {
+                cardsView.style.display = '';
+                timelineView.style.display = 'none';
+                if (btnCards) { btnCards.style.background = 'var(--accent)'; btnCards.style.color = '#fff'; }
+                if (btnTimeline) { btnTimeline.style.background = 'transparent'; btnTimeline.style.color = 'var(--text)'; }
+            }
+            localStorage.setItem('epg_renewal_view', mode);
+        }
+
+        function moveRenewal(id, newType) {
+            const r = state.renewals.find(r => r.id === id);
+            if (!r) return;
+            r.type = newType;
+            r.steps = renewalSteps[newType].map(s => ({ text: s, done: false }));
+            r.collapsed = true;
+            saveStateKey('renewals', state.renewals);
+            renderRenewals();
+        }
+
+        function renderRenewalTimeline() {
+            const container = document.getElementById('renewalTimeline');
+            if (!container) return;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const typeColors  = { pending: 'var(--accent)', renewing: 'var(--success)', notRenewing: 'var(--warning)' };
+            const typeLabels  = { pending: 'Pending', renewing: 'Renewing', notRenewing: 'Not Renewing' };
+            const monthNames  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+            function dayColor(days) {
+                if (days < 0)   return 'var(--danger)';
+                if (days <= 30) return 'var(--danger)';
+                if (days <= 60) return 'var(--warning)';
+                if (days <= 90) return '#ca8a04';
+                return 'var(--muted)';
+            }
+
+            function tagPillsHtml(r) {
+                const tags = r.tags ? (Array.isArray(r.tags) ? r.tags : r.tags.split(',')).map(t => t.trim()).filter(Boolean) : [];
+                if (!tags.length) return '';
+                return `<div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">${tags.map(tag =>
+                    `<span style="font-size:10px; font-weight:600; padding:2px 6px; border-radius:10px;
+                        background:${tag.toLowerCase()==='eviction'?'rgba(220,38,38,0.12)':tag.toLowerCase()==='v2'?'rgba(108,142,191,0.15)':'rgba(203,121,47,0.12)'};
+                        color:${tag.toLowerCase()==='eviction'?'var(--danger)':tag.toLowerCase()==='v2'?'#6c8ebf':'var(--accent)'};">${tag}</span>`
+                ).join('')}</div>`;
+            }
+
+            function rowHtml(r, daysLabel, color) {
+                return `
+                    <div style="display:grid; grid-template-columns:1fr 80px 90px auto; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--border); flex-wrap:wrap;">
+                        <div>
+                            <div style="font-size:13px; font-weight:600; color:var(--text); margin-bottom:1px;">🏠 ${r.property}</div>
+                            <div style="font-size:12px; color:var(--text-sm);">👤 ${r.tenant}${r.rent ? ` <span style="margin-left:6px; color:var(--success); font-weight:600;">$${r.rent}/mo</span>` : ''}</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:15px; font-weight:700; color:${color}; line-height:1.1;">${daysLabel}</div>
+                            <div style="font-size:10px; color:var(--muted);">${r.leaseExp || 'MTM'}</div>
+                        </div>
+                        <div>
+                            <span style="font-size:11px; font-weight:600; padding:3px 8px; border-radius:10px;
+                                background:${typeColors[r.type]}22; color:${typeColors[r.type]};">${typeLabels[r.type]}</span>
+                        </div>
+                        <div>${tagPillsHtml(r)}</div>
+                    </div>`;
+            }
+
+            // Split renewals
+            const withDates = (state.renewals || []).filter(r => r.leaseExp).map(r => {
+                const exp = new Date(r.leaseExp);
+                exp.setHours(0, 0, 0, 0);
+                const diffDays = Math.round((exp - today) / 86400000);
+                return { ...r, expDate: exp, diffDays };
+            }).sort((a, b) => a.expDate - b.expDate);
+
+            const mtm      = (state.renewals || []).filter(r => !r.leaseExp);
+            const overdue  = withDates.filter(r => r.diffDays < 0);
+            const upcoming = withDates.filter(r => r.diffDays >= 0);
+
+            // Group upcoming by YYYY-MM
+            const monthGroups = {};
+            upcoming.forEach(r => {
+                const key = `${r.expDate.getFullYear()}-${String(r.expDate.getMonth() + 1).padStart(2, '0')}`;
+                (monthGroups[key] = monthGroups[key] || []).push(r);
+            });
+
+            let html = '';
+
+            // ── Overdue ──────────────────────────────────────
+            if (overdue.length) {
+                html += `<div class="panel" style="border-left:4px solid var(--danger); margin-bottom:14px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                        <div class="panel-title" style="color:var(--danger); margin:0;">⚠️ Overdue <span style="font-size:12px; font-weight:400; color:var(--muted);">(${overdue.length} lease${overdue.length!==1?'s':''})</span></div>
+                    </div>
+                    <div style="border-radius:6px; overflow:hidden; border:1px solid var(--border);">
+                        ${overdue.map(r => rowHtml(r, `${Math.abs(r.diffDays)}d over`, 'var(--danger)')).join('')}
+                    </div>
+                </div>`;
+            }
+
+            // ── Month-to-Month ───────────────────────────────
+            if (mtm.length) {
+                html += `<div class="panel" style="border-left:4px solid var(--muted); margin-bottom:14px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                        <div class="panel-title" style="color:var(--muted); margin:0;">📅 Month-to-Month <span style="font-size:12px; font-weight:400;">(${mtm.length})</span></div>
+                    </div>
+                    <div style="border-radius:6px; overflow:hidden; border:1px solid var(--border);">
+                        ${mtm.map(r => {
+                            const tags = r.tags ? (Array.isArray(r.tags) ? r.tags : r.tags.split(',')).map(t => t.trim()).filter(Boolean) : [];
+                            return `<div style="display:grid; grid-template-columns:1fr 80px 90px auto; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--border);">
+                                <div>
+                                    <div style="font-size:13px; font-weight:600; margin-bottom:1px;">🏠 ${r.property}</div>
+                                    <div style="font-size:12px; color:var(--text-sm);">👤 ${r.tenant}${r.rent ? ` <span style="margin-left:6px; color:var(--success); font-weight:600;">$${r.rent}/mo</span>` : ''}</div>
+                                </div>
+                                <div style="text-align:center;">
+                                    <div style="font-size:12px; font-weight:600; color:var(--muted);">MTM</div>
+                                </div>
+                                <div><span style="font-size:11px; font-weight:600; padding:3px 8px; border-radius:10px; background:${typeColors[r.type]}22; color:${typeColors[r.type]};">${typeLabels[r.type]}</span></div>
+                                <div>${tags.length ? `<div style="display:flex; gap:4px;">${tags.map(tag=>`<span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;background:${tag.toLowerCase()==='eviction'?'rgba(220,38,38,0.12)':tag.toLowerCase()==='v2'?'rgba(108,142,191,0.15)':'rgba(203,121,47,0.12)'};color:${tag.toLowerCase()==='eviction'?'var(--danger)':tag.toLowerCase()==='v2'?'#6c8ebf':'var(--accent)'};">${tag}</span>`).join('')}</div>` : ''}</div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+            }
+
+            // ── Monthly buckets ──────────────────────────────
+            Object.keys(monthGroups).sort().forEach(key => {
+                const items = monthGroups[key];
+                const [yr, mo] = key.split('-');
+                const monthName = monthNames[parseInt(mo) - 1];
+                const minDays = items[0].diffDays;
+                const maxDays = items[items.length - 1].diffDays;
+                const hColor = dayColor(minDays);
+                const urgencyBadge = minDays <= 30 ? '<span style="font-size:11px; padding:2px 7px; border-radius:8px; background:rgba(184,50,50,0.1); color:var(--danger); margin-left:8px; font-weight:600;">🔴 Urgent</span>'
+                    : minDays <= 60 ? '<span style="font-size:11px; padding:2px 7px; border-radius:8px; background:rgba(217,119,6,0.1); color:var(--warning); margin-left:8px; font-weight:600;">🟡 Soon</span>'
+                    : minDays <= 90 ? '<span style="font-size:11px; padding:2px 7px; border-radius:8px; background:rgba(202,138,4,0.1); color:#ca8a04; margin-left:8px; font-weight:600;">📋 90-day</span>'
+                    : '';
+                html += `<div class="panel" style="border-left:4px solid ${hColor}; margin-bottom:14px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                        <div class="panel-title" style="color:${hColor}; margin:0;">${monthName} ${yr}${urgencyBadge} <span style="font-size:12px; font-weight:400; color:var(--muted); margin-left:6px;">${items.length} lease${items.length!==1?'s':''}</span></div>
+                        <span style="font-size:12px; color:var(--muted);">${minDays === maxDays ? `${minDays}d out` : `${minDays}–${maxDays}d out`}</span>
+                    </div>
+                    <div style="border-radius:6px; overflow:hidden; border:1px solid var(--border);">
+                        ${items.map(r => rowHtml(r, r.diffDays === 0 ? 'Today' : `${r.diffDays}d`, dayColor(r.diffDays))).join('')}
+                    </div>
+                </div>`;
+            });
+
+            if (!html) {
+                html = `<p style="color:var(--text-sm); text-align:center; padding:40px 20px;">No renewals added yet — switch to Cards view and add some.</p>`;
+            }
+
+            container.innerHTML = html;
         }
 
         // ============================================
