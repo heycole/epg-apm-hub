@@ -5974,26 +5974,37 @@
         // ============================================
         const renewalSteps = {
             pending: [
-                'Reached out to owner to confirm interest in renewing',
-                'Sent renewal notice to tenant',
-                'Followed up with tenant (if no response)',
-                'Decision received — move to Renewing or Not Renewing'
+                'Reach out to owner — confirm no reason not to renew (e.g. selling). Propose new rent (up to 4% for all clients; V2 clients up to 5%)',
+                'Waiting on approval from owner',
+                'Present lease renewal offer to tenant',
+                'Waiting on answer from tenant — move card to ✅ Renewing or 🚪 Not Renewing once decided'
             ],
             renewing: [
-                'Draft Renewal',
-                'Renewal Sent',
-                'Tenant Signed',
-                'Landlord Executed',
-                'Executed on AppFolio'
+                'Check if there is a Security Deposit 2 to credit the tenant',
+                'Draft the lease',
+                'Sent to owner to sign',
+                'Sent to tenant to sign',
+                'Fully executed',
+                'Download lease and place in tenant folder under Property Leasing folder in Google Drive',
+                'Update AppFolio with the new terms',
+                'Add Security Deposit 2 credit 15 days prior to their final month',
+                'Move funds in AppFolio from 1160 → 1150 (if applicable) and move from escrow to rent in Wells Fargo',
+                'Is the lease fully compliant?',
+                'Request updated Renters Insurance',
+                'Charge Renewal Fee (confirm if applicable)'
             ],
             notRenewing: [
+                'Let the owner know',
+                'Pull comps',
+                'Send Listing Contract',
                 'Listing Contract Signed',
-                'Unit Drafted in the MLS & AppFolio',
-                'Unit Listed',
-                'Move Out Packet Sent',
-                'Make sure if tenants are owed a credit for Security Deposit #2 that they receive it on their ledger prior to the 1st of their last month',
-                'Walkthrough Inspection Complete',
-                'Security Deposit Issued'
+                'List property for rent',
+                'Check if there is a Security Deposit 2 to credit the tenant for their final month',
+                'Start Move Out Process',
+                'Get Forwarding Address',
+                'Move Out Inspection',
+                'Itemized invoice',
+                'Security Deposit Return'
             ]
         };
 
