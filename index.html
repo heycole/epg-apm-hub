@@ -6070,8 +6070,9 @@
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleRenewal(${r.id})">
                             <div style="flex:1;">
                                 <div style="font-weight:600; font-size:14px; margin-bottom:2px;">🏠 ${r.property}</div>
-                                <div style="font-size:13px; color:var(--text-sm); margin-bottom:${r.leaseExp ? '2' : '6'}px;">👤 ${r.tenant}</div>
-                                ${r.leaseExp ? `<div style="font-size:12px; color:var(--muted); margin-bottom:6px;">📅 Lease expires: ${r.leaseExp}</div>` : ''}
+                                <div style="font-size:13px; color:var(--text-sm); margin-bottom:2px;">👤 ${r.tenant}${r.rent ? `<span style="margin-left:10px; font-size:12px; font-weight:600; color:var(--success);">$${r.rent}/mo</span>` : ''}</div>
+                                ${r.leaseExp ? `<div style="font-size:12px; color:var(--muted); margin-bottom:4px;">📅 Lease expires: ${r.leaseExp}</div>` : '<div style="font-size:12px; color:var(--muted); margin-bottom:4px;">📅 Month-to-Month</div>'}
+                                ${r.tags && r.tags.length ? `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px;">${(Array.isArray(r.tags) ? r.tags : r.tags.split(',')).map(tag => tag.trim()).filter(Boolean).map(tag => `<span style="font-size:11px; font-weight:600; padding:2px 7px; border-radius:10px; background:${tag.toLowerCase()==='eviction'?'rgba(220,38,38,0.12)':tag.toLowerCase()==='v2'?'rgba(108,142,191,0.15)':'rgba(203,121,47,0.12)'}; color:${tag.toLowerCase()==='eviction'?'var(--danger)':tag.toLowerCase()==='v2'?'#6c8ebf':'var(--accent)'};">${tag}</span>`).join('')}</div>` : ''}
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
                                         <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : statusColor}; border-radius:3px; transition:width 0.3s;"></div>
