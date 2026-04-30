@@ -6109,25 +6109,28 @@
                     : `<button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'pending')" style="background:var(--bg); border:1px solid var(--border); color:var(--text-sm); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">← Pending</button>`;
 
                 return `
-                    <div style="background:var(--bg); border-radius:8px; padding:14px; margin-bottom:10px; border-left:4px solid ${statusColor};">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start; cursor:pointer;" onclick="toggleRenewal(${r.id})">
-                            <div style="flex:1;">
-                                <div style="font-weight:600; font-size:14px; margin-bottom:2px;">🏠 ${r.property}</div>
-                                <div style="font-size:13px; color:var(--text-sm); margin-bottom:2px;">👤 ${r.tenant}${r.rent ? `<span style="margin-left:10px; font-size:12px; font-weight:600; color:var(--success);">$${r.rent}/mo</span>` : ''}</div>
-                                ${r.leaseExp ? `<div style="font-size:12px; color:var(--muted); margin-bottom:4px;">📅 Lease expires: ${r.leaseExp}</div>` : '<div style="font-size:12px; color:var(--muted); margin-bottom:4px;">📅 Month-to-Month</div>'}
-                                ${r.tags && r.tags.length ? `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px;">${(Array.isArray(r.tags) ? r.tags : r.tags.split(',')).map(tag => tag.trim()).filter(Boolean).map(tag => `<span style="font-size:11px; font-weight:600; padding:2px 7px; border-radius:10px; background:${tag.toLowerCase()==='eviction'?'rgba(220,38,38,0.12)':tag.toLowerCase()==='v2'?'rgba(108,142,191,0.15)':'rgba(203,121,47,0.12)'}; color:${tag.toLowerCase()==='eviction'?'var(--danger)':tag.toLowerCase()==='v2'?'#6c8ebf':'var(--accent)'};">${tag}</span>`).join('')}</div>` : ''}
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <div style="flex:1; height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
-                                        <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : statusColor}; border-radius:3px; transition:width 0.3s;"></div>
+                    <div style="background:var(--bg); border-radius:8px; padding:9px 12px; margin-bottom:6px; border-left:4px solid ${statusColor};">
+                        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleRenewal(${r.id})">
+                            <div style="flex:1; min-width:0;">
+                                <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:1px;">
+                                    <span style="font-weight:600; font-size:13px;">🏠 ${r.property}</span>
+                                    ${r.rent ? `<span style="font-size:11px; font-weight:600; color:var(--success);">$${r.rent}/mo</span>` : ''}
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                    <span style="font-size:12px; color:var(--text-sm);">👤 ${r.tenant}</span>
+                                    <span style="font-size:11px; color:var(--muted);">${r.leaseExp ? `📅 ${r.leaseExp}` : '📅 MTM'}</span>
+                                    ${r.tags && r.tags.length ? (Array.isArray(r.tags) ? r.tags : r.tags.split(',')).map(tag => tag.trim()).filter(t => t && t.toLowerCase() !== 'import').map(tag => `<span style="font-size:10px; font-weight:600; padding:1px 6px; border-radius:8px; background:${tag.toLowerCase()==='eviction'?'rgba(220,38,38,0.12)':tag.toLowerCase()==='v2'?'rgba(108,142,191,0.15)':'rgba(203,121,47,0.12)'}; color:${tag.toLowerCase()==='eviction'?'var(--danger)':tag.toLowerCase()==='v2'?'#6c8ebf':'var(--accent)'};">${tag}</span>`).join('') : ''}
+                                    <div style="display:flex; align-items:center; gap:5px; margin-left:4px;">
+                                        <div style="width:60px; height:4px; background:var(--border); border-radius:2px; overflow:hidden;">
+                                            <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : statusColor}; border-radius:2px; transition:width 0.3s;"></div>
+                                        </div>
+                                        <span style="font-size:10px; color:var(--muted);">${completedSteps}/${totalSteps}</span>
                                     </div>
-                                    <span style="font-size:11px; color:var(--muted); white-space:nowrap;">${completedSteps}/${totalSteps}</span>
                                 </div>
                             </div>
-                            <div style="display:flex; align-items:flex-start; gap:6px; margin-left:12px; flex-wrap:wrap; justify-content:flex-end;">
+                            <div style="display:flex; align-items:center; gap:5px; margin-left:10px; flex-shrink:0;">
                                 ${moveButtons}
-                                ${attributionBadgeHtml(r)}
-                                <span style="font-size:11px; color:var(--muted); align-self:center;">${r.dateCreated}</span>
-                                <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px; align-self:center;" title="Remove">×</button>
+                                <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px; line-height:1;" title="Remove">×</button>
                             </div>
                         </div>
                         ${stepsHtml}
