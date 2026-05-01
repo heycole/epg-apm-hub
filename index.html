@@ -1073,7 +1073,6 @@
                 <div class="nav-section-label">DAILY</div>
                 <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
                 <div class="nav-item" data-page="team-calendar">📅 Team Calendar</div>
-                <div class="nav-item" data-page="tasks">✓ My Tasks</div>
                 <div class="nav-item" data-page="eod">📝 End of Day</div>
                 <div class="nav-item" data-page="team-overview" data-admin-only style="display:none;">👥 Team Overview</div>
             </div>
@@ -1140,6 +1139,10 @@
                 </div>
 
                 <div class="stats-grid">
+                    <div class="stat-card" style="cursor:pointer;" onclick="document.getElementById('dashboard-tasks-panel').scrollIntoView({behavior:'smooth'})" title="Jump to My Tasks">
+                        <div class="stat-label">MY TASKS</div>
+                        <div class="stat-value" id="stat-tasks">0</div>
+                    </div>
                     <div class="stat-card">
                         <div class="stat-label">APPROVALS</div>
                         <div class="stat-value" id="stat-approvals">0</div>
@@ -1176,14 +1179,13 @@
                         <div id="dashboard-calendar-tasks" style="max-height:340px; overflow-y:auto;"></div>
                     </div>
                     <!-- RIGHT: My Tasks snapshot -->
-                    <div class="panel" style="margin-bottom:0; padding:14px; min-height:280px;">
+                    <div id="dashboard-tasks-panel" class="panel" style="margin-bottom:0; padding:14px; min-height:280px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                             <div style="display:flex; align-items:baseline; gap:10px;">
                                 <div class="panel-title" style="margin-bottom:0; font-size:15px;">📋 My Tasks</div>
                                 <span id="dashboard-tasks-count" style="font-size:11px; color:var(--text-sm);"></span>
                             </div>
                             <div style="display:flex; gap:6px; align-items:center;">
-                                <button class="btn" style="font-size:11px; padding:4px 10px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="navigateTo('tasks')">View all →</button>
                                 <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="openAddTaskModal('tasks')">+ Add Task</button>
                             </div>
                         </div>
@@ -1487,14 +1489,20 @@
             <div class="page" data-page="daily-weekly">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <div class="panel" style="margin-bottom: 0;">
-                        <div class="panel-title">📋 Daily Checklist</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                            <div class="panel-title" style="margin-bottom:0;">📋 Daily Checklist</div>
+                            <span id="daily-progress" style="font-size:12px; font-weight:700; color:var(--accent); background:rgba(203,121,47,0.1); padding:3px 10px; border-radius:10px;"></span>
+                        </div>
                         <div class="checklist" id="dailyChecklist"></div>
                         <div class="button-group">
                             <button class="btn btn-secondary" onclick="resetChecklist('daily')">Reset</button>
                         </div>
                     </div>
                     <div class="panel" style="margin-bottom: 0;">
-                        <div class="panel-title">📅 Weekly Checklist</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                            <div class="panel-title" style="margin-bottom:0;">📅 Weekly Checklist</div>
+                            <span id="weekly-progress" style="font-size:12px; font-weight:700; color:var(--accent); background:rgba(203,121,47,0.1); padding:3px 10px; border-radius:10px;"></span>
+                        </div>
                         <div class="checklist" id="weeklyChecklist"></div>
                         <div class="button-group">
                             <button class="btn btn-secondary" onclick="resetChecklist('weekly')">Reset</button>
@@ -1692,20 +1700,32 @@
                 <!-- CARDS VIEW -->
                 <div id="rlCardsView">
                     <!-- Process guide (collapsible, expanded by default) -->
-                    <div class="panel" style="margin-bottom:14px;">
+                    <div class="panel" style="margin-bottom:14px; padding:12px 16px;">
                         <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'; this.querySelector('.rl-pg-chev').style.transform=this.nextElementSibling.style.display==='none'?'rotate(-90deg)':'';">
-                            <span class="panel-title" style="margin:0;">🔄 Lease Renewal Process Guide</span>
+                            <div style="display:flex; align-items:center; gap:12px; flex:1;">
+                                <span class="panel-title" style="margin:0; font-size:14px;">🔄 Lease Renewal Process Guide</span>
+                                <span style="font-size:11px; color:var(--text-sm);">4% increase · no MTM · 90-day notice required</span>
+                            </div>
                             <span class="rl-pg-chev" style="font-size:13px; color:var(--muted); transition:transform .2s;">▾</span>
                         </div>
-                        <div style="margin-top:14px;">
-                            <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
-                                <strong style="color:var(--accent);">Key Rules:</strong> All leases automatically renew with a <strong>4% increase</strong>. We do <strong>not</strong> do month-to-month. Tenants must provide notice by <strong>90 days</strong> before lease expiration.
-                            </div>
-                            <div class="pipeline">
-                                <div class="pipeline-stage"><div class="pipeline-num">1</div><div class="pipeline-label">120 Days Out</div><div class="pipeline-desc">Pull expiring leases from AppFolio — reach out to owners to confirm interest in renewing</div></div>
-                                <div class="pipeline-stage"><div class="pipeline-num">2</div><div class="pipeline-label">105 Days Out</div><div class="pipeline-desc">Follow up with owners if no decision yet</div></div>
-                                <div class="pipeline-stage"><div class="pipeline-num">3</div><div class="pipeline-label">90 Days Out</div><div class="pipeline-desc">Tenant notice deadline — must confirm renewing or not renewing</div></div>
-                                <div class="pipeline-stage"><div class="pipeline-num">4</div><div class="pipeline-label">Post-Decision</div><div class="pipeline-desc">Follow the appropriate path below based on tenant's decision</div></div>
+                        <div style="margin-top:10px;">
+                            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
+                                <div style="background:var(--bg); border-radius:8px; padding:10px 12px; border-left:3px solid var(--accent);">
+                                    <div style="font-size:11px; font-weight:700; color:var(--accent); margin-bottom:3px;">① 120 Days Out</div>
+                                    <div style="font-size:11px; color:var(--text-sm); line-height:1.5;">Pull expiring leases — reach out to owners to confirm interest</div>
+                                </div>
+                                <div style="background:var(--bg); border-radius:8px; padding:10px 12px; border-left:3px solid var(--accent);">
+                                    <div style="font-size:11px; font-weight:700; color:var(--accent); margin-bottom:3px;">② 105 Days Out</div>
+                                    <div style="font-size:11px; color:var(--text-sm); line-height:1.5;">Follow up with owners if no decision yet</div>
+                                </div>
+                                <div style="background:var(--bg); border-radius:8px; padding:10px 12px; border-left:3px solid var(--accent);">
+                                    <div style="font-size:11px; font-weight:700; color:var(--accent); margin-bottom:3px;">③ 90 Days Out</div>
+                                    <div style="font-size:11px; color:var(--text-sm); line-height:1.5;">Tenant notice deadline — must confirm renewing or not</div>
+                                </div>
+                                <div style="background:var(--bg); border-radius:8px; padding:10px 12px; border-left:3px solid var(--accent);">
+                                    <div style="font-size:11px; font-weight:700; color:var(--accent); margin-bottom:3px;">④ Post-Decision</div>
+                                    <div style="font-size:11px; color:var(--text-sm); line-height:1.5;">Follow renewing or not-renewing path in the columns below</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2501,7 +2521,9 @@
                             <button class="btn btn-primary" style="font-size:13px; padding:7px 14px; white-space:nowrap;" onclick="openRLModal()">+ Add Property</button>
                         </div>
                     </div>
-                    <div id="rentalLicensesTable" style="margin-top:12px;"></div>
+                    <!-- Stats bar + filter -->
+                    <div id="rl-stats-bar" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:12px 0 0 0;"></div>
+                    <div id="rentalLicensesTable" style="margin-top:10px;"></div>
                 </div>
             </div>
 
@@ -2710,7 +2732,7 @@
             <div class="page" data-page="portfolio">
                 <div class="panel">
                     <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                        <span>🏢 Property & Owner Directory</span>
+                        <span>🏢 Property & Owners</span>
                         <div style="display:flex; gap:8px; align-items:center;">
                             <input type="text" id="portfolioSearch" placeholder="Search by address, owner, phone..." oninput="renderPortfolio()" style="padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); width:240px;">
                             <button class="btn btn-primary" style="font-size:13px; padding:7px 14px; white-space:nowrap;" onclick="openPropertyModal()">+ Add Property</button>
@@ -5192,6 +5214,12 @@
                 dateEl.textContent = now.toLocaleDateString('en-US', options);
             }
 
+            const openTasksCount = (state.tasks || []).filter(t => !t.completed).length;
+            const statTasksEl = document.getElementById('stat-tasks');
+            if (statTasksEl) {
+                statTasksEl.textContent = openTasksCount;
+                statTasksEl.closest('.stat-card').style.borderLeftColor = openTasksCount > 0 ? 'var(--accent)' : 'var(--border)';
+            }
             document.getElementById('stat-approvals').textContent = state.approvals.length;
             document.getElementById('stat-waiting').textContent = state.waiting.length;
 
@@ -5530,6 +5558,16 @@
             ]
         };
 
+        function updateChecklistProgress(key) {
+            const el = document.getElementById(`${key}-progress`);
+            if (!el || !checklistItems[key]) return;
+            const total = checklistItems[key].length;
+            const done = checklistItems[key].filter((_, idx) => state.checklists[`${key}-${idx}`]).length;
+            el.textContent = `${done} / ${total}`;
+            el.style.color = done === total ? '#16a34a' : 'var(--accent)';
+            el.style.background = done === total ? 'rgba(22,163,74,0.1)' : 'rgba(203,121,47,0.1)';
+        }
+
         function populateChecklists() {
             Object.keys(checklistItems).forEach(key => {
                 const container = document.getElementById(`${key}Checklist`);
@@ -5547,12 +5585,16 @@
                         `;
                     }).join('');
                 }
+                updateChecklistProgress(key);
             });
         }
 
         function toggleChecklistItem(id) {
             state.checklists[id] = document.getElementById(id).checked;
             saveState(state);
+            // Update progress counter for the parent checklist key
+            const key = id.substring(0, id.lastIndexOf('-'));
+            updateChecklistProgress(key);
         }
 
         function resetChecklist(key) {
@@ -6648,6 +6690,7 @@
         // ============================================
         let rentalLicensesData = [];
         let rlModalEditId = null;
+        let rlStatusFilter = 'all'; // 'all' | 'expired' | 'soon' | 'ok'
 
         async function fetchRentalLicenses() {
             const { data, error } = await sbData.from('rental_licenses').select('*').order('address');
@@ -6751,18 +6794,53 @@
             return `<span style="font-size:11px; color:${color};">${formatted}${badge}</span>`;
         }
 
+        function setRLFilter(f) { rlStatusFilter = f; renderRentalLicenses(); }
+
         function renderRentalLicenses() {
             const container = document.getElementById('rentalLicensesTable');
             if (!container) return;
             const search = (document.getElementById('rlSearch')?.value || '').toLowerCase();
 
+            // Compute stats across ALL data (before search/filter)
+            const now = new Date();
+            let cntExpired = 0, cntSoon = 0, cntOk = 0;
+            rentalLicensesData.forEach(r => {
+                const d = rlDaysUntil(r.rental_license_expiration);
+                if (d === null) { cntOk++; return; }
+                if (d < 0) cntExpired++;
+                else if (d <= 90) cntSoon++;
+                else cntOk++;
+            });
+
+            // Render stats bar
+            const statsBar = document.getElementById('rl-stats-bar');
+            if (statsBar) {
+                const btnStyle = (f) => `cursor:pointer; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid; transition:all 0.15s; ${rlStatusFilter === f ? '' : 'opacity:0.65;'}`;
+                statsBar.innerHTML = `
+                    <button onclick="setRLFilter('all')" style="${btnStyle('all')} background:${rlStatusFilter==='all'?'var(--primary-navy)':'var(--bg)'}; color:${rlStatusFilter==='all'?'#fff':'var(--text)'}; border-color:${rlStatusFilter==='all'?'var(--primary-navy)':'var(--border)'};">All ${rentalLicensesData.length}</button>
+                    <button onclick="setRLFilter('expired')" style="${btnStyle('expired')} background:${rlStatusFilter==='expired'?'#dc2626':'var(--bg)'}; color:${rlStatusFilter==='expired'?'#fff':'#dc2626'}; border-color:#dc2626;">🔴 Expired ${cntExpired}</button>
+                    <button onclick="setRLFilter('soon')" style="${btnStyle('soon')} background:${rlStatusFilter==='soon'?'#f59e0b':'var(--bg)'}; color:${rlStatusFilter==='soon'?'#fff':'#b45309'}; border-color:#f59e0b;">🟡 Expiring ≤90d ${cntSoon}</button>
+                    <button onclick="setRLFilter('ok')" style="${btnStyle('ok')} background:${rlStatusFilter==='ok'?'#16a34a':'var(--bg)'}; color:${rlStatusFilter==='ok'?'#fff':'#16a34a'}; border-color:#16a34a;">✅ OK ${cntOk}</button>
+                `;
+            }
+
             let items = rentalLicensesData;
             if (search) items = items.filter(r =>
                 (r.address + ' ' + (r.owner||'') + ' ' + (r.rental_license||'') + ' ' + (r.commercial_activity_license||'')).toLowerCase().includes(search)
             );
+            // Apply status filter
+            if (rlStatusFilter !== 'all') {
+                items = items.filter(r => {
+                    const d = rlDaysUntil(r.rental_license_expiration);
+                    if (rlStatusFilter === 'expired') return d !== null && d < 0;
+                    if (rlStatusFilter === 'soon')    return d !== null && d >= 0 && d <= 90;
+                    if (rlStatusFilter === 'ok')      return d === null || d > 90;
+                    return true;
+                });
+            }
 
             if (items.length === 0) {
-                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No records yet — click "+ Add Property" to get started.</p>';
+                container.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px;">No records match this filter.</p>';
                 return;
             }
 
