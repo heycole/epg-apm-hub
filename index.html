@@ -1693,54 +1693,68 @@
 
                 <!-- CARDS VIEW -->
                 <div id="rlCardsView">
-                    <div class="panel">
-                        <div class="panel-title">🔄 Lease Renewal Process</div>
-                        <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
-                            <strong style="color:var(--accent);">Key Rules:</strong> All leases automatically renew with a <strong>4% increase</strong>. We do <strong>not</strong> do month-to-month. Tenants must provide notice by <strong>90 days</strong> before lease expiration.
+                    <!-- Process guide (collapsible, collapsed by default) -->
+                    <div class="panel" style="margin-bottom:14px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'; this.querySelector('.rl-pg-chev').style.transform=this.nextElementSibling.style.display==='none'?'rotate(-90deg)':'';">
+                            <span class="panel-title" style="margin:0;">🔄 Lease Renewal Process Guide</span>
+                            <span class="rl-pg-chev" style="font-size:13px; color:var(--muted); transition:transform .2s; transform:rotate(-90deg);">▾</span>
                         </div>
-                        <div class="pipeline">
-                            <div class="pipeline-stage"><div class="pipeline-num">1</div><div class="pipeline-label">120 Days Out</div><div class="pipeline-desc">Pull expiring leases from AppFolio — reach out to owners to confirm interest in renewing</div></div>
-                            <div class="pipeline-stage"><div class="pipeline-num">2</div><div class="pipeline-label">105 Days Out</div><div class="pipeline-desc">Follow up with owners if no decision yet</div></div>
-                            <div class="pipeline-stage"><div class="pipeline-num">3</div><div class="pipeline-label">90 Days Out</div><div class="pipeline-desc">Tenant notice deadline — must confirm renewing or not renewing</div></div>
-                            <div class="pipeline-stage"><div class="pipeline-num">4</div><div class="pipeline-label">Post-Decision</div><div class="pipeline-desc">Follow the appropriate path below based on tenant's decision</div></div>
+                        <div style="display:none; margin-top:14px;">
+                            <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
+                                <strong style="color:var(--accent);">Key Rules:</strong> All leases automatically renew with a <strong>4% increase</strong>. We do <strong>not</strong> do month-to-month. Tenants must provide notice by <strong>90 days</strong> before lease expiration.
+                            </div>
+                            <div class="pipeline">
+                                <div class="pipeline-stage"><div class="pipeline-num">1</div><div class="pipeline-label">120 Days Out</div><div class="pipeline-desc">Pull expiring leases from AppFolio — reach out to owners to confirm interest in renewing</div></div>
+                                <div class="pipeline-stage"><div class="pipeline-num">2</div><div class="pipeline-label">105 Days Out</div><div class="pipeline-desc">Follow up with owners if no decision yet</div></div>
+                                <div class="pipeline-stage"><div class="pipeline-num">3</div><div class="pipeline-label">90 Days Out</div><div class="pipeline-desc">Tenant notice deadline — must confirm renewing or not renewing</div></div>
+                                <div class="pipeline-stage"><div class="pipeline-num">4</div><div class="pipeline-label">Post-Decision</div><div class="pipeline-desc">Follow the appropriate path below based on tenant's decision</div></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="panel" id="rlPanel-pending">
-                        <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="toggleRenewalPanel('pending')">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <span class="panel-title" style="margin:0;">⏳ Pending Response</span>
-                                <span id="rlCount-pending" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(203,121,47,0.12); color:var(--accent);">0</span>
+
+                    <!-- Kanban board -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; align-items:start;">
+
+                        <!-- Pending column -->
+                        <div style="background:var(--surface); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);">
+                            <div style="padding:12px 14px; border-bottom:1px solid var(--border); border-top:3px solid var(--accent);">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-size:13px; font-weight:700;">⏳ Pending Response</span>
+                                    <span id="rlCount-pending" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(203,121,47,0.12); color:var(--accent);">0</span>
+                                </div>
+                                <div style="font-size:11px; color:var(--text-sm); margin-top:3px;">Click ✅ or 🚪 once tenant has decided</div>
                             </div>
-                            <span id="rlChevron-pending" style="font-size:13px; color:var(--muted); transition:transform 0.2s;">▾</span>
-                        </div>
-                        <div id="rlBody-pending">
-                            <p style="font-size:12px; color:var(--text-sm); margin:12px 0 12px;">Tenants who haven't confirmed — click ✅ or 🚪 to move them once decided.</p>
-                            <div id="pendingRenewalList"></div>
-                        </div>
-                    </div>
-                    <div class="panel" id="rlPanel-renewing">
-                        <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="toggleRenewalPanel('renewing')">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <span class="panel-title" style="margin:0;">✅ Tenant is Renewing</span>
-                                <span id="rlCount-renewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(45,122,79,0.12); color:var(--success);">0</span>
+                            <div style="padding:10px; max-height:72vh; overflow-y:auto;">
+                                <div id="pendingRenewalList"></div>
                             </div>
-                            <span id="rlChevron-renewing" style="font-size:13px; color:var(--muted); transition:transform 0.2s;">▾</span>
                         </div>
-                        <div id="rlBody-renewing">
-                            <div style="margin-top:12px;" id="renewingList"></div>
-                        </div>
-                    </div>
-                    <div class="panel" id="rlPanel-notRenewing">
-                        <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="toggleRenewalPanel('notRenewing')">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <span class="panel-title" style="margin:0;">🚪 Tenant is Not Renewing</span>
-                                <span id="rlCount-notRenewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(217,119,6,0.12); color:var(--warning);">0</span>
+
+                        <!-- Renewing column -->
+                        <div style="background:var(--surface); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);">
+                            <div style="padding:12px 14px; border-bottom:1px solid var(--border); border-top:3px solid var(--success);">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-size:13px; font-weight:700;">✅ Tenant is Renewing</span>
+                                    <span id="rlCount-renewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(45,122,79,0.12); color:var(--success);">0</span>
+                                </div>
                             </div>
-                            <span id="rlChevron-notRenewing" style="font-size:13px; color:var(--muted); transition:transform 0.2s;">▾</span>
+                            <div style="padding:10px; max-height:72vh; overflow-y:auto;">
+                                <div id="renewingList"></div>
+                            </div>
                         </div>
-                        <div id="rlBody-notRenewing">
-                            <div style="margin-top:12px;" id="notRenewingList"></div>
+
+                        <!-- Not Renewing column -->
+                        <div style="background:var(--surface); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);">
+                            <div style="padding:12px 14px; border-bottom:1px solid var(--border); border-top:3px solid var(--warning);">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-size:13px; font-weight:700;">🚪 Not Renewing</span>
+                                    <span id="rlCount-notRenewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(217,119,6,0.12); color:var(--warning);">0</span>
+                                </div>
+                            </div>
+                            <div style="padding:10px; max-height:72vh; overflow-y:auto;">
+                                <div id="notRenewingList"></div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -6063,16 +6077,7 @@
             // Update count badges
             ['pending', 'renewing', 'notRenewing'].forEach(type => {
                 const countEl = document.getElementById('rlCount-' + type);
-                if (countEl) {
-                    const n = (state.renewals || []).filter(r => r.type === type).length;
-                    countEl.textContent = n;
-                }
-                // Restore collapsed state from localStorage
-                const collapsed = localStorage.getItem('epg_rl_collapsed_' + type) === 'true';
-                const body = document.getElementById('rlBody-' + type);
-                const chevron = document.getElementById('rlChevron-' + type);
-                if (body) body.style.display = collapsed ? 'none' : '';
-                if (chevron) chevron.style.transform = collapsed ? 'rotate(-90deg)' : '';
+                if (countEl) countEl.textContent = (state.renewals || []).filter(r => r.type === type).length;
             });
             // Also refresh timeline if it's currently visible
             const tl = document.getElementById('rlTimelineView');
@@ -6200,15 +6205,16 @@
                 }
 
                 let html = '';
-                if (mtm.length) {
-                    html += monthGroupHtml('mtm', mtm, '📅 Month-to-Month',
-                        `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(107,114,128,.1);color:var(--muted);">MTM</span>`);
-                }
                 Object.keys(groups).sort().forEach(key => {
                     const [yr, mo] = key.split('-');
                     const label = monthNames[parseInt(mo)-1] + ' ' + yr;
                     html += monthGroupHtml(key, groups[key], label, urgencyBadge(key));
                 });
+                // MTM at the bottom — no fixed expiry date so lowest priority
+                if (mtm.length) {
+                    html += monthGroupHtml('mtm', mtm, '📅 Month-to-Month',
+                        `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(107,114,128,.1);color:var(--muted);">MTM</span>`);
+                }
                 container.innerHTML = html;
                 return;
             }
