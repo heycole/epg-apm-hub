@@ -6079,75 +6079,152 @@
             if (tl && tl.style.display !== 'none') renderRenewalTimeline();
         }
 
+        function renewalCardHtml(r, type) {
+            const statusColors = { pending: 'var(--accent)', renewing: 'var(--success)', notRenewing: 'var(--warning)' };
+            const statusColor = statusColors[type] || 'var(--accent)';
+            const completedSteps = (r.steps || []).filter(s => s.done).length;
+            const totalSteps = (r.steps || []).length;
+            const pct = totalSteps ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
+            const stepsHtml = r.collapsed ? '' : `
+                <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+                    ${(r.steps || []).map((step, idx) => `
+                        <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleRenewalStep(${r.id}, ${idx})">
+                            <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
+                            <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
+                            ${stepDoneByHtml(step)}
+                        </div>
+                    `).join('')}
+                    <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
+                        <label style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">📝 Notes</label>
+                        <textarea onchange="updateRenewalNotes(${r.id}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:60px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--bg); color:var(--text); resize:vertical;">${r.notes || ''}</textarea>
+                    </div>
+                </div>`;
+
+            const moveButtons = type === 'pending'
+                ? `<button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'renewing')" style="background:var(--success-light); border:1px solid var(--success); color:var(--success); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">✅ Renewing</button>
+                   <button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'notRenewing')" style="background:var(--warning-light); border:1px solid var(--warning); color:var(--warning); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">🚪 Not Renewing</button>`
+                : `<button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'pending')" style="background:var(--bg); border:1px solid var(--border); color:var(--text-sm); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">← Pending</button>`;
+
+            const tagPills = (r.tags && r.tags.length)
+                ? (Array.isArray(r.tags) ? r.tags : r.tags.split(',')).map(t => t.trim()).filter(t => t && t.toLowerCase() !== 'import')
+                    .map(tag => `<span style="font-size:10px; font-weight:600; padding:1px 6px; border-radius:8px; background:${tag.toLowerCase()==='eviction'?'rgba(220,38,38,0.12)':tag.toLowerCase()==='v2'?'rgba(108,142,191,0.15)':'rgba(203,121,47,0.12)'}; color:${tag.toLowerCase()==='eviction'?'var(--danger)':tag.toLowerCase()==='v2'?'#6c8ebf':'var(--accent)'};">${tag}</span>`).join('')
+                : '';
+
+            return `
+                <div style="background:var(--bg); border-radius:8px; padding:9px 12px; margin-bottom:6px; border-left:4px solid ${statusColor};">
+                    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleRenewal(${r.id})">
+                        <div style="flex:1; min-width:0;">
+                            <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:1px;">
+                                <span style="font-weight:600; font-size:13px;">🏠 ${r.property}</span>
+                                ${r.rent ? `<span style="font-size:11px; font-weight:600; color:var(--success);">$${r.rent}/mo</span>` : ''}
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <span style="font-size:12px; color:var(--text-sm);">👤 ${r.tenant}</span>
+                                <span style="font-size:11px; color:var(--muted);">${r.leaseExp ? `📅 ${r.leaseExp}` : '📅 MTM'}</span>
+                                ${tagPills}
+                                <div style="display:flex; align-items:center; gap:5px; margin-left:4px;">
+                                    <div style="width:60px; height:4px; background:var(--border); border-radius:2px; overflow:hidden;">
+                                        <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : statusColor}; border-radius:2px; transition:width 0.3s;"></div>
+                                    </div>
+                                    <span style="font-size:10px; color:var(--muted);">${completedSteps}/${totalSteps}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:5px; margin-left:10px; flex-shrink:0;">
+                            ${moveButtons}
+                            <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px; line-height:1;" title="Remove">×</button>
+                        </div>
+                    </div>
+                    ${stepsHtml}
+                </div>`;
+        }
+
         function renderRenewalList(type, container) {
             if (!container) return;
             const items = (state.renewals || []).filter(r => r.type === type);
             const emptyLabels = { pending: 'pending responses', renewing: 'renewals', notRenewing: 'non-renewals' };
-            const emptyLabel = emptyLabels[type] || 'items';
 
             if (items.length === 0) {
-                container.innerHTML = `<p style="color:var(--text-sm); text-align:center; padding:20px;">No active ${emptyLabel}. Click the button above to add one.</p>`;
+                container.innerHTML = `<p style="color:var(--text-sm); text-align:center; padding:20px;">No active ${emptyLabels[type] || 'items'}. Click the button above to add one.</p>`;
                 return;
             }
 
-            const statusColors = { pending: 'var(--accent)', renewing: 'var(--success)', notRenewing: 'var(--warning)' };
-            const statusColor = statusColors[type] || 'var(--accent)';
+            // Pending: month groups + 2-column grid inside each group
+            if (type === 'pending') {
+                const today = new Date(); today.setHours(0,0,0,0);
+                const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-            container.innerHTML = items.map(r => {
-                const completedSteps = r.steps.filter(s => s.done).length;
-                const totalSteps = r.steps.length;
-                const pct = Math.round((completedSteps / totalSteps) * 100);
+                // Sort by expiration date ascending, MTM at top
+                const mtm     = items.filter(r => !r.leaseExp);
+                const dated   = items.filter(r =>  r.leaseExp).sort((a, b) => new Date(a.leaseExp) - new Date(b.leaseExp));
 
-                const stepsHtml = r.collapsed ? '' : `
-                    <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
-                        ${r.steps.map((step, idx) => `
-                            <div style="display:flex; align-items:flex-start; gap:8px; padding:6px 0; cursor:pointer;" onclick="toggleRenewalStep(${r.id}, ${idx})">
-                                <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:16px; height:16px; pointer-events:none;">
-                                <span style="font-size:13px; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : 'color:var(--text);'}">${step.text}</span>
-                                ${stepDoneByHtml(step)}
-                            </div>
-                        `).join('')}
-                        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);">
-                            <label style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">📝 Notes</label>
-                            <textarea onchange="updateRenewalNotes(${r.id}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:60px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--card); color:var(--text); resize:vertical;">${r.notes || ''}</textarea>
-                        </div>
-                    </div>
-                `;
+                // Group dated by YYYY-MM
+                const groups = {};
+                dated.forEach(r => {
+                    const d = new Date(r.leaseExp);
+                    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                    (groups[key] = groups[key] || []).push(r);
+                });
 
-                const moveButtons = type === 'pending'
-                    ? `<button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'renewing')" style="background:var(--success-light); border:1px solid var(--success); color:var(--success); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">✅ Renewing</button>
-                       <button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'notRenewing')" style="background:var(--warning-light); border:1px solid var(--warning); color:var(--warning); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">🚪 Not Renewing</button>`
-                    : `<button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'pending')" style="background:var(--bg); border:1px solid var(--border); color:var(--text-sm); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">← Pending</button>`;
+                function urgencyBadge(key) {
+                    const [yr, mo] = key.split('-').map(Number);
+                    const days = Math.round((new Date(yr, mo-1, 28) - today) / 86400000);
+                    if (days < 0)   return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(184,50,50,.1);color:var(--danger);">⚠️ Overdue</span>`;
+                    if (days <= 30) return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(184,50,50,.1);color:var(--danger);">🔴 Urgent</span>`;
+                    if (days <= 60) return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(217,119,6,.1);color:var(--warning);">🟡 Soon</span>`;
+                    if (days <= 90) return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(202,138,4,.1);color:#ca8a04;">📋 90-day</span>`;
+                    return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(107,114,128,.1);color:var(--muted);">&gt;90d</span>`;
+                }
 
-                return `
-                    <div style="background:var(--bg); border-radius:8px; padding:9px 12px; margin-bottom:6px; border-left:4px solid ${statusColor};">
-                        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleRenewal(${r.id})">
-                            <div style="flex:1; min-width:0;">
-                                <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:1px;">
-                                    <span style="font-weight:600; font-size:13px;">🏠 ${r.property}</span>
-                                    ${r.rent ? `<span style="font-size:11px; font-weight:600; color:var(--success);">$${r.rent}/mo</span>` : ''}
+                function monthGroupHtml(key, groupItems, label, badge) {
+                    const lsKey    = 'epg_rl_month_' + key;
+                    const collapsed = localStorage.getItem(lsKey) === 'true';
+                    const chevron  = collapsed ? 'rotate(-90deg)' : '';
+                    const bodyDisp = collapsed ? 'display:none;' : '';
+                    return `
+                        <div style="margin-bottom:8px; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:var(--surface);cursor:pointer;user-select:none;"
+                                 onclick="toggleRenewalMonthGroup('${key}')">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span style="font-size:13px;font-weight:700;">${label}</span>
+                                    <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:8px;background:rgba(203,121,47,.1);color:var(--accent);">${groupItems.length}</span>
+                                    ${badge}
                                 </div>
-                                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                                    <span style="font-size:12px; color:var(--text-sm);">👤 ${r.tenant}</span>
-                                    <span style="font-size:11px; color:var(--muted);">${r.leaseExp ? `📅 ${r.leaseExp}` : '📅 MTM'}</span>
-                                    ${r.tags && r.tags.length ? (Array.isArray(r.tags) ? r.tags : r.tags.split(',')).map(tag => tag.trim()).filter(t => t && t.toLowerCase() !== 'import').map(tag => `<span style="font-size:10px; font-weight:600; padding:1px 6px; border-radius:8px; background:${tag.toLowerCase()==='eviction'?'rgba(220,38,38,0.12)':tag.toLowerCase()==='v2'?'rgba(108,142,191,0.15)':'rgba(203,121,47,0.12)'}; color:${tag.toLowerCase()==='eviction'?'var(--danger)':tag.toLowerCase()==='v2'?'#6c8ebf':'var(--accent)'};">${tag}</span>`).join('') : ''}
-                                    <div style="display:flex; align-items:center; gap:5px; margin-left:4px;">
-                                        <div style="width:60px; height:4px; background:var(--border); border-radius:2px; overflow:hidden;">
-                                            <div style="height:100%; width:${pct}%; background:${pct === 100 ? 'var(--success)' : statusColor}; border-radius:2px; transition:width 0.3s;"></div>
-                                        </div>
-                                        <span style="font-size:10px; color:var(--muted);">${completedSteps}/${totalSteps}</span>
-                                    </div>
-                                </div>
+                                <span id="rlMonthChevron-${key}" style="font-size:12px;color:var(--muted);transform:${chevron};display:inline-block;transition:transform .2s;">▾</span>
                             </div>
-                            <div style="display:flex; align-items:center; gap:5px; margin-left:10px; flex-shrink:0;">
-                                ${moveButtons}
-                                <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px; line-height:1;" title="Remove">×</button>
+                            <div id="rlMonthBody-${key}" style="${bodyDisp}padding:8px;background:var(--bg);display:grid;grid-template-columns:1fr 1fr;gap:0 10px;">
+                                ${groupItems.map(r => renewalCardHtml(r, 'pending')).join('')}
                             </div>
-                        </div>
-                        ${stepsHtml}
-                    </div>
-                `;
-            }).join('');
+                        </div>`;
+                }
+
+                let html = '';
+                if (mtm.length) {
+                    html += monthGroupHtml('mtm', mtm, '📅 Month-to-Month',
+                        `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:rgba(107,114,128,.1);color:var(--muted);">MTM</span>`);
+                }
+                Object.keys(groups).sort().forEach(key => {
+                    const [yr, mo] = key.split('-');
+                    const label = monthNames[parseInt(mo)-1] + ' ' + yr;
+                    html += monthGroupHtml(key, groups[key], label, urgencyBadge(key));
+                });
+                container.innerHTML = html;
+                return;
+            }
+
+            // Renewing / Not Renewing: single column (fewer cards)
+            container.innerHTML = items.map(r => renewalCardHtml(r, type)).join('');
+        }
+
+        function toggleRenewalMonthGroup(key) {
+            const body    = document.getElementById('rlMonthBody-' + key);
+            const chevron = document.getElementById('rlMonthChevron-' + key);
+            if (!body) return;
+            const nowCollapsed = body.style.display === 'none';
+            body.style.display    = nowCollapsed ? 'grid' : 'none';
+            if (chevron) chevron.style.transform = nowCollapsed ? '' : 'rotate(-90deg)';
+            localStorage.setItem('epg_rl_month_' + key, nowCollapsed ? 'false' : 'true');
         }
 
         function setRenewalView(mode) {
