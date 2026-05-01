@@ -1749,26 +1749,32 @@
 
                         <!-- Renewing column -->
                         <div style="background:var(--surface); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);">
-                            <div style="padding:12px 14px; border-bottom:1px solid var(--border); border-top:3px solid var(--success);">
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <span style="font-size:13px; font-weight:700;">✅ Tenant is Renewing</span>
-                                    <span id="rlCount-renewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(45,122,79,0.12); color:var(--success);">0</span>
+                            <div style="padding:12px 14px; border-bottom:1px solid var(--border); border-top:3px solid var(--success); cursor:pointer; user-select:none;" onclick="toggleKanbanColumn('renewing')">
+                                <div style="display:flex; align-items:center; justify-content:space-between;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="font-size:13px; font-weight:700;">✅ Tenant is Renewing</span>
+                                        <span id="rlCount-renewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(45,122,79,0.12); color:var(--success);">0</span>
+                                    </div>
+                                    <span id="rlColChev-renewing" style="font-size:12px; color:var(--muted); transition:transform .2s; display:inline-block;">▾</span>
                                 </div>
                             </div>
-                            <div style="padding:10px; max-height:72vh; overflow-y:auto;">
+                            <div id="rlColBody-renewing" style="padding:10px; max-height:72vh; overflow-y:auto;">
                                 <div id="renewingList"></div>
                             </div>
                         </div>
 
                         <!-- Not Renewing column -->
                         <div style="background:var(--surface); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);">
-                            <div style="padding:12px 14px; border-bottom:1px solid var(--border); border-top:3px solid var(--warning);">
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <span style="font-size:13px; font-weight:700;">🚪 Not Renewing</span>
-                                    <span id="rlCount-notRenewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(217,119,6,0.12); color:var(--warning);">0</span>
+                            <div style="padding:12px 14px; border-bottom:1px solid var(--border); border-top:3px solid var(--warning); cursor:pointer; user-select:none;" onclick="toggleKanbanColumn('notRenewing')">
+                                <div style="display:flex; align-items:center; justify-content:space-between;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="font-size:13px; font-weight:700;">🚪 Not Renewing</span>
+                                        <span id="rlCount-notRenewing" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(217,119,6,0.12); color:var(--warning);">0</span>
+                                    </div>
+                                    <span id="rlColChev-notRenewing" style="font-size:12px; color:var(--muted); transition:transform .2s; display:inline-block;">▾</span>
                                 </div>
                             </div>
-                            <div style="padding:10px; max-height:72vh; overflow-y:auto;">
+                            <div id="rlColBody-notRenewing" style="padding:10px; max-height:72vh; overflow-y:auto;">
                                 <div id="notRenewingList"></div>
                             </div>
                         </div>
@@ -6090,6 +6096,28 @@
             renderRenewals();
         }
 
+        function toggleKanbanColumn(type) {
+            const body = document.getElementById('rlColBody-' + type);
+            const chev = document.getElementById('rlColChev-' + type);
+            if (!body) return;
+            const isNowCollapsed = body.style.display !== 'none';
+            body.style.display = isNowCollapsed ? 'none' : '';
+            if (chev) chev.style.transform = isNowCollapsed ? 'rotate(-90deg)' : '';
+            localStorage.setItem('epg_rl_col_' + type, isNowCollapsed ? 'true' : 'false');
+        }
+
+        function restoreKanbanColumnStates() {
+            ['renewing', 'notRenewing'].forEach(type => {
+                const stored = localStorage.getItem('epg_rl_col_' + type);
+                if (stored === 'true') {
+                    const body = document.getElementById('rlColBody-' + type);
+                    const chev = document.getElementById('rlColChev-' + type);
+                    if (body) body.style.display = 'none';
+                    if (chev) chev.style.transform = 'rotate(-90deg)';
+                }
+            });
+        }
+
         function toggleRenewalStep(rId, stepIdx) {
             const r = state.renewals.find(r => r.id === rId);
             if (r) markChecklistItem(r.steps[stepIdx], 'done', !r.steps[stepIdx].done);
@@ -6122,6 +6150,8 @@
             // Also refresh timeline if it's currently visible
             const tl = document.getElementById('rlTimelineView');
             if (tl && tl.style.display !== 'none') renderRenewalTimeline();
+            // Restore column collapse states (re-render wipes inline display style)
+            restoreKanbanColumnStates();
         }
 
         function renewalCardHtml(r, type) {
@@ -6183,6 +6213,7 @@
                         <div style="display:flex; align-items:center; gap:5px; margin-left:10px; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end;">
                             ${markCompleteBtn}
                             ${moveButtons}
+                            <span style="font-size:11px; color:var(--muted); transition:transform .2s; display:inline-block; transform:${r.collapsed ? 'rotate(-90deg)' : ''}; pointer-events:none;">▾</span>
                             <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px; line-height:1;" title="Remove">×</button>
                         </div>
                     </div>
