@@ -6198,7 +6198,7 @@
                                 </div>
                                 <span id="rlMonthChevron-${key}" style="font-size:12px;color:var(--muted);transform:${chevron};display:inline-block;transition:transform .2s;">▾</span>
                             </div>
-                            <div id="rlMonthBody-${key}" style="${bodyDisp}padding:8px;background:var(--bg);display:grid;grid-template-columns:1fr 1fr;gap:0 10px;">
+                            <div id="rlMonthBody-${key}" style="${bodyDisp}padding:8px;background:var(--bg);">
                                 ${groupItems.map(r => renewalCardHtml(r, 'pending')).join('')}
                             </div>
                         </div>`;
@@ -6228,7 +6228,7 @@
             const chevron = document.getElementById('rlMonthChevron-' + key);
             if (!body) return;
             const nowCollapsed = body.style.display === 'none';
-            body.style.display    = nowCollapsed ? 'grid' : 'none';
+            body.style.display    = nowCollapsed ? '' : 'none';
             if (chevron) chevron.style.transform = nowCollapsed ? '' : 'rotate(-90deg)';
             localStorage.setItem('epg_rl_month_' + key, nowCollapsed ? 'false' : 'true');
         }
