@@ -6111,6 +6111,10 @@
                    <button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'notRenewing')" style="background:var(--warning-light); border:1px solid var(--warning); color:var(--warning); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">🚪 Not Renewing</button>`
                 : `<button onclick="event.stopPropagation(); moveRenewal(${r.id}, 'pending')" style="background:var(--bg); border:1px solid var(--border); color:var(--text-sm); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">← Pending</button>`;
 
+            const markCompleteBtn = (pct === 100 && type !== 'pending')
+                ? `<button onclick="event.stopPropagation(); markRenewalComplete(${r.id})" style="background:var(--success-light); border:1px solid var(--success); color:var(--success); border-radius:6px; padding:3px 9px; font-size:11px; font-weight:700; cursor:pointer; white-space:nowrap;">✓ Mark Complete</button>`
+                : '';
+
             const tagPills = (r.tags && r.tags.length)
                 ? (Array.isArray(r.tags) ? r.tags : r.tags.split(',')).map(t => t.trim()).filter(t => t && t.toLowerCase() !== 'import')
                     .map(tag => `<span style="font-size:10px; font-weight:600; padding:1px 6px; border-radius:8px; background:${tag.toLowerCase()==='eviction'?'rgba(220,38,38,0.12)':tag.toLowerCase()==='v2'?'rgba(108,142,191,0.15)':'rgba(203,121,47,0.12)'}; color:${tag.toLowerCase()==='eviction'?'var(--danger)':tag.toLowerCase()==='v2'?'#6c8ebf':'var(--accent)'};">${tag}</span>`).join('')
@@ -6136,7 +6140,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:5px; margin-left:10px; flex-shrink:0;">
+                        <div style="display:flex; align-items:center; gap:5px; margin-left:10px; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end;">
+                            ${markCompleteBtn}
                             ${moveButtons}
                             <button onclick="event.stopPropagation(); removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px; line-height:1;" title="Remove">×</button>
                         </div>
@@ -6219,8 +6224,76 @@
                 return;
             }
 
-            // Renewing / Not Renewing: single column (fewer cards)
-            container.innerHTML = items.map(r => renewalCardHtml(r, type)).join('');
+            // Renewing / Not Renewing: active cards + collapsed archive at bottom
+            const activeItems    = items.filter(r => !r.completed);
+            const completedItems = items.filter(r =>  r.completed)
+                .sort((a, b) => (b.completedAt || '').localeCompare(a.completedAt || ''));
+
+            let html = activeItems.length
+                ? activeItems.map(r => renewalCardHtml(r, type)).join('')
+                : `<p style="color:var(--text-sm); text-align:center; padding:20px; font-size:12px;">No active ${emptyLabels[type] || 'items'}. Click the button above to add one.</p>`;
+
+            if (completedItems.length) {
+                const lsKey   = 'epg_rl_archive_' + type;
+                const isOpen  = localStorage.getItem(lsKey) === 'true';
+                const chevRot = isOpen ? '' : 'rotate(-90deg)';
+                const bodyDsp = isOpen ? '' : 'display:none;';
+                html += `
+                    <div style="margin-top:12px; border-top:1px dashed var(--border); padding-top:10px;">
+                        <div style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; margin-bottom:8px;"
+                             onclick="toggleRenewalArchive('${type}')">
+                            <span style="font-size:12px; font-weight:700; color:var(--success);">✓ Completed</span>
+                            <span style="font-size:11px; font-weight:700; padding:1px 7px; border-radius:8px; background:rgba(45,122,79,.1); color:var(--success);">${completedItems.length}</span>
+                            <span id="rlArchiveChevron-${type}" style="font-size:11px; color:var(--muted); display:inline-block; transition:transform .2s; transform:${chevRot};">▾</span>
+                        </div>
+                        <div id="rlArchiveBody-${type}" style="${bodyDsp}">
+                            ${completedItems.map(r => {
+                                const d = r.completedAt ? new Date(r.completedAt).toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'}) : '';
+                                return `<div style="background:var(--bg); border-radius:8px; padding:9px 12px; margin-bottom:6px; border-left:4px solid var(--success); opacity:0.7;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                        <div style="min-width:0; flex:1;">
+                                            <div style="font-weight:600; font-size:13px; color:var(--muted); text-decoration:line-through; margin-bottom:1px;">🏠 ${r.property}</div>
+                                            <div style="font-size:11px; color:var(--muted);">👤 ${r.tenant}${d ? ` · ✓ ${d}` : ''}</div>
+                                        </div>
+                                        <div style="display:flex; gap:4px; flex-shrink:0;">
+                                            <button onclick="reopenRenewal(${r.id})" style="background:var(--bg); border:1px solid var(--border); color:var(--text-sm); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">↩ Reopen</button>
+                                            <button onclick="removeRenewal(${r.id})" style="background:none; border:none; cursor:pointer; color:var(--muted); font-size:16px; line-height:1;" title="Remove">×</button>
+                                        </div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function markRenewalComplete(id) {
+            const r = state.renewals.find(r => r.id === id);
+            if (!r) return;
+            r.completed  = true;
+            r.completedAt = new Date().toISOString();
+            saveStateKey('renewals', state.renewals);
+            renderRenewals();
+        }
+
+        function reopenRenewal(id) {
+            const r = state.renewals.find(r => r.id === id);
+            if (!r) return;
+            r.completed   = false;
+            r.completedAt = null;
+            saveStateKey('renewals', state.renewals);
+            renderRenewals();
+        }
+
+        function toggleRenewalArchive(type) {
+            const body    = document.getElementById('rlArchiveBody-'    + type);
+            const chevron = document.getElementById('rlArchiveChevron-' + type);
+            if (!body) return;
+            const nowOpen = body.style.display === 'none';
+            body.style.display = nowOpen ? '' : 'none';
+            if (chevron) chevron.style.transform = nowOpen ? '' : 'rotate(-90deg)';
+            localStorage.setItem('epg_rl_archive_' + type, nowOpen ? 'true' : 'false');
         }
 
         function toggleRenewalMonthGroup(key) {
