@@ -1089,7 +1089,7 @@
             <div class="nav-section">
                 <div class="nav-section-label">OPERATIONS</div>
                 <div class="nav-item" data-page="sops">📚 SOPs & Video Library</div>
-                <div class="nav-item" data-page="portfolio">🏢 Property & Owner Directory</div>
+                <div class="nav-item" data-page="portfolio">🏢 Property & Owners</div>
                 <div class="nav-item" data-page="finance">💰 Finance</div>
                 <div class="nav-item" data-page="maintenance">🔧 Maintenance</div>
                 <div class="nav-item" data-page="rental-applications">📋 Rental Applications</div>
@@ -1686,20 +1686,18 @@
                     </div>
                     <div style="display:flex; gap:8px;">
                         <button class="btn" onclick="addRenewal('pending')">+ Add Pending</button>
-                        <button class="btn" onclick="addRenewal('renewing')">+ Add Renewal</button>
-                        <button class="btn" onclick="addRenewal('notRenewing')">+ Add Non-Renewal</button>
                     </div>
                 </div>
 
                 <!-- CARDS VIEW -->
                 <div id="rlCardsView">
-                    <!-- Process guide (collapsible, collapsed by default) -->
+                    <!-- Process guide (collapsible, expanded by default) -->
                     <div class="panel" style="margin-bottom:14px;">
                         <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'; this.querySelector('.rl-pg-chev').style.transform=this.nextElementSibling.style.display==='none'?'rotate(-90deg)':'';">
                             <span class="panel-title" style="margin:0;">🔄 Lease Renewal Process Guide</span>
-                            <span class="rl-pg-chev" style="font-size:13px; color:var(--muted); transition:transform .2s; transform:rotate(-90deg);">▾</span>
+                            <span class="rl-pg-chev" style="font-size:13px; color:var(--muted); transition:transform .2s;">▾</span>
                         </div>
-                        <div style="display:none; margin-top:14px;">
+                        <div style="margin-top:14px;">
                             <div style="background:rgba(203,121,47,0.08); border:1px solid rgba(203,121,47,0.2); border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--text); line-height:1.6;">
                                 <strong style="color:var(--accent);">Key Rules:</strong> All leases automatically renew with a <strong>4% increase</strong>. We do <strong>not</strong> do month-to-month. Tenants must provide notice by <strong>90 days</strong> before lease expiration.
                             </div>
