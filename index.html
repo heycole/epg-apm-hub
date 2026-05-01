@@ -1735,14 +1735,17 @@
 
                         <!-- Pending column -->
                         <div style="background:var(--surface); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);">
-                            <div style="padding:12px 14px; border-bottom:1px solid var(--border); border-top:3px solid var(--accent);">
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <span style="font-size:13px; font-weight:700;">⏳ Pending Response</span>
-                                    <span id="rlCount-pending" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(203,121,47,0.12); color:var(--accent);">0</span>
+                            <div style="padding:12px 14px; border-bottom:1px solid var(--border); border-top:3px solid var(--accent); cursor:pointer; user-select:none;" onclick="toggleKanbanColumn('pending')">
+                                <div style="display:flex; align-items:center; justify-content:space-between;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span style="font-size:13px; font-weight:700;">⏳ Pending Response</span>
+                                        <span id="rlCount-pending" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; background:rgba(203,121,47,0.12); color:var(--accent);">0</span>
+                                    </div>
+                                    <span id="rlColChev-pending" style="font-size:12px; color:var(--muted); transition:transform .2s; display:inline-block;">▾</span>
                                 </div>
                                 <div style="font-size:11px; color:var(--text-sm); margin-top:3px;">Click ✅ or 🚪 once tenant has decided</div>
                             </div>
-                            <div style="padding:10px; max-height:72vh; overflow-y:auto;">
+                            <div id="rlColBody-pending" style="padding:10px; max-height:72vh; overflow-y:auto;">
                                 <div id="pendingRenewalList"></div>
                             </div>
                         </div>
@@ -6107,7 +6110,7 @@
         }
 
         function restoreKanbanColumnStates() {
-            ['renewing', 'notRenewing'].forEach(type => {
+            ['pending', 'renewing', 'notRenewing'].forEach(type => {
                 const stored = localStorage.getItem('epg_rl_col_' + type);
                 if (stored === 'true') {
                     const body = document.getElementById('rlColBody-' + type);
