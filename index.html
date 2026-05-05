@@ -7364,23 +7364,21 @@
                 const { data: links, error } = await sbData.from('sop_links').select('*').ilike('topic', topicKey).order('created_at');
                 if (error) throw error;
                 if (links && links.length > 0) {
-                    sopContainer.innerHTML = links.map(link => \`
-                        <a href="\${link.url}" target="_blank" style="display:flex; align-items:center; gap:12px; padding:12px 14px; margin-bottom:8px; background:var(--bg); border:1px solid var(--border); border-radius:8px; text-decoration:none; transition:all 0.2s; cursor:pointer;" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-light)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
-                            <div style="width:36px; height:36px; background:rgba(203,121,47,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">📄</div>
-                            <div style="flex:1;">
-                                <div style="font-size:13px; font-weight:600; color:var(--text);">\${link.label}</div>
-                                <div style="font-size:11px; color:var(--muted); margin-top:2px;">Google Docs ↗</div>
-                            </div>
-                        </a>
-                    \`).join('');
+                    sopContainer.innerHTML = links.map(function(link) {
+                        return '<a href="' + link.url + '" target="_blank" style="display:flex; align-items:center; gap:12px; padding:12px 14px; margin-bottom:8px; background:var(--bg); border:1px solid var(--border); border-radius:8px; text-decoration:none; transition:all 0.2s; cursor:pointer;" onmouseover="this.style.borderColor=\'var(--accent)\';this.style.background=\'var(--accent-light)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--bg)\'">'
+                            + '<div style="width:36px; height:36px; background:rgba(203,121,47,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">📄</div>'
+                            + '<div style="flex:1;">'
+                            + '<div style="font-size:13px; font-weight:600; color:var(--text);">' + link.label + '</div>'
+                            + '<div style="font-size:11px; color:var(--muted); margin-top:2px;">Google Docs ↗</div>'
+                            + '</div>'
+                            + '</a>';
+                    }).join('');
                 } else {
-                    sopContainer.innerHTML = \`
-                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px 0; text-align:center;">
-                            <div style="width:48px; height:48px; background:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:10px; font-size:20px;">📋</div>
-                            <p style="color:var(--muted); font-size:12px; font-style:italic; margin:0;">No SOPs added yet</p>
-                            <p style="color:var(--muted); font-size:11px; margin:4px 0 0;">Content will be added here</p>
-                        </div>
-                    \`;
+                    sopContainer.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px 0; text-align:center;">'
+                        + '<div style="width:48px; height:48px; background:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:10px; font-size:20px;">📋</div>'
+                        + '<p style="color:var(--muted); font-size:12px; font-style:italic; margin:0;">No SOPs added yet</p>'
+                        + '<p style="color:var(--muted); font-size:11px; margin:4px 0 0;">Content will be added here</p>'
+                        + '</div>';
                 }
             } catch (err) {
                 console.error('Failed to load SOPs:', err);
