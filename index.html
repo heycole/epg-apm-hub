@@ -7348,44 +7348,34 @@
         };
 
         async function openSOP(topicKey) {
-        const topic = sopTopics[topicKey];
+        var topic = sopTopics[topicKey];
         if (!topic) return;
-        document.getElementById('sopDirectory').style.display = 'none';
-        document.getElementById('sopSubPage').style.display = 'block';
-        document.getElementById('sopSubIcon').textContent = topic.icon;
-        document.getElementById('sopSubIconBg').textContent = topic.icon;
-        document.getElementById('sopSubTitle').textContent = topic.title;
-        document.getElementById('sopSubCategory').textContent = topic.category;
-
-        const sopContainer = document.getElementById('sopSubSOPs');
-        if (sopContainer) {
-            sopContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted); font-size:12px;">Loading SOPs...</div>';
-            try {
-                const { data: links, error } = await sbData.from('sop_links').select('*').ilike('Topic', topicKey).order('created_at');
-                if (error) throw error;
-                if (links && links.length > 0) {
-                    sopContainer.innerHTML = links.map(function(link) {
-                        html += '<a href="' + link.URL + '" target="_blank" style="display:flex; align-items:center; gap:8px; padding:6px 10px; margin-bottom:3px; background:var(--bg); border:0.5px solid rgba(0,0,0,0.06); border-radius:6px; text-decoration:none; transition:all 0.15s; cursor:pointer;">';
-                        html += '<span style="font-size:12px; opacity:0.35; flex-shrink:0;">&#128196;</span>';
-                        html += '<span style="font-size:12.5px; font-weight:500; color:var(--text); flex:1;">' + link.Label + '</span>';
-                        html += '<span style="font-size:10px; color:var(--muted); opacity:0.35; flex-shrink:0;">&#8599;</span>';
-                        html += '</a>';
-                    }).join('');
-                } else {
-                    sopContainer.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px 0; text-align:center;">'
-                        + '<div style="width:48px; height:48px; background:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:10px; font-size:20px;">📋</div>'
-                        + '<p style="color:var(--muted); font-size:12px; font-style:italic; margin:0;">No SOPs added yet</p>'
-                        + '<p style="color:var(--muted); font-size:11px; margin:4px 0 0;">Content will be added here</p>'
-                        + '</div>';
-                }
-            } catch (err) {
-                console.error('Failed to load SOPs:', err);
-                sopContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger); font-size:12px;">Failed to load SOPs</div>';
+        var container = document.getElementById('sop-links-container');
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">Loading SOPs...</div>';
+        document.getElementById('sop-section-title').textContent = topic.title + ' SOPs';
+        showSection('sop-links');
+        try {
+            var result = await sbData.from('sop_links').select('*').ilike('Topic', topicKey).order('created_at');
+            if (result.error) throw result.error;
+            var links = result.data || [];
+            if (links.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">No SOPs found for this topic.</div>';
+                return;
             }
+            var html = '';
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i];
+                html += '<div style="display:flex;align-items:center;padding:6px 10px;margin-bottom:3px;border:0.5px solid rgba(0,0,0,0.06);border-radius:6px;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background=\'rgba(0,0,0,0.02)\'" onmouseout="this.style.background=\'transparent\'" onclick="window.open(\'' + link.URL + '\', \'_blank\')">';
+                html += '<span style="font-size:12px;opacity:0.35;margin-right:8px;">\u{1F4C4}</span>';
+                html += '<span style="font-size:12.5px;font-weight:500;flex:1;">' + link.Label + '</span>';
+                html += '<span style="font-size:10px;opacity:0.35;">\u2197</span>';
+                html += '</div>';
+            }
+            container.innerHTML = html;
+        } catch(e) {
+            console.error('Failed to load SOPs:', e);
+            container.innerHTML = '<div style="text-align:center;padding:20px;color:#c00;">Failed to load SOPs. Please try again.</div>';
         }
-
-        const contentArea = document.querySelector('.content-area');
-        if (contentArea) contentArea.scrollTop = 0;
     }
 
         // Toggle between the horizontal workflow and the lifecycle (vertical) view
