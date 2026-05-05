@@ -7365,13 +7365,11 @@
                 if (error) throw error;
                 if (links && links.length > 0) {
                     sopContainer.innerHTML = links.map(function(link) {
-                        return '<a href="' + link.URL + '" target="_blank" style="display:flex; align-items:center; gap:12px; padding:12px 14px; margin-bottom:8px; background:var(--bg); border:0.5px solid rgba(0,0,0,0.08); border-radius:8px; text-decoration:none; transition:all 0.2s; cursor:pointer;" onmouseover="this.style.borderColor=\'var(--accent)\';this.style.background=\'var(--accent-light)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--bg)\'">'
-                            + '<div style="width:36px; height:36px; background:rgba(203,121,47,0.1); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">📄</div>'
-                            + '<div style="flex:1;">'
-                            + '<div style="font-size:13px; font-weight:600; color:var(--text);">' + link.Label + '</div>'
-                            + '<div style="font-size:11px; color:var(--muted); margin-top:2px;">Google Docs ↗</div>'
-                            + '</div>'
-                            + '</a>';
+                        html += '<a href="' + link.URL + '" target="_blank" style="display:flex; align-items:center; gap:8px; padding:6px 10px; margin-bottom:3px; background:var(--bg); border:0.5px solid rgba(0,0,0,0.06); border-radius:6px; text-decoration:none; transition:all 0.15s; cursor:pointer;">';
+                        html += '<span style="font-size:12px; opacity:0.35; flex-shrink:0;">&#128196;</span>';
+                        html += '<span style="font-size:12.5px; font-weight:500; color:var(--text); flex:1;">' + link.Label + '</span>';
+                        html += '<span style="font-size:10px; color:var(--muted); opacity:0.35; flex-shrink:0;">&#8599;</span>';
+                        html += '</a>';
                     }).join('');
                 } else {
                     sopContainer.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px 0; text-align:center;">'
