@@ -3767,7 +3767,7 @@
         const PERSONAL_KEYS = new Set([
             'tasks', 'urgent', 'scratchpad',
             'approvals', 'waiting', 'eodReports',
-            'calendarChecks'
+            'calendarChecks', 'archivedTasks'
         ]);
         const SHARED_KEYS = new Set([
             'workOrders', 'applications', 'renewals', 'delinquencies',
@@ -3798,7 +3798,8 @@
             owners: [],
             onboardingProperties: [],
             onboardingTenants: [],
-            onboardingOwners: []
+            onboardingOwners: [],
+            archivedTasks: []
         };
 
         let saveTimeout = null;
@@ -4118,7 +4119,6 @@
             ];
 
             const activeItems = allItems.filter(item => !item.completed);
-            const completedItems = allItems.filter(item => item.completed);
 
             // Sort active: urgent first, then overdue/today, then by due date
             activeItems.sort((a, b) => {
@@ -4129,14 +4129,6 @@
                 if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
                 if (a.dueDate) return -1;
                 if (b.dueDate) return 1;
-                return 0;
-            });
-
-            // Sort completed: most recently completed first
-            completedItems.sort((a, b) => {
-                if (a.completedAt && b.completedAt) return b.completedAt.localeCompare(a.completedAt);
-                if (a.completedAt) return -1;
-                if (b.completedAt) return 1;
                 return 0;
             });
 
@@ -4160,24 +4152,8 @@
                 </div>`;
             }
 
-            function renderCompletedRow(item) {
-                const pill = taskPillHtml(item);
-                return `
-                <div style="padding: 10px 12px; background: rgba(34,197,94,0.04); border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; opacity:0.75;">
-                    <button onclick="toggleCompleteTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="Mark incomplete" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid var(--success); background:var(--success); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.2s;">
-                        <span style="color:white; font-size:11px; line-height:1;">✓</span>
-                    </button>
-                    <span style="flex-shrink:0; width:14px; height:14px;"></span>
-                    <span style="font-size: 12px; color: var(--accent); font-weight: 600; background: rgba(201,151,81,0.1); padding: 2px 6px; border-radius: 4px;">${item.type}</span>
-                    <span style="font-size: 13px; color: var(--text-sm); flex: 1; text-decoration: line-through;">${item.title}${taskCompletedByHtml(item)}</span>
-                    ${pill}
-                    <div style="display:flex; gap:4px; flex-shrink:0;">
-                        <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="Remove">✕</button>
-                    </div>
-                </div>`;
-            }
-
-            if (activeItems.length === 0 && completedItems.length === 0) {
+            const archived = (state.archivedTasks || []);
+            if (activeItems.length === 0 && archived.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-sm); padding: 16px; text-align: center;">No tasks yet — add one above!</p>';
                 return;
             }
@@ -4190,25 +4166,58 @@
                 html += activeItems.map(renderTaskRow).join('');
             }
 
-            if (completedItems.length > 0) {
+            // Archive section — pulls from state.archivedTasks
+            if (archived.length > 0) {
+                function renderArchivedRow(item, aidx) {
+                    const when = item.completedAt ? (() => {
+                        const d = new Date(item.completedAt);
+                        const mo = d.toLocaleString('default', { month:'short' });
+                        return ` · ${mo} ${d.getDate()}`;
+                    })() : '';
+                    const byLabel = item.completedByName ? `✓ ${item.completedByName}${when}` : '✓ Done';
+                    const typePill = `<span style="font-size:11px; color:var(--accent); font-weight:600; background:rgba(201,151,81,0.1); padding:2px 5px; border-radius:4px; flex-shrink:0;">${item.originalType || 'Task'}</span>`;
+                    const assignedPill = item.assignedTo ? `<span style="font-size:11px; color:var(--text-sm); background:var(--bg); border:1px solid var(--border); padding:2px 6px; border-radius:4px; flex-shrink:0;">${item.assignedTo}</span>` : '';
+                    return `
+                    <div style="padding:9px 12px; background:rgba(34,197,94,0.04); border-radius:6px; margin-bottom:5px; display:flex; align-items:center; gap:8px; opacity:0.8;">
+                        <div style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid var(--success); background:var(--success); display:flex; align-items:center; justify-content:center;">
+                            <span style="color:white; font-size:11px; line-height:1;">✓</span>
+                        </div>
+                        ${typePill}
+                        <span style="font-size:13px; color:var(--text-sm); flex:1; text-decoration:line-through;">${item.title}</span>
+                        ${assignedPill}
+                        <span style="font-size:11px; color:var(--success); white-space:nowrap; flex-shrink:0; font-style:italic;">${byLabel}</span>
+                        <div style="display:flex; gap:4px; flex-shrink:0;">
+                            <button class="btn" style="padding:3px 7px; font-size:11px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="restoreArchivedTask(${aidx})" title="Restore to active">↩</button>
+                            <button class="btn" style="padding:3px 7px; font-size:11px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="deleteArchivedTask(${aidx})" title="Delete permanently">✕</button>
+                        </div>
+                    </div>`;
+                }
+
                 html += `
-                <div style="margin-top:18px; border-top:1px solid var(--border); padding-top:14px;">
-                    <div style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding:6px 0; user-select:none;" onclick="
-                        const body = document.getElementById('completedTasksBody');
-                        const chevron = document.getElementById('completedTasksChevron');
+                <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:14px;">
+                    <div style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding:4px 0 10px; user-select:none;" onclick="
+                        const body = document.getElementById('archivedTasksBody');
+                        const chev = document.getElementById('archivedTasksChevron');
                         const hidden = body.classList.toggle('hidden');
-                        chevron.textContent = hidden ? '▸' : '▾';
+                        chev.textContent = hidden ? '▸' : '▾';
                     ">
-                        <span style="font-size:13px; font-weight:600; color:var(--text-sm);">🗄️ Completed &nbsp;<span style="font-size:12px; font-weight:500; color:var(--muted);">(${completedItems.length})</span></span>
-                        <span id="completedTasksChevron" style="color:var(--text-sm); font-size:12px;">▸</span>
+                        <span style="font-size:13px; font-weight:600; color:var(--text-sm);">🗄️ Archive <span style="font-size:12px; font-weight:400; color:var(--muted);">(${archived.length} completed)</span></span>
+                        <span id="archivedTasksChevron" style="color:var(--text-sm); font-size:12px;">▸</span>
                     </div>
-                    <div id="completedTasksBody" class="hidden" style="padding-top:8px;">
-                        ${completedItems.map(renderCompletedRow).join('')}
+                    <div id="archivedTasksBody" class="hidden" style="padding-top:4px;">
+                        ${archived.map((item, i) => renderArchivedRow(item, i)).join('')}
                     </div>
                 </div>`;
             }
 
             container.innerHTML = html;
+        }
+
+        function deleteArchivedTask(idx) {
+            if (!state.archivedTasks || !state.archivedTasks[idx]) return;
+            state.archivedTasks.splice(idx, 1);
+            saveStateKey('archivedTasks', state.archivedTasks);
+            if (typeof renderAllTasksPage === 'function') renderAllTasksPage();
         }
 
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -4383,6 +4392,7 @@
                     </button>
                     <button onclick="toggleTaskUrgent('${type}', ${idx})" title="${task.urgent ? 'Remove urgent flag' : 'Mark urgent (sorts to top)'}" style="flex-shrink:0; width:14px; height:14px; border-radius:50%; border:2px solid; cursor:pointer; padding:0; transition:all 0.15s; ${dotStyle}"></button>
                     <span style="font-size: 13px; color: var(--text); flex: 1; ${task.completed ? 'text-decoration: line-through; color: var(--text-sm);' : ''}">${task.title}${taskCompletedByHtml(task)}</span>
+                    ${task.assignedTo ? `<span style="font-size:11px; color:var(--text-sm); background:var(--bg); border:1px solid var(--border); padding:2px 6px; border-radius:4px; flex-shrink:0;">${task.assignedTo}</span>` : ''}
                     ${pill}
                     <div style="display:flex; gap:4px; flex-shrink:0;">
                         <button class="btn" style="padding:4px 8px; font-size:11px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="editTask('${type}', ${idx})" title="Edit">✏️</button>
@@ -4492,6 +4502,16 @@
                     <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:14px;">Add Task</div>
                     <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Task</label>
                     <input type="text" id="new-task-title" placeholder="What needs to be done?" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:12px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Assigned to</label>
+                    <select id="new-task-assigned" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:12px;">
+                        <option value="">— Unassigned —</option>
+                        <option value="Cole">Cole</option>
+                        <option value="Diana">Diana</option>
+                        <option value="Chris">Chris</option>
+                        <option value="Mark">Mark</option>
+                        <option value="Vance">Vance</option>
+                        <option value="Elan">Elan</option>
+                    </select>
                     <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Due date (optional)</label>
                     <input type="date" id="new-task-due" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:12px;">
                     <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text); margin-bottom:18px; cursor:pointer;">
@@ -4529,9 +4549,11 @@
             if (!title) { document.getElementById('new-task-title').focus(); return; }
             const dueDate = document.getElementById('new-task-due').value || '';
             const today = document.getElementById('new-task-today').checked;
-            const entry = { title, completed: false };
+            const assignedTo = (document.getElementById('new-task-assigned') && document.getElementById('new-task-assigned').value) || '';
+            const entry = { title, completed: false, createdAt: new Date().toISOString() };
             if (dueDate) entry.dueDate = dueDate;
             if (today) entry.today = true;
+            if (assignedTo) entry.assignedTo = assignedTo;
             if (!state.tasks) state.tasks = [];
             state.tasks.push(entry);
             saveStateKey('tasks', state.tasks);
@@ -4542,34 +4564,120 @@
         function toggleCompleteTask(type, idx) {
             const key = type === 'Task' ? 'tasks' : type === 'Approval' ? 'approvals' : type === 'Waiting' ? 'waiting' : type === 'Meeting' ? 'meetings' : type;
             if (state[key] && state[key][idx]) {
-                const item = state[key][idx];
-                const newCompleted = !item.completed;
-                item.completed = newCompleted;
-                if (newCompleted) {
-                    item.completedBy = (currentUser && currentUser.id) || null;
-                    item.completedByName = displayName();
-                    item.completedAt = new Date().toISOString();
-                } else {
-                    delete item.completedBy;
-                    delete item.completedByName;
-                    delete item.completedAt;
-                }
+                const item = { ...state[key][idx] };
+                // Move to archive with completion metadata
+                item.completed = true;
+                item.completedBy = (currentUser && currentUser.id) || null;
+                item.completedByName = displayName();
+                item.completedAt = new Date().toISOString();
+                item.originalType = type;
+                // Remove from source array
+                state[key].splice(idx, 1);
+                // Add to archivedTasks
+                if (!state.archivedTasks) state.archivedTasks = [];
+                state.archivedTasks.unshift(item); // newest first
                 saveStateKey(key, state[key]);
+                saveStateKey('archivedTasks', state.archivedTasks);
                 renderDashboard();
                 if (typeof renderAllTasksPage === 'function') renderAllTasksPage();
             }
         }
 
+        function restoreArchivedTask(idx) {
+            if (!state.archivedTasks || !state.archivedTasks[idx]) return;
+            const item = { ...state.archivedTasks[idx] };
+            const type = item.originalType || 'Task';
+            const key = type === 'Task' ? 'tasks' : type === 'Approval' ? 'approvals' : type === 'Waiting' ? 'waiting' : type === 'Meeting' ? 'meetings' : 'tasks';
+            // Strip completion metadata
+            delete item.completed;
+            delete item.completedBy;
+            delete item.completedByName;
+            delete item.completedAt;
+            delete item.originalType;
+            if (!state[key]) state[key] = [];
+            state[key].push(item);
+            state.archivedTasks.splice(idx, 1);
+            saveStateKey(key, state[key]);
+            saveStateKey('archivedTasks', state.archivedTasks);
+            renderDashboard();
+            if (typeof renderAllTasksPage === 'function') renderAllTasksPage();
+        }
+
         function editTask(type, idx) {
             const key = type === 'Task' ? 'tasks' : type === 'Approval' ? 'approvals' : type === 'Waiting' ? 'waiting' : type === 'Meeting' ? 'meetings' : type;
-            if (state[key] && state[key][idx]) {
-                const newTitle = prompt('Edit item:', state[key][idx].title);
-                if (newTitle !== null && newTitle.trim()) {
-                    state[key][idx].title = newTitle.trim();
-                    saveState(state);
-                    renderDashboard();
+            if (!state[key] || !state[key][idx]) return;
+            const task = state[key][idx];
+
+            const existing = document.getElementById('edit-task-modal');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'edit-task-modal';
+            overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(12,18,50,0.55); z-index:9500; display:flex; align-items:center; justify-content:center; padding:20px;';
+
+            const dueFmt = task.dueDate || '';
+            const assignedVal = task.assignedTo || '';
+            const teamMembers = ['Cole','Diana','Chris','Mark','Vance','Elan'];
+            const assignedOptions = '<option value="">— Unassigned —</option>' +
+                teamMembers.map(n => `<option value="${n}" ${assignedVal === n ? 'selected' : ''}>${n}</option>`).join('');
+
+            overlay.innerHTML = `
+                <div style="background:var(--surface); border-radius:12px; padding:22px; width:100%; max-width:440px; box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+                    <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:14px;">Edit Task</div>
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Task</label>
+                    <input type="text" id="edit-task-title" value="${task.title.replace(/"/g,'&quot;')}" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:12px;">
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Assigned to</label>
+                    <select id="edit-task-assigned" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:12px;">${assignedOptions}</select>
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Due date (optional)</label>
+                    <input type="date" id="edit-task-due" value="${dueFmt}" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:12px;">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text); margin-bottom:18px; cursor:pointer;">
+                        <input type="checkbox" id="edit-task-today" ${task.today ? 'checked' : ''} style="accent-color:var(--danger); width:16px; height:16px;">
+                        <span>🔴 Must-do today</span>
+                    </label>
+                    <div style="display:flex; justify-content:flex-end; gap:8px;">
+                        <button class="btn" onclick="closeEditTaskModal()" style="font-size:13px; padding:8px 14px;">Cancel</button>
+                        <button class="btn btn-primary" onclick="submitEditTaskModal('${type}', ${idx})" style="font-size:13px; padding:8px 14px;">Save Changes</button>
+                    </div>
+                </div>
+            `;
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeEditTaskModal();
+            });
+            document.body.appendChild(overlay);
+            setTimeout(() => {
+                const t = document.getElementById('edit-task-title');
+                if (t) {
+                    t.focus();
+                    t.setSelectionRange(t.value.length, t.value.length);
+                    t.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') { e.preventDefault(); submitEditTaskModal(type, idx); }
+                        if (e.key === 'Escape') closeEditTaskModal();
+                    });
                 }
-            }
+            }, 0);
+        }
+
+        function closeEditTaskModal() {
+            const m = document.getElementById('edit-task-modal');
+            if (m) m.remove();
+        }
+
+        function submitEditTaskModal(type, idx) {
+            const key = type === 'Task' ? 'tasks' : type === 'Approval' ? 'approvals' : type === 'Waiting' ? 'waiting' : type === 'Meeting' ? 'meetings' : type;
+            if (!state[key] || !state[key][idx]) { closeEditTaskModal(); return; }
+            const title = (document.getElementById('edit-task-title').value || '').trim();
+            if (!title) { document.getElementById('edit-task-title').focus(); return; }
+            const assignedTo = document.getElementById('edit-task-assigned').value || '';
+            const dueDate = document.getElementById('edit-task-due').value || '';
+            const today = document.getElementById('edit-task-today').checked;
+            state[key][idx].title = title;
+            state[key][idx].assignedTo = assignedTo || undefined;
+            state[key][idx].dueDate = dueDate || undefined;
+            state[key][idx].today = today || undefined;
+            saveStateKey(key, state[key]);
+            closeEditTaskModal();
+            renderDashboard();
+            if (typeof renderAllTasksPage === 'function') renderAllTasksPage();
         }
 
         function removeTask(type, idx) {
