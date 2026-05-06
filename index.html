@@ -4141,8 +4141,7 @@
                     : 'background:transparent; border-color:var(--border);';
                 return `
                 <div style="padding: 10px 12px; background: ${item.urgent ? 'rgba(184,50,50,0.04)' : 'var(--bg)'}; border-radius: 6px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; ${item.urgent ? 'border-left:3px solid var(--danger);' : ''}">
-                    <button onclick="toggleCompleteTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="Mark complete" style="flex-shrink:0; width:20px; height:20px; border-radius:50%; border:2px solid var(--border); background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.2s;"></button>
-                    <button onclick="toggleTaskUrgent('${item.type}', ${item.idx})" title="${dotTitle}" style="flex-shrink:0; width:14px; height:14px; border-radius:50%; border:2px solid; cursor:pointer; padding:0; transition:all 0.15s; ${dotStyle}"></button>
+                    <button onclick="toggleCompleteTask('${item.type}', ${item.idx}); renderAllTasksPage();" title="Mark complete" style="flex-shrink:0; width:18px; height:18px; border-radius:4px; border:2px solid var(--border); background:transparent; cursor:pointer; padding:0; transition:all 0.2s;"></button>
                     <span style="font-size: 12px; color: var(--accent); font-weight: 600; background: rgba(201,151,81,0.1); padding: 2px 6px; border-radius: 4px;">${item.type}</span>
                     <span style="font-size: 13px; color: var(--text); flex: 1;">${item.title}</span>
                     ${pill}
