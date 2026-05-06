@@ -144,7 +144,6 @@
             padding: 8px 16px;
             font-size: 11px;
             font-weight: 700;
-            text-transform: uppercase;
             color: rgba(203, 121, 47, 0.7);
             letter-spacing: 0.5px;
         }
@@ -1070,7 +1069,7 @@
         <div class="sidebar-nav">
             <!-- DAILY -->
             <div class="nav-section">
-                <div class="nav-section-label">DAILY</div>
+                <div class="nav-section-label">Daily</div>
                 <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
                 <div class="nav-item" data-page="tasks">✅ My Tasks</div>
                 <div class="nav-item" data-page="team-calendar">📅 Team Calendar</div>
@@ -1080,14 +1079,14 @@
 
             <!-- ROLE -->
             <div class="nav-section">
-                <div class="nav-section-label">ROLE</div>
+                <div class="nav-section-label">Role</div>
                 <div class="nav-item" data-page="role-overview">🏠 Role Overview</div>
                 <div class="nav-item" data-page="daily-weekly">📋 Daily & Weekly</div>
             </div>
 
             <!-- OPERATIONS -->
             <div class="nav-section">
-                <div class="nav-section-label">OPERATIONS</div>
+                <div class="nav-section-label">Operations</div>
                 <div class="nav-item" data-page="sops">📚 SOPs & Video Library</div>
                 <div class="nav-item" data-page="portfolio">🏢 Property & Owners</div>
                 <div class="nav-item" data-page="finance">💰 Finance</div>
@@ -1101,7 +1100,7 @@
             <!-- IN PROCESS (Drafts) -->
             <div class="nav-section">
                 <div class="nav-section-label" id="inProcessLabel" onclick="toggleInProcess()" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none;">
-                    <span>IN PROCESS</span>
+                    <span>In Process</span>
                     <span id="inProcessChevron" style="transition:transform .2s; display:inline-block;">▸</span>
                 </div>
                 <div id="inProcessItems" style="display:none;">
@@ -1137,6 +1136,20 @@
                         <div class="greeting-subtitle">EPG Management — Assistant Property Manager</div>
                     </div>
                     <div class="greeting-date" id="dashDate"></div>
+                    <a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:6px; font-size:11px; font-weight:600; color:#fff; text-decoration:none; white-space:nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                        <img src="https://www.appfolio.com/favicon.ico" alt="" style="height:11px; width:11px; object-fit:contain;">
+                        AppFolio ↗
+                    </a>
+                </div>
+
+                <!-- SECTION QUICK-NAV -->
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; padding:12px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
+                    <span style="font-size:11px; font-weight:600; color:var(--text-sm); align-self:center; margin-right:4px;">Jump to:</span>
+                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('maintenance')">🔧 Work Orders</button>
+                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('rental-applications')">📋 Applications</button>
+                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('lease-renewals')">🔄 Lease Renewals</button>
+                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('finance')">💰 Finance</button>
+                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('eod')">📝 End of Day</button>
                 </div>
 
                 <div class="stats-grid">
@@ -1149,7 +1162,7 @@
                         <div class="stat-value" id="stat-approvals">0</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">WAITING ON</div>
+                        <div class="stat-label">FOLLOW-UPS</div>
                         <div class="stat-value" id="stat-waiting">0</div>
                     </div>
                     <div class="stat-card" id="stat-workorders-card">
@@ -1205,17 +1218,11 @@
                     <button class="btn" style="font-size:12px; padding:6px 14px; white-space:nowrap;" onclick="navigateTo('eod')">Go to EOD →</button>
                 </div>
 
-                <!-- APPFOLIO LINK -->
-                <div style="margin-bottom:14px; display:flex; justify-content:flex-end;">
-                    <a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:7px; padding:7px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px; font-size:12px; font-weight:600; color:var(--text); text-decoration:none; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'">
-                        <img src="https://www.appfolio.com/favicon.ico" alt="" style="height:13px; width:13px; object-fit:contain;">
-                        Open AppFolio ↗
-                    </a>
-                </div>
 
-                <!-- APPROVALS + WAITING ON: side by side -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;">
-                    <div class="panel" style="margin-bottom:0; border-left:4px solid var(--warning);">
+
+                <!-- APPROVALS + FOLLOW-UPS: compact stacked right column -->
+                <div style="max-width:420px; margin-left:auto; display:flex; flex-direction:column; gap:12px;">
+                    <div class="panel" style="margin-bottom:0; border-left:4px solid var(--danger); background:rgba(184,50,50,0.02);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <div class="panel-title" style="margin-bottom:0; font-size:14px;">⏳ Awaiting Approval</div>
                             <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('approvals')">+ Add</button>
@@ -1225,7 +1232,7 @@
 
                     <div class="panel" style="margin-bottom:0; border-left:4px solid #6c8ebf;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div class="panel-title" style="margin-bottom:0; font-size:14px;">⌛ Waiting On</div>
+                            <div class="panel-title" style="margin-bottom:0; font-size:14px;">⌛ Follow-Ups</div>
                             <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('waiting')">+ Add</button>
                         </div>
                         <div id="dashboard-waiting"></div>
