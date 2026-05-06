@@ -1284,11 +1284,7 @@
 
                 <!-- COMPANY HQ PANEL -->
                 <div id="hq-panel-company-hq" class="hq-panel">
-                    <div class="panel" style="padding:48px 32px; text-align:center;">
-                        <div style="font-size:28px; margin-bottom:12px;">🏢</div>
-                        <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px;">Company HQ</div>
-                        <div style="font-size:13px; color:var(--text-sm); max-width:360px; margin:0 auto;">Portfolio KPIs, move-ins/outs, lease renewals, and team task rollup — coming next.</div>
-                    </div>
+                    <div id="company-hq-root"></div>
                 </div>
 
                 <!-- TEAM PERFORMANCE PANEL -->
@@ -3818,6 +3814,306 @@
             });
             const panel = document.getElementById('hq-panel-' + tab);
             if (panel) panel.classList.add('active');
+            if (tab === 'company-hq') renderCompanyHQ();
+        }
+
+
+        // =============================================
+        // COMPANY HQ
+        // =============================================
+
+        function chqDaysUntil(dateStr) {
+            if (!dateStr) return null;
+            const diff = Math.round((new Date(dateStr + 'T00:00:00') - new Date(todayIsoDate() + 'T00:00:00')) / 86400000);
+            return diff;
+        }
+
+        function chqStatusDot(status) {
+            const map = {
+                'signed': '#2d7a4f', 'confirmed': '#2d7a4f', 'on-track': '#2d7a4f', 'done': '#2d7a4f',
+                'sent': '#3b6dbf', 'notice received': '#3b6dbf', 'walkthrough completed': '#3b6dbf', 'in progress': '#3b6dbf',
+                'draft': '#d97706', 'awaiting deposit': '#d97706', 'pending': '#d97706', 'stalled': '#b83232',
+            };
+            const color = map[(status || '').toLowerCase()] || '#94a3b8';
+            return `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${color}; flex-shrink:0;"></span>`;
+        }
+
+        function chqMoveInRow(lease) {
+            const days = chqDaysUntil(lease.leaseStart);
+            const label = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `in ${days} days`;
+            return `
+            <div style="padding:10px 0; border-bottom:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div style="font-size:13px; font-weight:600; color:var(--text);">${lease.property || '—'}</div>
+                    <div style="font-size:12px; color:var(--text-sm); white-space:nowrap; margin-left:12px;">${label}</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+                    ${chqStatusDot(lease.status)}
+                    <span style="font-size:12px; color:var(--text-sm);">${lease.tenantName || ''} · ${lease.status || 'Draft'}</span>
+                </div>
+            </div>`;
+        }
+
+        function chqMoveOutRow(mo) {
+            const days = chqDaysUntil(mo.moveOutDate);
+            const label = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `in ${days} days`;
+            return `
+            <div style="padding:10px 0; border-bottom:1px solid var(--border);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div style="font-size:13px; font-weight:600; color:var(--text);">${mo.property || '—'}</div>
+                    <div style="font-size:12px; color:var(--text-sm); white-space:nowrap; margin-left:12px;">${label}</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+                    ${chqStatusDot(mo.status)}
+                    <span style="font-size:12px; color:var(--text-sm);">${mo.tenantName || ''} · ${mo.status || 'Pending'}</span>
+                </div>
+                <div style="display:flex; gap:4px; margin-top:6px;">
+                    <select onchange="updateMoveOutStatus('${mo.id}', this.value)" style="font-size:11px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--bg); color:var(--text); cursor:pointer;">
+                        ${['Pending','Notice received','Walkthrough scheduled','Walkthrough completed','Keys returned','Confirmed'].map(s =>
+                            `<option value="${s}" ${mo.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+                    </select>
+                    <button class="btn" style="padding:2px 7px; font-size:10px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeMoveOut('${mo.id}')">✕</button>
+                </div>
+            </div>`;
+        }
+
+        function addMoveOut() {
+            const property = prompt('Property address + unit:');
+            if (!property) return;
+            const tenantName = prompt('Tenant name:');
+            if (!tenantName) return;
+            const moveOutDate = prompt('Move-out date (YYYY-MM-DD):');
+            if (!moveOutDate) return;
+            if (!state.moveOuts) state.moveOuts = [];
+            state.moveOuts.push({ id: Date.now(), property: property.trim(), tenantName: tenantName.trim(), moveOutDate, status: 'Notice received', createdAt: new Date().toISOString() });
+            saveStateKey('moveOuts', state.moveOuts);
+            renderCompanyHQ();
+        }
+
+        function removeMoveOut(id) {
+            state.moveOuts = (state.moveOuts || []).filter(m => String(m.id) !== String(id));
+            saveStateKey('moveOuts', state.moveOuts);
+            renderCompanyHQ();
+        }
+
+        function updateMoveOutStatus(id, status) {
+            const m = (state.moveOuts || []).find(m => String(m.id) === String(id));
+            if (m) { m.status = status; saveStateKey('moveOuts', state.moveOuts); renderCompanyHQ(); }
+        }
+
+        function addCompanyTask() {
+            const title = prompt('Task title:');
+            if (!title) return;
+            const assignedTo = prompt('Assigned to (name):') || '';
+            if (!state.companyTasks) state.companyTasks = [];
+            state.companyTasks.push({ id: Date.now(), title: title.trim(), assignedTo: assignedTo.trim(), completed: false, urgent: false, dueDate: '', createdAt: new Date().toISOString() });
+            saveStateKey('companyTasks', state.companyTasks);
+            renderCompanyHQ();
+        }
+
+        function toggleCompanyTask(id) {
+            const t = (state.companyTasks || []).find(t => String(t.id) === String(id));
+            if (!t) return;
+            t.completed = !t.completed;
+            t.completedAt = t.completed ? new Date().toISOString() : null;
+            saveStateKey('companyTasks', state.companyTasks);
+            renderCompanyHQ();
+        }
+
+        function removeCompanyTask(id) {
+            state.companyTasks = (state.companyTasks || []).filter(t => String(t.id) !== String(id));
+            saveStateKey('companyTasks', state.companyTasks);
+            renderCompanyHQ();
+        }
+
+        function addWeeklyFix() {
+            const name = prompt('Team member name:');
+            if (!name) return;
+            const item = prompt('What are they fixing this week?');
+            if (!item) return;
+            if (!state.weeklyFixes) state.weeklyFixes = [];
+            const weekOf = getMondayOfWeek();
+            // Replace if same person already submitted this week
+            state.weeklyFixes = state.weeklyFixes.filter(f => !(f.name === name.trim() && f.weekOf === weekOf));
+            state.weeklyFixes.push({ id: Date.now(), weekOf, name: name.trim(), item: item.trim(), status: 'on-track' });
+            saveStateKey('weeklyFixes', state.weeklyFixes);
+            renderCompanyHQ();
+        }
+
+        function toggleFixStatus(id) {
+            const f = (state.weeklyFixes || []).find(f => String(f.id) === String(id));
+            if (!f) return;
+            const cycle = ['on-track', 'stalled', 'done'];
+            f.status = cycle[(cycle.indexOf(f.status) + 1) % cycle.length];
+            saveStateKey('weeklyFixes', state.weeklyFixes);
+            renderCompanyHQ();
+        }
+
+        function getMondayOfWeek() {
+            const d = new Date();
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            const mon = new Date(d.setDate(diff));
+            return mon.toISOString().split('T')[0];
+        }
+
+        function editPortfolioKPI(field) {
+            const kpis = state.portfolioKPIs || {};
+            const labels = { totalUnits: 'Total units', totalProperties: 'Total properties', occupiedUnits: 'Occupied units' };
+            const val = prompt(`${labels[field] || field}:`, kpis[field] || 0);
+            if (val === null) return;
+            if (!state.portfolioKPIs) state.portfolioKPIs = {};
+            state.portfolioKPIs[field] = parseInt(val) || 0;
+            saveStateKey('portfolioKPIs', state.portfolioKPIs);
+            renderCompanyHQ();
+        }
+
+        function renderCompanyHQ() {
+            const root = document.getElementById('company-hq-root');
+            if (!root) return;
+
+            const kpis = state.portfolioKPIs || { totalUnits: 0, totalProperties: 0, occupiedUnits: 0 };
+            const totalUnits = kpis.totalUnits || 0;
+            const occupiedUnits = kpis.occupiedUnits || 0;
+            const vacantUnits = Math.max(0, totalUnits - occupiedUnits);
+            const occupancy = totalUnits > 0 ? ((occupiedUnits / totalUnits) * 100).toFixed(1) : '—';
+
+            const openWOsList = (state.workOrders || []).filter(wo => {
+                const done = (wo.steps || []).filter(s => s.done).length;
+                return done < (wo.steps || []).length;
+            });
+            const urgentWOs = openWOsList.filter(wo => wo.priority === 'emergency' || wo.priority === 'urgent').length;
+
+            const activeDelinq = (state.delinquencies || []).filter(d => (d.status || '').toLowerCase() !== 'resolved');
+            const delinqAmount = activeDelinq.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+            const delinqFmt = delinqAmount > 0 ? '$' + delinqAmount.toLocaleString('en-US', { minimumFractionDigits: 0 }) : '$0';
+
+            const today = todayIsoDate();
+            const in14 = new Date(); in14.setDate(in14.getDate() + 14);
+            const in14Str = in14.toISOString().split('T')[0];
+
+            const moveIns = (state.newLeases || [])
+                .filter(l => l.leaseStart && l.leaseStart >= today && l.leaseStart <= in14Str)
+                .sort((a, b) => (a.leaseStart || '').localeCompare(b.leaseStart || ''));
+
+            const moveOuts = (state.moveOuts || [])
+                .filter(m => m.moveOutDate && m.moveOutDate >= today && m.moveOutDate <= in14Str)
+                .sort((a, b) => (a.moveOutDate || '').localeCompare(b.moveOutDate || ''));
+
+            const companyTasks = (state.companyTasks || []).filter(t => !t.completed);
+            const companyTasksDone = (state.companyTasks || []).filter(t => t.completed);
+
+            const weekOf = getMondayOfWeek();
+            const weekFixes = (state.weeklyFixes || []).filter(f => f.weekOf === weekOf);
+            const weekLabel = new Date(weekOf + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            const statusBadge = (s) => {
+                const styles = {
+                    'on-track':  'background:#dcfce7; color:#166534;',
+                    'stalled':   'background:#fee2e2; color:#991b1b;',
+                    'done':      'background:#f1f5f9; color:#475569; text-decoration:line-through;',
+                };
+                const labels = { 'on-track': 'On track', 'stalled': 'Stalled', 'done': 'Done' };
+                return `<span style="font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; cursor:pointer; ${styles[s] || ''}">${labels[s] || s}</span>`;
+            };
+
+            root.innerHTML = `
+            <!-- KPI CARDS -->
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;">
+                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer;" onclick="editPortfolioKPI('totalUnits')" title="Click to edit">
+                    <div style="font-size:11px; font-weight:700; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">Total Units</div>
+                    <div style="font-size:28px; font-weight:800; color:var(--text); line-height:1;">${totalUnits || '<span style="font-size:16px; color:var(--text-sm);">click to set</span>'}</div>
+                    <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">Across ${kpis.totalProperties || '—'} properties <span style="color:var(--accent);">✎</span></div>
+                </div>
+                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer;" onclick="editPortfolioKPI('occupiedUnits')" title="Click to edit occupied units">
+                    <div style="font-size:11px; font-weight:700; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">Occupancy</div>
+                    <div style="font-size:28px; font-weight:800; color:${parseFloat(occupancy) >= 95 ? 'var(--success)' : parseFloat(occupancy) >= 85 ? 'var(--text)' : 'var(--danger)'}; line-height:1;">${occupancy !== '—' ? occupancy + '%' : '—'}</div>
+                    <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">${occupiedUnits} occupied · ${vacantUnits} vacant <span style="color:var(--accent);">✎</span></div>
+                </div>
+                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer; ${delinqAmount > 0 ? 'border-left:3px solid var(--danger);' : ''}" onclick="navigateTo('finance')" title="Go to Finance">
+                    <div style="font-size:11px; font-weight:700; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">Delinquencies</div>
+                    <div style="font-size:28px; font-weight:800; color:${delinqAmount > 0 ? 'var(--danger)' : 'var(--success)'}; line-height:1;">${delinqFmt}</div>
+                    <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">${activeDelinq.length} tenant${activeDelinq.length !== 1 ? 's' : ''} · tap to manage</div>
+                </div>
+                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer; ${urgentWOs > 0 ? 'border-left:3px solid var(--warning);' : ''}" onclick="navigateTo('maintenance')" title="Go to Maintenance">
+                    <div style="font-size:11px; font-weight:700; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">Open Work Orders</div>
+                    <div style="font-size:28px; font-weight:800; color:var(--text); line-height:1;">${openWOsList.length}</div>
+                    <div style="font-size:11px; color:${urgentWOs > 0 ? 'var(--danger)' : 'var(--text-sm)'}; margin-top:4px;">${urgentWOs > 0 ? urgentWOs + ' urgent' : 'No urgent items'}</div>
+                </div>
+            </div>
+
+            <!-- MOVE-INS / MOVE-OUTS -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                <div class="panel" style="margin-bottom:0; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <div>
+                            <span style="font-size:14px; font-weight:700; color:var(--text);">Move-ins</span>
+                            <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">Next 14 days · ${moveIns.length}</span>
+                        </div>
+                        <button class="btn" style="font-size:11px; padding:3px 10px;" onclick="navigateTo('leasing')">+ Add →</button>
+                    </div>
+                    ${moveIns.length === 0
+                        ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:16px 0;">No move-ins in next 14 days</p>'
+                        : moveIns.map(l => chqMoveInRow(l)).join('')}
+                </div>
+                <div class="panel" style="margin-bottom:0; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <div>
+                            <span style="font-size:14px; font-weight:700; color:var(--text);">Move-outs</span>
+                            <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">Next 14 days · ${moveOuts.length}</span>
+                        </div>
+                        <button class="btn" style="font-size:11px; padding:3px 10px;" onclick="addMoveOut()">+ Add</button>
+                    </div>
+                    ${moveOuts.length === 0
+                        ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:16px 0;">No move-outs in next 14 days</p>'
+                        : moveOuts.map(m => chqMoveOutRow(m)).join('')}
+                </div>
+            </div>
+
+            <!-- TEAM TASK ROLLUP -->
+            <div class="panel" style="margin-bottom:16px; padding:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                    <div>
+                        <span style="font-size:14px; font-weight:700; color:var(--text);">Team Tasks</span>
+                        <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">${companyTasks.length} open</span>
+                    </div>
+                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="addCompanyTask()">+ Add Task</button>
+                </div>
+                ${companyTasks.length === 0 && companyTasksDone.length === 0
+                    ? '<p style="color:var(--text-sm); font-size:13px; text-align:center; padding:16px 0;">No team tasks yet — click + Add Task to create one.</p>'
+                    : companyTasks.map(t => `
+                    <div style="padding:9px 12px; background:var(--bg); border-radius:6px; margin-bottom:6px; display:flex; align-items:center; gap:8px; ${t.urgent ? 'border-left:3px solid var(--danger);' : ''}">
+                        <button onclick="toggleCompanyTask('${t.id}')" style="flex-shrink:0; width:16px; height:16px; border-radius:3px; border:2px solid var(--border); background:transparent; cursor:pointer; padding:0;" title="Complete"></button>
+                        <span style="font-size:13px; color:var(--text); flex:1;">${t.title}</span>
+                        ${t.assignedTo ? `<span style="font-size:11px; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); padding:2px 8px; border-radius:4px; flex-shrink:0;">${t.assignedTo}</span>` : ''}
+                        <button class="btn" style="padding:2px 7px; font-size:10px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeCompanyTask('${t.id}')">✕</button>
+                    </div>`).join('')}
+                ${companyTasksDone.length > 0 ? `<p style="font-size:11px; color:var(--text-sm); margin-top:8px; text-align:right;">${companyTasksDone.length} completed task${companyTasksDone.length !== 1 ? 's' : ''} hidden</p>` : ''}
+            </div>
+
+            <!-- WHAT THE TEAM IS FIXING -->
+            <div class="panel" style="margin-bottom:0; padding:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <div style="font-size:14px; font-weight:700; color:var(--text);">What the team is fixing this week</div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:11px; color:var(--text-sm);">Week of ${weekLabel} · ${weekFixes.length} submitted</span>
+                        <button class="btn" style="font-size:11px; padding:3px 10px;" onclick="addWeeklyFix()">+ Add</button>
+                    </div>
+                </div>
+                <p style="font-size:12px; color:var(--text-sm); margin-bottom:14px;">One thing that's broken or inefficient — and how you're addressing it.</p>
+                ${weekFixes.length === 0
+                    ? '<p style="font-size:13px; color:var(--text-sm); text-align:center; padding:16px 0;">No submissions yet this week.</p>'
+                    : `<table style="width:100%; border-collapse:collapse;">
+                        ${weekFixes.map(f => `
+                        <tr style="border-bottom:1px solid var(--border);">
+                            <td style="padding:10px 8px; font-size:13px; font-weight:700; color:var(--text); width:80px; white-space:nowrap;">${f.name}</td>
+                            <td style="padding:10px 8px; font-size:13px; color:var(--text); flex:1;">${f.item}</td>
+                            <td style="padding:10px 8px; text-align:right; white-space:nowrap;">
+                                <span onclick="toggleFixStatus('${f.id}')" title="Click to cycle status">${statusBadge(f.status)}</span>
+                            </td>
+                        </tr>`).join('')}
+                    </table>`}
+            </div>`;
         }
 
         function applyUserChrome() {
@@ -3853,7 +4149,8 @@
             'workOrders', 'applications', 'renewals', 'delinquencies',
             'properties', 'owners', 'portfolioNotes', 'newLeases',
             'onboardingProperties', 'onboardingTenants', 'onboardingOwners',
-            'checklists', 'trainingChecks', 'meetings', 'reconciliationNotes'
+            'checklists', 'trainingChecks', 'meetings', 'reconciliationNotes',
+            'moveOuts', 'companyTasks', 'weeklyFixes', 'portfolioKPIs'
         ]);
 
         let currentUser = null;     // auth.users row
@@ -3880,7 +4177,11 @@
             onboardingTenants: [],
             onboardingOwners: [],
             archivedTasks: [],
-            archivedWaiting: []
+            archivedWaiting: [],
+            moveOuts: [],
+            companyTasks: [],
+            weeklyFixes: [],
+            portfolioKPIs: { totalUnits: 0, totalProperties: 0, occupiedUnits: 0 }
         };
 
         let saveTimeout = null;
