@@ -3897,16 +3897,59 @@
         }
 
         function addWeeklyFix() {
-            const name = prompt('Team member name:');
-            if (!name) return;
-            const item = prompt('What are they fixing this week?');
-            if (!item) return;
+            const existing = document.getElementById('weekly-fix-modal');
+            if (existing) existing.remove();
+            const teamMembers = ['Cole','Diana','Chris','Mark','Vance','Elan'];
+            const overlay = document.createElement('div');
+            overlay.id = 'weekly-fix-modal';
+            overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(12,18,50,0.55); z-index:9500; display:flex; align-items:center; justify-content:center; padding:20px;';
+            overlay.innerHTML = `
+                <div style="background:var(--surface); border-radius:12px; padding:22px; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+                    <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:16px;">This week's fix</div>
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Your name</label>
+                    <select id="wf-name" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:12px;">
+                        <option value="">— Select name —</option>
+                        ${teamMembers.map(n => `<option value="${n}">${n}</option>`).join('')}
+                    </select>
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">What are you fixing?</label>
+                    <textarea id="wf-item" rows="3" placeholder="Describe what's broken or inefficient and how you're addressing it…" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); margin-bottom:18px; resize:vertical; box-sizing:border-box;"></textarea>
+                    <div style="display:flex; justify-content:flex-end; gap:8px;">
+                        <button class="btn" onclick="closeWeeklyFixModal()" style="font-size:13px; padding:8px 14px;">Cancel</button>
+                        <button class="btn btn-primary" onclick="submitWeeklyFixModal()" style="font-size:13px; padding:8px 14px;">Submit</button>
+                    </div>
+                </div>
+            `;
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeWeeklyFixModal();
+            });
+            document.body.appendChild(overlay);
+            setTimeout(() => {
+                const sel = document.getElementById('wf-name');
+                if (sel) sel.focus();
+                const ta = document.getElementById('wf-item');
+                if (ta) ta.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submitWeeklyFixModal(); }
+                });
+            }, 0);
+        }
+
+        function closeWeeklyFixModal() {
+            const m = document.getElementById('weekly-fix-modal');
+            if (m) m.remove();
+        }
+
+        function submitWeeklyFixModal() {
+            const name = (document.getElementById('wf-name').value || '').trim();
+            const item = (document.getElementById('wf-item').value || '').trim();
+            if (!name) { document.getElementById('wf-name').focus(); return; }
+            if (!item) { document.getElementById('wf-item').focus(); return; }
             if (!state.weeklyFixes) state.weeklyFixes = [];
             const weekOf = getMondayOfWeek();
             // Replace if same person already submitted this week
-            state.weeklyFixes = state.weeklyFixes.filter(f => !(f.name === name.trim() && f.weekOf === weekOf));
-            state.weeklyFixes.push({ id: Date.now(), weekOf, name: name.trim(), item: item.trim(), status: 'on-track' });
+            state.weeklyFixes = state.weeklyFixes.filter(f => !(f.name === name && f.weekOf === weekOf));
+            state.weeklyFixes.push({ id: Date.now(), weekOf, name, item, status: 'on-track' });
             saveStateKey('weeklyFixes', state.weeklyFixes);
+            closeWeeklyFixModal();
             renderCompanyHQ();
         }
 
@@ -5707,30 +5750,20 @@
             const roleOrder = Object.keys(groups).filter(r => r !== 'GENERAL').sort();
             if (groups['GENERAL']) roleOrder.push('GENERAL');
 
+            // Compact rows: one summary row per category
             container.innerHTML = roleOrder.map(role => {
                 const items = groups[role];
                 const total = items.length;
                 const done = items.filter(l => isCalendarTaskChecked(role, l)).length;
+                const allDone = done === total;
                 const roleLabel = role === 'GENERAL' ? 'General' : role;
+                const summary = items.join(' · ');
+                const truncated = summary.length > 72 ? summary.slice(0, 70) + '…' : summary;
                 return `
-                    <div style="margin-bottom:14px;">
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; padding:0 4px;">
-                            <div style="font-size:11px; font-weight:700; letter-spacing:0.6px; color:var(--accent); text-transform:uppercase;">${roleLabel}</div>
-                            <div style="font-size:10px; color:var(--text-sm);">${done}/${total}</div>
-                        </div>
-                        ${items.map(label => {
-                            const checked = isCalendarTaskChecked(role, label);
-                            const safeRole = role.replace(/'/g, "\\'");
-                            const safeLabel = label.replace(/'/g, "\\'");
-                            return `
-                                <div onclick="toggleCalendarTask('${safeRole}', '${safeLabel}')" style="display:flex; align-items:flex-start; gap:8px; padding:7px 10px; margin-bottom:4px; background:${checked ? 'rgba(34,197,94,0.06)' : 'var(--bg)'}; border-radius:6px; cursor:pointer; ${checked ? 'opacity:0.7;' : ''}">
-                                    <div style="flex-shrink:0; width:16px; height:16px; border-radius:4px; border:2px solid ${checked ? 'var(--success)' : 'var(--border)'}; background:${checked ? 'var(--success)' : 'transparent'}; display:flex; align-items:center; justify-content:center; margin-top:1px;">
-                                        ${checked ? '<span style="color:white; font-size:10px; line-height:1;">✓</span>' : ''}
-                                    </div>
-                                    <span style="font-size:13px; color:var(--text); ${checked ? 'text-decoration:line-through; color:var(--text-sm);' : ''} flex:1; line-height:1.35;">${label}</span>
-                                </div>
-                            `;
-                        }).join('')}
+                    <div style="display:flex; align-items:baseline; gap:0; padding:7px 10px; margin-bottom:4px; background:var(--bg); border-radius:6px; ${allDone ? 'opacity:0.55;' : ''}">
+                        <span style="flex-shrink:0; font-size:11px; font-weight:700; letter-spacing:0.5px; color:var(--accent); text-transform:uppercase; min-width:68px;">${roleLabel}</span>
+                        <span style="font-size:12px; color:${allDone ? 'var(--text-sm)' : 'var(--text)'}; flex:1; line-height:1.4; ${allDone ? 'text-decoration:line-through;' : ''}">${truncated}</span>
+                        <span style="flex-shrink:0; font-size:10px; color:${done > 0 ? 'var(--success)' : 'var(--text-sm)'}; font-weight:600; margin-left:8px;">${done}/${total}</span>
                     </div>
                 `;
             }).join('');
