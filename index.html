@@ -4052,6 +4052,65 @@
             renderCompanyHQ();
         }
 
+        function buildTeamTasksHtml(companyTasksDone) {
+            const todayStr = todayIsoDate();
+            const allOpen = (state.companyTasks || []).filter(t => !t.completed);
+            const teamMembers = ['Cole','Diana','Chris','Mark','Vance','Elan'];
+            const curUser = (typeof displayName === 'function') ? displayName().split(' ')[0] : 'Cole';
+            const activeFilter = window._ctFilter || 'all';
+
+            const chipStyle = (f) => {
+                const active = activeFilter === f;
+                return `padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid ${active ? 'var(--accent)' : 'var(--border)'};background:${active ? 'var(--accent)' : 'var(--bg)'};color:${active ? '#fff' : 'var(--text-sm)'};`;
+            };
+            const chips = [
+                `<button style="${chipStyle('all')}" onclick="setCompanyTaskFilter('all')">All</button>`,
+                `<button style="${chipStyle('overdue')}" onclick="setCompanyTaskFilter('overdue')">Overdue</button>`,
+                `<button style="${chipStyle('flagged')}" onclick="setCompanyTaskFilter('flagged')">Flagged for ${curUser}</button>`,
+                ...teamMembers.map(n => `<button style="${chipStyle(n)}" onclick="setCompanyTaskFilter('${n}')">${n}</button>`)
+            ].join('');
+
+            let filtered = allOpen;
+            if (activeFilter === 'overdue') filtered = allOpen.filter(t => t.dueDate && t.dueDate < todayStr);
+            else if (activeFilter === 'flagged') filtered = allOpen.filter(t => t.urgent && t.assignedTo === curUser);
+            else if (teamMembers.includes(activeFilter)) filtered = allOpen.filter(t => t.assignedTo === activeFilter);
+
+            const statusBadge = (t) => {
+                if (t.dueDate && t.dueDate < todayStr)
+                    return `<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:#fee2e2;color:#991b1b;cursor:pointer;" onclick="cycleCompanyTaskStatus('${t.id}')" title="Click to update">Overdue</span>`;
+                const map = { 'in-progress': ['#dbeafe','#1e40af','In progress'], 'stalled': ['#fef3c7','#92400e','Stalled'], 'not-started': ['var(--bg)','var(--text-sm)','Not started'] };
+                const [bg, col, lbl] = map[t.status || 'not-started'] || map['not-started'];
+                return `<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${bg};color:${col};border:1px solid var(--border);cursor:pointer;" onclick="cycleCompanyTaskStatus('${t.id}')" title="Click to update">${lbl}</span>`;
+            };
+
+            const rows = filtered.length === 0
+                ? `<tr><td colspan="4" style="text-align:center;color:var(--text-sm);font-size:12px;padding:16px 0;">${allOpen.length === 0 ? 'No team tasks yet — click + Add Task.' : 'No tasks match this filter.'}</td></tr>`
+                : filtered.map(t => `
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:9px 8px 9px 4px;"><div style="display:flex;align-items:center;gap:7px;">
+                            ${t.urgent ? '<span style="color:var(--danger);font-size:11px;flex-shrink:0;" title="Urgent">▲</span>' : ''}
+                            <span style="font-size:13px;color:var(--text);">${t.title}</span>
+                        </div></td>
+                        <td style="padding:9px 8px;font-size:12px;color:var(--text-sm);width:72px;white-space:nowrap;">${t.assignedTo || '—'}</td>
+                        <td style="padding:9px 8px;font-size:12px;width:68px;white-space:nowrap;color:${t.dueDate && t.dueDate < todayStr ? 'var(--danger)' : 'var(--text-sm)'};">${t.dueDate ? new Date(t.dueDate + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</td>
+                        <td style="padding:9px 8px;width:110px;text-align:right;">${statusBadge(t)}</td>
+                    </tr>`).join('');
+
+            return `
+                <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">${chips}</div>
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead><tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px 5px 4px;">Task</th>
+                        <th style="text-align:left;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:72px;">Assignee</th>
+                        <th style="text-align:left;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:68px;">Due</th>
+                        <th style="text-align:right;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:110px;">Status</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                ${companyTasksDone.length > 0 ? `<p style="font-size:11px;color:var(--text-sm);margin-top:8px;text-align:right;">${companyTasksDone.length} completed hidden</p>` : ''}
+            `;
+        }
+
         function renderCompanyHQ() {
             const root = document.getElementById('company-hq-root');
             if (!root) return;
@@ -4100,6 +4159,7 @@
                 const labels = { 'on-track': 'On track', 'stalled': 'Stalled', 'done': 'Done' };
                 return `<span style="font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; cursor:pointer; ${styles[s] || ''}">${labels[s] || s}</span>`;
             };
+
 
             root.innerHTML = `
             <!-- KPI CARDS -->
@@ -4154,77 +4214,7 @@
                             <button class="btn" style="font-size:11px; padding:3px 9px;" onclick="addCompanyTask()">+ Add Task</button>
                         </div>
 
-                        ${(() => {
-                            const todayStr = todayIsoDate();
-                            const allOpen = (state.companyTasks || []).filter(t => !t.completed);
-                            const teamMembers = ['Cole','Diana','Chris','Mark','Vance','Elan'];
-                            const curUser = displayName ? displayName().split(' ')[0] : 'Cole';
-                            const activeFilter = window._ctFilter || 'all';
-
-                            // Filter chips
-                            const chipStyle = (f) => {
-                                const active = activeFilter === f;
-                                return \`padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; border:1px solid \${active ? 'var(--accent)' : 'var(--border)'}; background:\${active ? 'var(--accent)' : 'var(--bg)'}; color:\${active ? '#fff' : 'var(--text-sm)'};\`;
-                            };
-
-                            const chips = [
-                                \`<button style="\${chipStyle('all')}" onclick="setCompanyTaskFilter('all')">All</button>\`,
-                                \`<button style="\${chipStyle('overdue')}" onclick="setCompanyTaskFilter('overdue')">Overdue</button>\`,
-                                \`<button style="\${chipStyle('flagged')}" onclick="setCompanyTaskFilter('flagged')">Flagged for \${curUser}</button>\`,
-                                ...teamMembers.map(n => \`<button style="\${chipStyle(n)}" onclick="setCompanyTaskFilter('\${n}')">\${n}</button>\`)
-                            ].join('');
-
-                            // Apply filter
-                            let filtered = allOpen;
-                            if (activeFilter === 'overdue') filtered = allOpen.filter(t => t.dueDate && t.dueDate < todayStr);
-                            else if (activeFilter === 'flagged') filtered = allOpen.filter(t => t.urgent && t.assignedTo === curUser);
-                            else if (teamMembers.includes(activeFilter)) filtered = allOpen.filter(t => t.assignedTo === activeFilter);
-
-                            // Status badge helper
-                            const statusBadgeTask = (t) => {
-                                if (t.dueDate && t.dueDate < todayStr) return \`<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:#fee2e2;color:#991b1b;cursor:pointer;" onclick="cycleCompanyTaskStatus('\${t.id}')" title="Click to update">Overdue</span>\`;
-                                const map = {
-                                    'in-progress': ['#dbeafe','#1e40af','In progress'],
-                                    'stalled':     ['#fef3c7','#92400e','Stalled'],
-                                    'not-started': ['var(--bg)','var(--text-sm)','Not started'],
-                                };
-                                const [bg, color, label] = map[t.status || 'not-started'] || map['not-started'];
-                                return \`<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:\${bg};color:\${color};border:1px solid var(--border);cursor:pointer;" onclick="cycleCompanyTaskStatus('\${t.id}')" title="Click to update">\${label}</span>\`;
-                            };
-
-                            const emptyMsg = filtered.length === 0
-                                ? \`<tr><td colspan="4" style="text-align:center;color:var(--text-sm);font-size:12px;padding:16px 0;">\${allOpen.length === 0 ? 'No team tasks yet — click + Add Task.' : 'No tasks match this filter.'}</td></tr>\`
-                                : filtered.map(t => \`
-                                    <tr style="border-bottom:1px solid var(--border);">
-                                        <td style="padding:9px 8px 9px 4px;">
-                                            <div style="display:flex;align-items:center;gap:7px;">
-                                                \${t.urgent ? '<span style="color:var(--danger);font-size:11px;flex-shrink:0;" title="Urgent">▲</span>' : ''}
-                                                <span style="font-size:13px;color:var(--text);">\${t.title}</span>
-                                            </div>
-                                        </td>
-                                        <td style="padding:9px 8px;font-size:12px;color:var(--text-sm);width:72px;white-space:nowrap;">\${t.assignedTo || '—'}</td>
-                                        <td style="padding:9px 8px;font-size:12px;width:68px;white-space:nowrap;color:\${t.dueDate && t.dueDate < todayStr ? 'var(--danger)' : 'var(--text-sm)'};">\${t.dueDate ? new Date(t.dueDate + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</td>
-                                        <td style="padding:9px 8px;width:110px;text-align:right;">
-                                            \${statusBadgeTask(t)}
-                                        </td>
-                                    </tr>\`).join('');
-
-                            return \`
-                                <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">\${chips}</div>
-                                <table style="width:100%;border-collapse:collapse;">
-                                    <thead>
-                                        <tr style="border-bottom:1px solid var(--border);">
-                                            <th style="text-align:left;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px 5px 4px;">Task</th>
-                                            <th style="text-align:left;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:72px;">Assignee</th>
-                                            <th style="text-align:left;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:68px;">Due</th>
-                                            <th style="text-align:right;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:110px;">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>\${emptyMsg}</tbody>
-                                </table>
-                                \${companyTasksDone.length > 0 ? \`<p style="font-size:11px;color:var(--text-sm);margin-top:8px;text-align:right;">\${companyTasksDone.length} completed hidden</p>\` : ''}
-                            \`;
-                        })()}
+                        ${buildTeamTasksHtml(companyTasksDone)}
                     </div>
 
                 </div><!-- /left col -->
