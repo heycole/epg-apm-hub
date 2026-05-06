@@ -291,6 +291,75 @@
         }
 
         /* SCRATCHPAD — floating button + slide-out drawer */
+
+        .modal-overlay {
+            position: fixed; top:0; left:0; right:0; bottom:0;
+            background: rgba(12,18,50,0.55);
+            z-index: 9500;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 22px 24px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+        .modal-title { font-size:16px; font-weight:700; color:var(--text); margin-bottom:16px; }
+        .modal-field { margin-bottom:13px; }
+        .modal-label { display:block; font-size:11px; font-weight:700; color:var(--muted); letter-spacing:0.4px; text-transform:uppercase; margin-bottom:4px; }
+        .modal-input, .modal-select, .modal-textarea {
+            width: 100%; padding: 9px 12px;
+            border: 1px solid var(--border); border-radius: 8px;
+            font-family: 'DM Sans', sans-serif; font-size: 14px;
+            color: var(--text); background: var(--bg);
+            box-sizing: border-box;
+            transition: border-color 0.15s;
+            outline: none;
+        }
+        .modal-input:focus, .modal-select:focus, .modal-textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(203,121,47,0.12);
+        }
+        .modal-textarea { resize: vertical; min-height: 72px; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+        .form-input {
+            width: 100%; padding: 10px 12px;
+            border: 1px solid var(--border); border-radius: 8px;
+            font-family: 'DM Sans', sans-serif; font-size: 13px;
+            color: var(--text); background: var(--bg);
+            box-sizing: border-box; outline: none;
+            transition: border-color 0.15s;
+        }
+        .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(203,121,47,0.12); }
+        .form-input[type="textarea"], textarea.form-input { resize: vertical; }
+
+        #speakUpFab {
+            position: fixed;
+            bottom: 88px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 800;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        #speakUpFab:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 22px rgba(0,0,0,0.24);
+        }
+
         #scratchpadFab {
             position: fixed;
             right: 20px;
@@ -1170,80 +1239,21 @@
                 <div class="hq-tabs">
                     <div class="hq-tab active" data-tab="company-hq" onclick="switchHQTab('company-hq')">Company HQ</div>
                     <div class="hq-tab" data-tab="my-hq" onclick="switchHQTab('my-hq')">My HQ</div>
-                    <div class="hq-tab disabled">Team performance <span>· soon</span></div>
+                    <div class="hq-tab" data-tab="team-performance" onclick="switchHQTab('team-performance')">Team Performance</div>
                 </div>
 
                 <!-- MY HQ PANEL -->
                 <div id="hq-panel-my-hq" class="hq-panel">
-
-                <!-- SECTION QUICK-NAV -->
-                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; padding:12px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
-                    <span style="font-size:11px; font-weight:600; color:var(--text-sm); align-self:center; margin-right:4px;">Jump to:</span>
-                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('maintenance')">🔧 Work Orders</button>
-                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('rental-applications')">📋 Applications</button>
-                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('lease-renewals')">🔄 Lease Renewals</button>
-                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('finance')">💰 Finance</button>
-                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('eod')">📝 End of Day</button>
-                    <a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" class="btn" style="font-size:12px; padding:5px 12px; text-decoration:none; color:var(--text);">🏢 AppFolio ↗</a>
-                </div>
-
-                <!-- PERSONAL STATS: Tasks / Approvals / Follow-Ups only -->
-                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px;">
-                    <div class="stat-card" style="cursor:pointer;" onclick="navigateTo('tasks')" title="Go to My Tasks">
-                        <div class="stat-label">MY TASKS</div>
-                        <div class="stat-value" id="stat-tasks">0</div>
+                    <div id="my-hq-root"></div>
+                    <!-- Hidden compat elements for JS that references these IDs -->
+                    <div style="display:none;">
+                        <span id="stat-workorders">0</span>
+                        <span id="stat-workorders-overdue"></span>
+                        <div id="stat-workorders-card"></div>
+                        <span id="stat-applications">0</span>
+                        <span id="stat-delinquencies">0</span>
+                        <div id="stat-delinquencies-card"></div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">AWAITING APPROVAL</div>
-                        <div class="stat-value" id="stat-approvals">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">FOLLOW-UPS</div>
-                        <div class="stat-value" id="stat-waiting">0</div>
-                    </div>
-                </div>
-                <!-- Hidden elements kept for JS compat -->
-                <div style="display:none;">
-                    <span id="stat-workorders">0</span>
-                    <span id="stat-workorders-overdue"></span>
-                    <div id="stat-workorders-card"></div>
-                    <span id="stat-applications">0</span>
-                    <span id="stat-delinquencies">0</span>
-                    <div id="stat-delinquencies-card"></div>
-                </div>
-
-                <div id="eodNudge" style="display:none; margin-bottom:16px; padding:12px 16px; background:rgba(200,160,60,0.1); border:1px solid rgba(200,160,60,0.3); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="font-size:18px;">📝</span>
-                        <div>
-                            <div style="font-weight:600; font-size:14px; color:var(--text);">Time to submit your End of Day report</div>
-                            <div style="font-size:12px; color:var(--text-sm);">Head to the End of Day page to log today's progress before wrapping up.</div>
-                        </div>
-                    </div>
-                    <button class="btn" style="font-size:12px; padding:6px 14px; white-space:nowrap;" onclick="navigateTo('eod')">Go to EOD →</button>
-                </div>
-
-
-
-                <!-- APPROVALS + FOLLOW-UPS -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-                    <div class="panel" style="margin-bottom:0; border-left:4px solid var(--danger); background:rgba(184,50,50,0.02);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div class="panel-title" style="margin-bottom:0; font-size:14px;">⏳ Awaiting Approval</div>
-                            <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('approvals')">+ Add</button>
-                        </div>
-                        <div id="dashboard-approvals"></div>
-                    </div>
-
-                    <div class="panel" style="margin-bottom:0; border-left:4px solid #6c8ebf;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div class="panel-title" style="margin-bottom:0; font-size:14px;">⌛ Follow-Ups</div>
-                            <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('waiting')">+ Add</button>
-                        </div>
-                        <div id="dashboard-waiting"></div>
-                    </div>
-                </div>
-
                 </div><!-- /hq-panel-my-hq -->
 
                 <!-- COMPANY HQ PANEL -->
@@ -1253,11 +1263,7 @@
 
                 <!-- TEAM PERFORMANCE PANEL -->
                 <div id="hq-panel-team-performance" class="hq-panel">
-                    <div class="panel" style="padding:48px 32px; text-align:center;">
-                        <div style="font-size:28px; margin-bottom:12px;">📊</div>
-                        <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px;">Team Performance</div>
-                        <div style="font-size:13px; color:var(--text-sm);">Coming soon.</div>
-                    </div>
+                    <div id="team-performance-root"></div>
                 </div>
 
             </div>
@@ -1325,36 +1331,36 @@
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
                             <div>
                                 <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Your Name</label>
-                                <input type="text" id="eodSubmittedBy" placeholder="e.g. Sarah" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px;" required>
+                                <input type="text" id="eodSubmittedBy" class="form-input" placeholder="e.g. Sarah" required>
                             </div>
                             <div>
                                 <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What's today's date?</label>
-                                <input type="text" id="eodDate" placeholder="e.g. Monday 3/31" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px;" required>
+                                <input type="text" id="eodDate" class="form-input" placeholder="e.g. Monday 3/31" required>
                             </div>
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What did you complete today?</label>
-                            <textarea id="eodCompleted" placeholder="List what you finished today..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 80px;" required></textarea>
+                            <textarea id="eodCompleted" placeholder="List what you finished today..." class="form-input" style="min-height:80px;" required></textarea>
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What is currently in progress?</label>
-                            <textarea id="eodInProgress" placeholder="What's still being worked on..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 80px;" required></textarea>
+                            <textarea id="eodInProgress" placeholder="What's still being worked on..." class="form-input" style="min-height:80px;" required></textarea>
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What did you learn today?</label>
-                            <textarea id="eodLearned" placeholder="New knowledge, processes, or insights..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 60px;"></textarea>
+                            <textarea id="eodLearned" placeholder="New knowledge, processes, or insights..." class="form-input" style="min-height:60px;"></textarea>
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What are tomorrow's top 3 priorities?</label>
-                            <textarea id="eodPriorities" placeholder="1. &#10;2. &#10;3." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 80px;" required></textarea>
+                            <textarea id="eodPriorities" placeholder="1. &#10;2. &#10;3." class="form-input" style="min-height:80px;" required></textarea>
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Is anything stuck because you are waiting for Elan or Cole?</label>
-                            <textarea id="eodBlocked" placeholder="Any blockers or items waiting on someone else..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 60px;"></textarea>
+                            <textarea id="eodBlocked" placeholder="Any blockers or items waiting on someone else..." class="form-input" style="min-height:60px;"></textarea>
                         </div>
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Additional Notes</label>
-                            <textarea id="eodNotes" placeholder="Anything else you'd like to add..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; min-height: 60px;"></textarea>
+                            <textarea id="eodNotes" placeholder="Anything else you'd like to add..." class="form-input" style="min-height:60px;"></textarea>
                         </div>
                         <div style="background:var(--bg); border-radius:8px; padding:12px;">
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">📧 Email report to:</label>
@@ -3769,6 +3775,124 @@
 
         // Updates sidebar avatar / name / greeting based on the loaded profile.
 
+        // =============================================
+        // TEAM PERFORMANCE
+        // =============================================
+
+        function renderTeamPerformance() {
+            const root = document.getElementById('team-performance-root');
+            if (!root) return;
+
+            const TEAM = ['Cole','Diana','Chris','Mark','Vance','Elan'];
+            const weekOf = getMondayOfWeek();
+            const weekFixes = (state.weeklyFixes || []).filter(f => f.weekOf === weekOf);
+            const allTasks = (state.companyTasks || []);
+            const weekLabel = new Date(weekOf + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            const statusStyle = (s) => {
+                if (s === 'on-track') return 'background:#dcfce7; color:#166534;';
+                if (s === 'stalled')  return 'background:#fee2e2; color:#991b1b;';
+                if (s === 'done')     return 'background:#f1f5f9; color:#64748b; text-decoration:line-through;';
+                return 'background:#f1f5f9; color:#64748b;';
+            };
+            const statusLabel = { 'on-track': 'On track', 'stalled': 'Stalled', 'done': 'Done' };
+
+            const memberCard = (name) => {
+                const initials = name.slice(0,2).toUpperCase();
+                const fix = weekFixes.find(f => f.name === name);
+                const openTasks = allTasks.filter(t => !t.completed && t.assignedTo === name);
+                const doneTasks = allTasks.filter(t => t.completed && t.assignedTo === name);
+                const totalTasks = openTasks.length + doneTasks.length;
+                const pct = totalTasks ? Math.round((doneTasks.length / totalTasks) * 100) : null;
+
+                const fixHtml = fix
+                    ? '<div style="margin-top:8px; padding:8px 10px; background:var(--bg); border:1px solid var(--border); border-radius:6px;">'
+                    +   '<div style="font-size:11px; font-weight:700; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:4px;">This week\u2019s fix</div>'
+                    +   '<div style="font-size:12px; color:var(--text); line-height:1.4;">' + fix.item + '</div>'
+                    +   '<div style="margin-top:6px;"><span style="font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; ' + statusStyle(fix.status) + '">' + (statusLabel[fix.status] || fix.status) + '</span></div>'
+                    + '</div>'
+                    : '<div style="margin-top:8px; padding:8px 10px; background:var(--bg); border:1px dashed var(--border); border-radius:6px; text-align:center;">'
+                    +   '<span style="font-size:12px; color:var(--text-sm);">No fix submitted yet</span>'
+                    + '</div>';
+
+                const taskBar = pct !== null
+                    ? '<div style="margin-top:10px;">'
+                    +   '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">'
+                    +     '<span style="font-size:11px; color:var(--text-sm);">Tasks</span>'
+                    +     '<span style="font-size:11px; color:var(--text-sm);">' + doneTasks.length + '/' + totalTasks + ' done</span>'
+                    +   '</div>'
+                    +   '<div style="height:4px; background:var(--border); border-radius:2px; overflow:hidden;">'
+                    +     '<div style="height:100%; width:' + pct + '%; background:var(--accent); border-radius:2px; transition:width 0.4s;"></div>'
+                    +   '</div>'
+                    + '</div>'
+                    : '<div style="margin-top:10px; font-size:12px; color:var(--text-sm);">No tasks assigned</div>';
+
+                const urgentCount = allTasks.filter(t => !t.completed && t.assignedTo === name && t.urgent).length;
+                const urgentBadge = urgentCount > 0
+                    ? '<span style="font-size:10px; font-weight:700; background:#fee2e2; color:#991b1b; padding:1px 7px; border-radius:10px; margin-left:6px;">' + urgentCount + ' urgent</span>'
+                    : '';
+
+                return '<div class="panel" style="margin-bottom:0; padding:14px;">'
+                    + '<div style="display:flex; align-items:center; gap:10px; margin-bottom:2px;">'
+                    +   '<div style="width:32px; height:32px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0;">' + initials + '</div>'
+                    +   '<div style="flex:1;">'
+                    +     '<div style="font-size:14px; font-weight:700; color:var(--text);">' + name + urgentBadge + '</div>'
+                    +     '<div style="font-size:11px; color:var(--text-sm);">' + openTasks.length + ' open task' + (openTasks.length !== 1 ? 's' : '') + '</div>'
+                    +   '</div>'
+                    + '</div>'
+                    + fixHtml
+                    + taskBar
+                    + '</div>';
+            };
+
+            const allSubmitted = weekFixes.length;
+            const onTrack = weekFixes.filter(f => f.status === 'on-track').length;
+            const stalled  = weekFixes.filter(f => f.status === 'stalled').length;
+            const done     = weekFixes.filter(f => f.status === 'done').length;
+            const totalOpen = allTasks.filter(t => !t.completed).length;
+
+            root.innerHTML = ''
+                + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">'
+                +   '<div>'
+                +     '<div style="font-size:16px; font-weight:800; color:var(--text);">📊 Team Performance</div>'
+                +     '<div style="font-size:12px; color:var(--text-sm); margin-top:2px;">Week of ' + weekLabel + '</div>'
+                +   '</div>'
+                +   '<a href="#" onclick="switchHQTab(\'team-overview\'); navigateTo(\'hq\'); return false;" style="font-size:12px; color:var(--accent); text-decoration:none;">Full admin view →</a>'
+                + '</div>'
+
+                // Summary row
+                + '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px;">'
+                +   '<div class="panel" style="margin-bottom:0; padding:12px; text-align:center;">'
+                +     '<div style="font-size:22px; font-weight:800; color:var(--text);">' + allSubmitted + '/' + TEAM.length + '</div>'
+                +     '<div style="font-size:11px; color:var(--text-sm); margin-top:2px;">Fixes submitted</div>'
+                +   '</div>'
+                +   '<div class="panel" style="margin-bottom:0; padding:12px; text-align:center;">'
+                +     '<div style="font-size:22px; font-weight:800; color:#166534;">' + onTrack + '</div>'
+                +     '<div style="font-size:11px; color:var(--text-sm); margin-top:2px;">On track</div>'
+                +   '</div>'
+                +   '<div class="panel" style="margin-bottom:0; padding:12px; text-align:center;">'
+                +     '<div style="font-size:22px; font-weight:800; color:' + (stalled > 0 ? '#991b1b' : 'var(--text)') + ';">' + stalled + '</div>'
+                +     '<div style="font-size:11px; color:var(--text-sm); margin-top:2px;">Stalled</div>'
+                +   '</div>'
+                +   '<div class="panel" style="margin-bottom:0; padding:12px; text-align:center;">'
+                +     '<div style="font-size:22px; font-weight:800; color:var(--text);">' + totalOpen + '</div>'
+                +     '<div style="font-size:11px; color:var(--text-sm); margin-top:2px;">Open tasks</div>'
+                +   '</div>'
+                + '</div>'
+
+                // Team grid 3-col
+                + '<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">'
+                +   TEAM.map(memberCard).join('')
+                + '</div>'
+
+                // Coming soon teaser
+                + '<div class="panel" style="margin-bottom:0; margin-top:16px; padding:16px; border:1px dashed var(--border); background:transparent; text-align:center;">'
+                +   '<div style="font-size:12px; color:var(--text-sm); line-height:1.6;">'
+                +     '📈 Coming soon: response time tracking, EOD completion rates, maintenance resolution speed, and tenant satisfaction scores.'
+                +   '</div>'
+                + '</div>';
+        }
+
         function switchHQTab(tab) {
             document.querySelectorAll('.hq-tab[data-tab]').forEach(el => {
                 el.classList.toggle('active', el.dataset.tab === tab);
@@ -3779,6 +3903,8 @@
             const panel = document.getElementById('hq-panel-' + tab);
             if (panel) panel.classList.add('active');
             if (tab === 'company-hq') { renderCompanyHQ(); setTimeout(renderDashboardCalendarTasks, 0); }
+            if (tab === 'my-hq') { renderMyHQ(); }
+            if (tab === 'team-performance') { renderTeamPerformance(); }
         }
 
 
@@ -3804,7 +3930,7 @@
 
         function chqMoveInRow(lease) {
             const days = chqDaysUntil(lease.leaseStart);
-            const label = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `in ${days} days`;
+            const label = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days !== null && days < 0 ? `${Math.abs(days)}d ago` : days !== null ? `in ${days}d` : '—';
             return `
             <div style="padding:10px 0; border-bottom:1px solid var(--border);">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -3820,7 +3946,7 @@
 
         function chqMoveOutRow(mo) {
             const days = chqDaysUntil(mo.moveOutDate);
-            const label = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `in ${days} days`;
+            const label = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days !== null && days < 0 ? `${Math.abs(days)}d ago` : days !== null ? `in ${days}d` : '—';
             return `
             <div style="padding:10px 0; border-bottom:1px solid var(--border);">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -3842,15 +3968,39 @@
         }
 
         function addMoveOut() {
-            const property = prompt('Property address + unit:');
-            if (!property) return;
-            const tenantName = prompt('Tenant name:');
-            if (!tenantName) return;
-            const moveOutDate = prompt('Move-out date (YYYY-MM-DD):');
-            if (!moveOutDate) return;
+            const existing = document.getElementById('move-out-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'move-out-modal';
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `<div class="modal-box">
+                <div class="modal-title">🚪 Add Move-Out</div>
+                <div class="modal-field"><label class="modal-label">Property + Unit</label>
+                    <input id="mo-property" class="modal-input" type="text" placeholder="e.g. 123 Main St, Unit 2B"></div>
+                <div class="modal-field"><label class="modal-label">Tenant Name</label>
+                    <input id="mo-tenant" class="modal-input" type="text" placeholder="Full name"></div>
+                <div class="modal-field"><label class="modal-label">Move-Out Date</label>
+                    <input id="mo-date" class="modal-input" type="date"></div>
+                <div class="modal-actions">
+                    <button class="btn" onclick="document.getElementById(\'move-out-modal\').remove()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitMoveOutModal()">Add Move-Out</button>
+                </div>
+            </div>`;
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => document.getElementById('mo-property').focus(), 0);
+        }
+        function submitMoveOutModal() {
+            const property = (document.getElementById('mo-property').value || '').trim();
+            const tenantName = (document.getElementById('mo-tenant').value || '').trim();
+            const moveOutDate = (document.getElementById('mo-date').value || '').trim();
+            if (!property) { document.getElementById('mo-property').focus(); return; }
+            if (!tenantName) { document.getElementById('mo-tenant').focus(); return; }
+            if (!moveOutDate) { document.getElementById('mo-date').focus(); return; }
             if (!state.moveOuts) state.moveOuts = [];
-            state.moveOuts.push({ id: Date.now(), property: property.trim(), tenantName: tenantName.trim(), moveOutDate, status: 'Notice received', createdAt: new Date().toISOString() });
+            state.moveOuts.push({ id: Date.now(), property, tenantName, moveOutDate, status: 'Notice received', createdAt: new Date().toISOString() });
             saveStateKey('moveOuts', state.moveOuts);
+            document.getElementById('move-out-modal').remove();
             renderCompanyHQ();
         }
 
@@ -3958,7 +4108,8 @@
             const cur = cycle.indexOf(t.status || 'not-started');
             t.status = cycle[(cur + 1) % cycle.length];
             saveStateKey('companyTasks', state.companyTasks);
-            renderCompanyHQ();
+            const myHQActive = document.getElementById('hq-panel-my-hq') && document.getElementById('hq-panel-my-hq').classList.contains('active');
+            if (myHQActive) { renderMyHQ(); } else { renderCompanyHQ(); }
         }
 
         function removeCompanyTask(id) {
@@ -4022,6 +4173,22 @@
             saveStateKey('weeklyFixes', state.weeklyFixes);
             closeWeeklyFixModal();
             renderCompanyHQ();
+            renderMyHQ();
+        }
+
+        // Alias for My HQ button - pre-fills current user's name
+        function openWeeklyFixModal() {
+            addWeeklyFix();
+            // Pre-select current user if possible
+            setTimeout(() => {
+                const sel = document.getElementById('wf-name');
+                if (sel) {
+                    const firstName = displayName().split(' ')[0];
+                    for (let i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === firstName) { sel.selectedIndex = i; break; }
+                    }
+                }
+            }, 50);
         }
 
         function toggleFixStatus(id) {
@@ -4044,12 +4211,345 @@
         function editPortfolioKPI(field) {
             const kpis = state.portfolioKPIs || {};
             const labels = { totalUnits: 'Total units', totalProperties: 'Total properties', occupiedUnits: 'Occupied units' };
-            const val = prompt(`${labels[field] || field}:`, kpis[field] || 0);
-            if (val === null) return;
+            const label = labels[field] || field;
+            const current = kpis[field] || 0;
+            const existing = document.getElementById('kpi-edit-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'kpi-edit-modal';
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = '<div class="modal-box" style="max-width:320px;">'
+                + '<div class="modal-title">Edit ' + label + '</div>'
+                + '<div class="modal-field"><label class="modal-label">' + label + '</label>'
+                + '<input id="kpi-val" class="modal-input" type="number" min="0" value="' + current + '"></div>'
+                + '<div class="modal-actions">'
+                + '<button class="btn" onclick="document.getElementById(\'kpi-edit-modal\').remove()">Cancel</button>'
+                + '<button class="btn btn-primary" onclick="submitKPIModal(\'' + field + '\')">Save</button>'
+                + '</div></div>';
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => { const el = document.getElementById('kpi-val'); if (el) { el.focus(); el.select(); } }, 0);
+        }
+        function submitKPIModal(field) {
+            const val = parseInt(document.getElementById('kpi-val').value) || 0;
             if (!state.portfolioKPIs) state.portfolioKPIs = {};
-            state.portfolioKPIs[field] = parseInt(val) || 0;
+            state.portfolioKPIs[field] = val;
             saveStateKey('portfolioKPIs', state.portfolioKPIs);
+            document.getElementById('kpi-edit-modal').remove();
             renderCompanyHQ();
+        }
+
+
+
+
+        // Generic confirm dialog — replaces browser confirm()
+        function showConfirmModal(message, onConfirm, title) {
+            title = title || 'Confirm';
+            const existing = document.getElementById('generic-confirm-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'generic-confirm-modal';
+            overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(12,18,50,0.5); z-index:9600; display:flex; align-items:center; justify-content:center; padding:20px;';
+            overlay.innerHTML = `<div style="background:var(--surface); border-radius:10px; padding:22px 24px; width:100%; max-width:380px; box-shadow:0 16px 48px rgba(0,0,0,0.25);">
+                <div style="font-size:15px; font-weight:700; color:var(--text); margin-bottom:10px;">${title}</div>
+                <div style="font-size:13px; color:var(--text-sm); margin-bottom:22px;">${message}</div>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button class="btn" id="gcm-cancel" style="font-size:13px; padding:8px 16px;">Cancel</button>
+                    <button class="btn" id="gcm-confirm" style="font-size:13px; padding:8px 16px; background:var(--danger); border-color:var(--danger); color:#fff;">Confirm</button>
+                </div>
+            </div>`;
+            overlay.querySelector('#gcm-cancel').onclick = () => overlay.remove();
+            overlay.querySelector('#gcm-confirm').onclick = () => { overlay.remove(); onConfirm(); };
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => overlay.querySelector('#gcm-confirm').focus(), 0);
+        }
+
+        // =============================================
+        // SPEAK UP (feedback modal)
+        // =============================================
+
+        function openSpeakUpModal() {
+            const existing = document.getElementById('speak-up-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'speak-up-modal';
+            overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(12,18,50,0.55); z-index:9500; display:flex; align-items:center; justify-content:center; padding:20px;';
+            overlay.innerHTML = `
+                <div style="background:var(--surface); border-radius:12px; padding:24px; width:100%; max-width:460px; box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <div style="font-size:16px; font-weight:700; color:var(--text);">💬 Speak Up</div>
+                        <button onclick="closeSpeakUpModal()" style="background:none; border:none; cursor:pointer; color:var(--text-sm); font-size:18px; padding:0; line-height:1;">✕</button>
+                    </div>
+                    <div style="font-size:13px; color:var(--text-sm); margin-bottom:18px;">Something on your mind? We want to hear it.</div>
+
+                    <div style="font-size:11px; font-weight:700; color:var(--muted); letter-spacing:0.5px; text-transform:uppercase; margin-bottom:8px;">What kind of feedback?</div>
+                    <div id="su-chips" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;">
+                        <button onclick="setSpeakUpCategory('broken')" class="su-chip" data-cat="broken" style="padding:7px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg); color:var(--text-sm);">🔴 Something&apos;s broken</button>
+                        <button onclick="setSpeakUpCategory('question')" class="su-chip" data-cat="question" style="padding:7px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg); color:var(--text-sm);">❓ I have a question</button>
+                        <button onclick="setSpeakUpCategory('add')" class="su-chip" data-cat="add" style="padding:7px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg); color:var(--text-sm);">✨ What should we add?</button>
+                        <button onclick="setSpeakUpCategory('better')" class="su-chip" data-cat="better" style="padding:7px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg); color:var(--text-sm);">🔧 Make this better</button>
+                    </div>
+
+                    <label style="display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:4px;">Tell us more</label>
+                    <textarea id="su-message" rows="4" placeholder="Be as specific as you like…" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--bg); resize:vertical; box-sizing:border-box; margin-bottom:18px;"></textarea>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:11px; color:var(--text-sm);">From: ${displayName()}</div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn" onclick="closeSpeakUpModal()" style="font-size:13px; padding:8px 14px;">Cancel</button>
+                            <button class="btn btn-primary" onclick="submitSpeakUpModal()" style="font-size:13px; padding:8px 14px;">Send Feedback</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeSpeakUpModal();
+            });
+            document.body.appendChild(overlay);
+            window._speakUpCategory = null;
+            setTimeout(() => {
+                const ta = document.getElementById('su-message');
+                if (ta) ta.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submitSpeakUpModal(); }
+                });
+            }, 0);
+        }
+
+        function setSpeakUpCategory(cat) {
+            window._speakUpCategory = cat;
+            document.querySelectorAll('.su-chip').forEach(btn => {
+                const active = btn.dataset.cat === cat;
+                btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+                btn.style.background = active ? 'var(--accent)' : 'var(--bg)';
+                btn.style.color = active ? '#fff' : 'var(--text-sm)';
+            });
+        }
+
+        function closeSpeakUpModal() {
+            const m = document.getElementById('speak-up-modal');
+            if (m) m.remove();
+            window._speakUpCategory = null;
+        }
+
+        function submitSpeakUpModal() {
+            const message = (document.getElementById('su-message').value || '').trim();
+            if (!message) { document.getElementById('su-message').focus(); return; }
+            const entry = {
+                id: Date.now(),
+                submittedBy: displayName(),
+                category: window._speakUpCategory || 'general',
+                message,
+                submittedAt: new Date().toISOString(),
+                resolved: false
+            };
+            if (!state.feedback) state.feedback = [];
+            state.feedback.push(entry);
+            saveStateKey('feedback', state.feedback);
+            closeSpeakUpModal();
+            // Brief confirmation toast
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed; bottom:90px; right:24px; background:var(--success); color:#fff; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; z-index:9999; box-shadow:0 4px 16px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease;';
+            toast.textContent = '✓ Feedback sent — thanks!';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // =============================================
+        // MY HQ
+        // =============================================
+
+        function cycleWeeklyFixStatus(id) {
+            const f = (state.weeklyFixes || []).find(f => String(f.id) === String(id));
+            if (!f) return;
+            const cycle = ['on-track', 'stalled', 'done'];
+            const cur = cycle.indexOf(f.status || 'on-track');
+            f.status = cycle[(cur + 1) % cycle.length];
+            saveStateKey('weeklyFixes', state.weeklyFixes);
+            renderMyHQ();
+        }
+
+        function deleteWeeklyFix(id) {
+            state.weeklyFixes = (state.weeklyFixes || []).filter(f => String(f.id) !== String(id));
+            saveStateKey('weeklyFixes', state.weeklyFixes);
+            renderMyHQ();
+        }
+
+        function buildMyHQFixesHtml(firstName, weekOf) {
+            const myFixes = (state.weeklyFixes || []).filter(f => f.name === firstName && f.weekOf === weekOf);
+            const statusDot = (status) => {
+                if (status === 'done') return 'background:#6b7280;';
+                if (status === 'stalled') return 'background:#d97706;';
+                return 'background:#2d7a4f;';
+            };
+            const statusLabel = (status) => {
+                if (status === 'done') return 'done';
+                if (status === 'stalled') return 'stalled';
+                return 'on track';
+            };
+            if (myFixes.length === 0) {
+                return '<div style="padding:20px 12px; text-align:center; color:var(--text-sm); font-size:13px;">Nothing added yet &#8212; click + Add to log what you\'re working on this week.</div>';
+            }
+            return myFixes.map(f => {
+                const isDone = f.status === 'done';
+                return '<div style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:var(--bg); border-radius:6px; margin-bottom:5px; ' + (isDone ? 'opacity:0.5;' : '') + '">'
+                    + '<button onclick="cycleWeeklyFixStatus(' + f.id + ')" title="Cycle status" style="flex-shrink:0; width:10px; height:10px; border-radius:50%; border:none; cursor:pointer; ' + statusDot(f.status || 'on-track') + '"></button>'
+                    + '<span style="flex:1; font-size:13px; color:var(--text); ' + (isDone ? 'text-decoration:line-through;' : '') + '">' + f.item + '</span>'
+                    + '<span style="font-size:10px; color:var(--text-sm); flex-shrink:0;">' + statusLabel(f.status || 'on-track') + '</span>'
+                    + '<button onclick="deleteWeeklyFix(' + f.id + ')" title="Remove" style="flex-shrink:0; background:none; border:none; cursor:pointer; color:var(--text-sm); font-size:12px; padding:0 2px; opacity:0.5;">✕</button>'
+                    + '</div>';
+            }).join('');
+        }
+
+        function buildMyHQNeedsHelpHtml(firstName) {
+            const myTasks = (state.companyTasks || []).filter(t => !t.completed && t.assignedTo === firstName);
+            if (myTasks.length === 0) {
+                return '<div style="padding:20px 12px; text-align:center; color:var(--text-sm); font-size:13px;">No open team tasks assigned to you.</div>';
+            }
+            const today = todayIsoDate();
+            return myTasks.map(t => {
+                const statusColors = { 'not-started': 'var(--text-sm)', 'in-progress': '#3b6dbf', 'stalled': 'var(--danger)' };
+                const statusLabels = { 'not-started': 'not started', 'in-progress': 'in progress', 'stalled': 'stalled' };
+                const st = t.status || 'not-started';
+                const isOverdue = t.dueDate && t.dueDate < today;
+                const dueStr = t.dueDate ? ('due ' + new Date(t.dueDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : '';
+                return '<div style="display:flex; align-items:flex-start; gap:10px; padding:9px 10px; background:var(--bg); border-radius:6px; margin-bottom:5px; ' + (t.urgent ? 'border-left:3px solid var(--danger);' : '') + '">'
+                    + '<div style="flex:1; min-width:0;">'
+                    + '<div style="font-size:13px; color:var(--text); margin-bottom:3px;">' + (t.urgent ? '🚨 ' : '') + t.title + '</div>'
+                    + (dueStr ? '<div style="font-size:11px; color:' + (isOverdue ? 'var(--danger)' : 'var(--text-sm)') + ';">' + dueStr + (isOverdue ? ' · overdue' : '') + '</div>' : '')
+                    + '</div>'
+                    + '<button onclick="cycleCompanyTaskStatus(' + t.id + '); renderMyHQ();" style="flex-shrink:0; font-size:11px; font-weight:600; padding:3px 8px; border-radius:4px; border:1px solid var(--border); background:var(--surface); color:' + statusColors[st] + '; cursor:pointer;">' + statusLabels[st] + '</button>'
+                    + '</div>';
+            }).join('');
+        }
+
+        function buildMyHQHtml() {
+            const name = displayName();
+            const firstName = name.split(' ')[0];
+            const role = (currentProfile && currentProfile.role) || 'member';
+            const roleLabel = role === 'admin' ? 'Administrator' : 'Team Member';
+            const initials = name.split(/\s+/).map(p => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ME';
+
+            const hour = new Date().getHours();
+            const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+            const openTasks = (state.tasks || []).filter(t => !t.completed).length;
+            const approvals = (state.approvals || []).length;
+            const followUps = (state.waiting || []).length;
+
+            const weekOf = getMondayOfWeek();
+            const weekLabel = new Date(weekOf + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+            const fixesHtml = buildMyHQFixesHtml(firstName, weekOf);
+            const needsHelpHtml = buildMyHQNeedsHelpHtml(firstName);
+
+            // EOD nudge check
+            const now = new Date();
+            const eodHour = now.getHours(); const eodMinute = now.getMinutes(); const eodDay = now.getDay();
+            const eodVisible = eodDay >= 1 && eodDay <= 5 && ((eodHour > 16) || (eodHour === 16 && eodMinute >= 30)) && eodHour < 18;
+            const todayKey = now.toLocaleDateString();
+            const hasEodToday = (state.eodReports || []).some(r => r.date === todayKey);
+            const eodNudgeHtml = (eodVisible && !hasEodToday)
+                ? '<div style="margin-bottom:16px; padding:11px 16px; background:rgba(200,160,60,0.08); border:1px solid rgba(200,160,60,0.3); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">'
+                    + '<div style="display:flex; align-items:center; gap:10px;"><span style="font-size:16px;">📝</span>'
+                    + '<div><div style="font-weight:600; font-size:13px; color:var(--text);">Time to submit your End of Day report</div>'
+                    + '<div style="font-size:12px; color:var(--text-sm);">Log today\'s progress before wrapping up.</div></div></div>'
+                    + '<button class="btn" style="font-size:12px; padding:5px 12px; white-space:nowrap;" onclick="navigateTo(\'eod\')">Go to EOD →</button>'
+                    + '</div>'
+                : '';
+
+            return '<div>'
+
+                // ── Personal card ──
+                + '<div style="display:flex; align-items:center; gap:16px; padding:16px 18px; background:var(--surface); border:1px solid var(--border); border-radius:10px; margin-bottom:14px;">'
+                    + '<div style="flex-shrink:0; width:48px; height:48px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:#fff; letter-spacing:0.5px;">' + initials + '</div>'
+                    + '<div style="flex:1; min-width:0;">'
+                        + '<div style="font-size:15px; font-weight:700; color:var(--text); margin-bottom:1px;">' + greeting + ', ' + firstName + '</div>'
+                        + '<div style="font-size:12px; color:var(--text-sm);">' + roleLabel + ' · EPG Management</div>'
+                    + '</div>'
+                    // Stats row
+                    + '<div style="display:flex; gap:20px; flex-shrink:0;">'
+                        + '<div style="text-align:center; cursor:pointer;" onclick="navigateTo(\'tasks\')" title="My Tasks">'
+                            + '<div style="font-size:20px; font-weight:700; color:' + (openTasks > 0 ? 'var(--accent)' : 'var(--text)') + '; line-height:1;" id="stat-tasks">' + openTasks + '</div>'
+                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); letter-spacing:0.4px; text-transform:uppercase; margin-top:2px;">Tasks</div>'
+                        + '</div>'
+                        + '<div style="text-align:center;">'
+                            + '<div style="font-size:20px; font-weight:700; color:' + (approvals > 0 ? 'var(--danger)' : 'var(--text)') + '; line-height:1;" id="stat-approvals">' + approvals + '</div>'
+                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); letter-spacing:0.4px; text-transform:uppercase; margin-top:2px;">Approvals</div>'
+                        + '</div>'
+                        + '<div style="text-align:center;">'
+                            + '<div style="font-size:20px; font-weight:700; color:var(--text); line-height:1;" id="stat-waiting">' + followUps + '</div>'
+                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); letter-spacing:0.4px; text-transform:uppercase; margin-top:2px;">Follow-Ups</div>'
+                        + '</div>'
+                    + '</div>'
+                + '</div>'
+
+                // ── Quick nav ──
+                + '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">'
+                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'maintenance\')">🔧 Work Orders</button>'
+                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'rental-applications\')">📋 Applications</button>'
+                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'lease-renewals\')">🔄 Renewals</button>'
+                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'finance\')">💰 Finance</button>'
+                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'eod\')">📝 End of Day</button>'
+                    + '<a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" class="btn" style="font-size:11px; padding:4px 10px; text-decoration:none; color:var(--text);">🏢 AppFolio ↗</a>'
+                + '</div>'
+
+                // ── EOD nudge ──
+                + eodNudgeHtml
+
+                // ── 2-col: Fixing this week + Team needs my help ──
+                + '<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">'
+
+                    // Left: fixing this week
+                    + '<div class="panel" style="margin-bottom:0;">'
+                        + '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">'
+                            + '<div>'
+                                + '<div class="panel-title" style="margin-bottom:1px; font-size:13px;">🔧 What are you fixing this week?</div>'
+                                + '<div style="font-size:11px; color:var(--text-sm);">Week of ' + weekLabel + '</div>'
+                            + '</div>'
+                            + '<button class="btn btn-primary" style="font-size:11px; padding:4px 10px; flex-shrink:0;" onclick="openWeeklyFixModal()">+ Add</button>'
+                        + '</div>'
+                        + fixesHtml
+                    + '</div>'
+
+                    // Right: team needs my help
+                    + '<div class="panel" style="margin-bottom:0; border-left:4px solid #3b6dbf;">'
+                        + '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">'
+                            + '<div class="panel-title" style="margin-bottom:0; font-size:13px;">🙋 Team needs my help</div>'
+                        + '</div>'
+                        + needsHelpHtml
+                    + '</div>'
+
+                + '</div>'
+
+                // ── Approvals + Follow-Ups ──
+                + '<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">'
+                    + '<div class="panel" style="margin-bottom:0; border-left:4px solid var(--danger); background:rgba(184,50,50,0.02);">'
+                        + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">'
+                            + '<div class="panel-title" style="margin-bottom:0; font-size:13px;">⏳ Awaiting Approval</div>'
+                            + '<button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal(\'approvals\')">+ Add</button>'
+                        + '</div>'
+                        + '<div id="dashboard-approvals"></div>'
+                    + '</div>'
+                    + '<div class="panel" style="margin-bottom:0; border-left:4px solid #6c8ebf;">'
+                        + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">'
+                            + '<div class="panel-title" style="margin-bottom:0; font-size:13px;">⌛ Follow-Ups</div>'
+                            + '<button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal(\'waiting\')">+ Add</button>'
+                        + '</div>'
+                        + '<div id="dashboard-waiting"></div>'
+                    + '</div>'
+                + '</div>'
+
+            + '</div>';
+        }
+
+        function renderMyHQ() {
+            const root = document.getElementById('my-hq-root');
+            if (!root) return;
+            root.innerHTML = buildMyHQHtml();
+            // Render approval + follow-up lists into freshly created divs
+            renderTaskList(document.getElementById('dashboard-approvals'), state.approvals, 'Approval');
+            renderFollowUpsPanel();
         }
 
         function buildTeamTasksHtml(companyTasksDone) {
@@ -4174,12 +4674,12 @@
                     <div style="font-size:28px; font-weight:800; color:${parseFloat(occupancy) >= 95 ? 'var(--success)' : parseFloat(occupancy) >= 85 ? 'var(--text)' : 'var(--danger)'}; line-height:1;">${occupancy !== '—' ? occupancy + '%' : '—'}</div>
                     <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">${occupiedUnits} occupied · ${vacantUnits} vacant <span style="color:var(--accent);">✎</span></div>
                 </div>
-                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer; ${delinqAmount > 0 ? 'border-left:3px solid var(--danger);' : ''}" onclick="navigateTo('finance')" title="Go to Finance">
+                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer; ${delinqAmount > 0 ? 'border-left:3px solid var(--danger);' : ''}" onclick="navigateTo(\'finance\')" title="Go to Finance">
                     <div style="font-size:11px; font-weight:700; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">Delinquencies</div>
                     <div style="font-size:28px; font-weight:800; color:${delinqAmount > 0 ? 'var(--danger)' : 'var(--success)'}; line-height:1;">${delinqFmt}</div>
                     <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">${activeDelinq.length} tenant${activeDelinq.length !== 1 ? 's' : ''} · tap to manage</div>
                 </div>
-                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer; ${urgentWOs > 0 ? 'border-left:3px solid var(--warning);' : ''}" onclick="navigateTo('maintenance')" title="Go to Maintenance">
+                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer; ${urgentWOs > 0 ? 'border-left:3px solid var(--warning);' : ''}" onclick="navigateTo(\'maintenance\')" title="Go to Maintenance">
                     <div style="font-size:11px; font-weight:700; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">Open Work Orders</div>
                     <div style="font-size:28px; font-weight:800; color:var(--text); line-height:1;">${openWOsList.length}</div>
                     <div style="font-size:11px; color:${urgentWOs > 0 ? 'var(--danger)' : 'var(--text-sm)'}; margin-top:4px;">${urgentWOs > 0 ? urgentWOs + ' urgent' : 'No urgent items'}</div>
@@ -4314,7 +4814,7 @@
             'properties', 'owners', 'portfolioNotes', 'newLeases',
             'onboardingProperties', 'onboardingTenants', 'onboardingOwners',
             'checklists', 'trainingChecks', 'meetings', 'reconciliationNotes',
-            'moveOuts', 'companyTasks', 'weeklyFixes', 'portfolioKPIs'
+            'moveOuts', 'companyTasks', 'weeklyFixes', 'portfolioKPIs', 'feedback'
         ]);
 
         let currentUser = null;     // auth.users row
@@ -4637,6 +5137,24 @@
             if (pageName === 'lease-renewals') {
                 const savedView = localStorage.getItem('epg_renewal_view') || 'cards';
                 setRenewalView(savedView);
+            }
+
+            // Auto-fill EOD form when navigating to it
+            if (pageName === 'eod') {
+                setTimeout(() => {
+                    const nameField = document.getElementById('eodSubmittedBy');
+                    const dateField = document.getElementById('eodDate');
+                    if (nameField && !nameField.value) {
+                        const firstName = displayName().split(/\s+/)[0] || localStorage.getItem('eodLastName') || '';
+                        nameField.value = firstName;
+                    }
+                    if (dateField && !dateField.value) {
+                        const now = new Date();
+                        const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+                        const mmdd = (now.getMonth() + 1) + '/' + now.getDate();
+                        dateField.value = dayName + ' ' + mmdd;
+                    }
+                }, 0);
             }
 
             // Scroll content to top
@@ -5111,18 +5629,46 @@
 
         function openAddTaskModal(type) {
             type = type || 'tasks';
-            if (type === 'tasks') {
-                openAddTaskModalRich();
-                return;
-            }
-            const labels = { approvals: 'item awaiting approval', waiting: 'item you\'re waiting on' };
-            const title = prompt('Enter ' + (labels[type] || 'task') + ':');
-            if (title) {
-                if (!state[type]) state[type] = [];
-                state[type].push({ title, completed: false });
-                saveState(state);
-                renderDashboard();
-            }
+            if (type === 'tasks') { openAddTaskModalRich(); return; }
+            const icons = { approvals: '\u23F3', waiting: '\u231B' };
+            const labels = { approvals: 'Awaiting Approval', waiting: 'Follow-Up' };
+            const existing = document.getElementById('simple-task-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'simple-task-modal';
+            overlay.className = 'modal-overlay';
+            const icon = icons[type] || '';
+            const label = labels[type] || 'Item';
+            overlay.innerHTML = '<div class="modal-box" style="max-width:400px;">'
+                + '<div class="modal-title">' + icon + ' Add ' + label + '</div>'
+                + '<div class="modal-field"><label class="modal-label">Description</label>'
+                + '<input id="stm-title" class="modal-input" type="text" placeholder="Describe the item..."></div>'
+                + '<div class="modal-actions">'
+                + '<button class="btn" onclick="document.getElementById(\'simple-task-modal\').remove()">Cancel</button>'
+                + '<button class="btn btn-primary" onclick="submitSimpleTaskModal()">Add</button>'
+                + '</div></div>';
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            const stmType = type;
+            setTimeout(() => {
+                const el = document.getElementById('stm-title');
+                if (el) {
+                    el.focus();
+                    el.addEventListener('keydown', e => { if (e.key === 'Enter') submitSimpleTaskModal(stmType); });
+                }
+            }, 0);
+            window._stmType = type;
+        }
+        function submitSimpleTaskModal(type) {
+            type = type || window._stmType;
+            const title = (document.getElementById('stm-title').value || '').trim();
+            if (!title) { document.getElementById('stm-title').focus(); return; }
+            if (!state[type]) state[type] = [];
+            state[type].push({ title, completed: false });
+            saveState(state);
+            document.getElementById('simple-task-modal').remove();
+            const myHQActive = document.getElementById('hq-panel-my-hq') && document.getElementById('hq-panel-my-hq').classList.contains('active');
+            if (myHQActive) { renderMyHQ(); } else { renderDashboard(); }
         }
 
         function openAddTaskModalRich() {
@@ -5400,36 +5946,54 @@
         }
 
         function deleteEODReport(idx) {
-            if (!confirm('Remove this EOD report?')) return;
-            state.eodReports.splice(idx, 1);
-            saveState(state);
-            renderEODHistory();
+            showConfirmModal('Remove this EOD report?', () => {
+                state.eodReports.splice(idx, 1);
+                saveState(state);
+                renderEODHistory();
+            });
         }
 
         // ============================================
         // DELINQUENCY TRACKER
         // ============================================
         function openAddDelinquency() {
-            const tenantName = prompt('Tenant name:');
-            if (!tenantName) return;
-            const property = prompt('Property address:');
-            if (!property) return;
-            const amount = prompt('Amount owed (just the number, e.g. 1500):');
-            if (!amount) return;
+            const existing = document.getElementById('delinquency-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'delinquency-modal';
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `<div class="modal-box">
+                <div class="modal-title">💸 Add Delinquency</div>
+                <div class="modal-field"><label class="modal-label">Tenant Name</label>
+                    <input id="dq-tenant" class="modal-input" type="text" placeholder="Full name"></div>
+                <div class="modal-field"><label class="modal-label">Property Address</label>
+                    <input id="dq-property" class="modal-input" type="text" placeholder="e.g. 123 Main St, Unit 2B"></div>
+                <div class="modal-field"><label class="modal-label">Amount Owed ($)</label>
+                    <input id="dq-amount" class="modal-input" type="number" min="0" step="0.01" placeholder="e.g. 1500"></div>
+                <div class="modal-actions">
+                    <button class="btn" onclick="document.getElementById(\'delinquency-modal\').remove()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitDelinquencyModal()">Add</button>
+                </div>
+            </div>`;
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => document.getElementById('dq-tenant').focus(), 0);
+        }
+        function submitDelinquencyModal() {
+            const tenantName = (document.getElementById('dq-tenant').value || '').trim();
+            const property = (document.getElementById('dq-property').value || '').trim();
+            const amount = parseFloat(document.getElementById('dq-amount').value) || 0;
+            if (!tenantName) { document.getElementById('dq-tenant').focus(); return; }
+            if (!property) { document.getElementById('dq-property').focus(); return; }
             const entry = {
-                id: Date.now(),
-                tenantName: tenantName.trim(),
-                property: property.trim(),
-                amount: parseFloat(amount) || 0,
-                status: 'active',
-                currentStage: 'Day 5 - Friendly Reminder',
-                notes: '',
-                createdAt: new Date().toISOString(),
-                lastUpdated: new Date().toISOString()
+                id: Date.now(), tenantName, property, amount, status: 'active',
+                currentStage: 'Day 5 - Friendly Reminder', notes: '',
+                createdAt: new Date().toISOString(), lastUpdated: new Date().toISOString()
             };
             if (!state.delinquencies) state.delinquencies = [];
             state.delinquencies.push(attributeItem(entry));
             saveState(state);
+            document.getElementById('delinquency-modal').remove();
             renderDelinquencies();
         }
 
@@ -5442,10 +6006,11 @@
         }
 
         function deleteDelinquency(id) {
-            if (!confirm('Remove this delinquency from the tracker? This cannot be undone.')) return;
-            state.delinquencies = state.delinquencies.filter(x => x.id !== id);
-            saveState(state);
-            renderDelinquencies();
+            showConfirmModal('Remove this delinquency from the tracker?', () => {
+                state.delinquencies = state.delinquencies.filter(x => x.id !== id);
+                saveState(state);
+                renderDelinquencies();
+            }, 'Cannot be undone');
         }
 
         function toggleResolveDelinquency(id) {
@@ -5533,10 +6098,31 @@
         // NEW LEASES TRACKER
         // ============================================
         function openAddNewLease() {
-            const tenantName = prompt('Tenant name:');
-            if (!tenantName) return;
-            const property = prompt('Property address:');
-            if (!property) return;
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.id = 'new-lease-modal';
+            overlay.innerHTML = '<div class="modal-box">'
+                + '<div class="modal-title">Add New Lease</div>'
+                + '<div class="modal-field"><label class="modal-label">Tenant Name</label>'
+                + '<input class="modal-input" id="nlm-tenant" placeholder="e.g. John Smith" /></div>'
+                + '<div class="modal-field"><label class="modal-label">Property Address</label>'
+                + '<input class="modal-input" id="nlm-property" placeholder="e.g. 123 Main St" /></div>'
+                + '<div class="modal-actions">'
+                + '<button class="btn btn-primary" onclick="submitNewLeaseModal()">Add</button>'
+                + '<button class="btn" onclick="document.getElementById(\'new-lease-modal\').remove()">Cancel</button>'
+                + '</div>'
+                + '</div>';
+            document.body.appendChild(overlay);
+            setTimeout(() => { const el = document.getElementById('nlm-tenant'); if (el) el.focus(); }, 50);
+        }
+
+        function submitNewLeaseModal() {
+            const tenantName = (document.getElementById('nlm-tenant') || {}).value || '';
+            const property = (document.getElementById('nlm-property') || {}).value || '';
+            if (!tenantName.trim()) { alert('Please enter a tenant name.'); return; }
+            if (!property.trim()) { alert('Please enter a property address.'); return; }
+            const overlay = document.getElementById('new-lease-modal');
+            if (overlay) overlay.remove();
             const entry = {
                 id: Date.now(),
                 tenantName: tenantName.trim(),
@@ -5564,34 +6150,55 @@
         }
 
         function deleteNewLease(id) {
-            if (!confirm('Remove this lease from the tracker? This cannot be undone.')) return;
-            state.newLeases = state.newLeases.filter(x => x.id !== id);
-            saveState(state);
-            renderNewLeases();
+            showConfirmModal('Remove this lease from the tracker?', () => {
+                state.newLeases = state.newLeases.filter(x => x.id !== id);
+                saveState(state);
+                renderNewLeases();
+            }, 'Cannot be undone');
         }
 
-        function addLeaseDocument(id) {
-            const label = prompt('Document label (e.g. "Lease", "Addendum", "Move-In Inspection"):');
-            if (!label) return;
-            const url = prompt('Google Drive URL:');
-            if (!url) return;
-            const l = state.newLeases.find(x => x.id === id);
+        function addLeaseDocument(leaseId) {
+            const existing = document.getElementById('lease-doc-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'lease-doc-modal';
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = '<div class="modal-box">'
+                + '<div class="modal-title">📎 Add Document Link</div>'
+                + '<div class="modal-field"><label class="modal-label">Document Label</label><input id="ld-label" class="modal-input" type="text" placeholder="e.g. Lease, Addendum, Move-In Inspection"></div>'
+                + '<div class="modal-field"><label class="modal-label">Google Drive URL</label><input id="ld-url" class="modal-input" type="url" placeholder="https://drive.google.com/..."></div>'
+                + '<div class="modal-actions">'
+                + '<button class="btn" onclick="document.getElementById(\'lease-doc-modal\').remove()">Cancel</button>'
+                + '<button class="btn btn-primary" onclick="submitLeaseDocModal(' + "'" + '" + leaseId + "' + "'" + ')">Add Link</button>'
+                + '</div></div>';
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => { const el = document.getElementById('ld-label'); if (el) el.focus(); }, 0);
+        }
+        function submitLeaseDocModal(leaseId) {
+            const label = (document.getElementById('ld-label').value || '').trim();
+            const url = (document.getElementById('ld-url').value || '').trim();
+            if (!label) { document.getElementById('ld-label').focus(); return; }
+            if (!url) { document.getElementById('ld-url').focus(); return; }
+            const l = state.newLeases.find(x => String(x.id) === String(leaseId));
             if (!l) return;
             if (!l.documents) l.documents = [];
-            l.documents.push({ label: label.trim(), url: url.trim() });
+            l.documents.push({ label, url });
             l.lastUpdated = new Date().toISOString();
             saveState(state);
+            document.getElementById('lease-doc-modal').remove();
             renderNewLeases();
         }
 
         function removeLeaseDocument(leaseId, docIdx) {
             const l = state.newLeases.find(x => x.id === leaseId);
             if (!l || !l.documents) return;
-            if (!confirm('Remove this document link?')) return;
-            l.documents.splice(docIdx, 1);
-            l.lastUpdated = new Date().toISOString();
-            saveState(state);
-            renderNewLeases();
+            showConfirmModal('Remove this document link?', () => {
+                l.documents.splice(docIdx, 1);
+                l.lastUpdated = new Date().toISOString();
+                saveState(state);
+                renderNewLeases();
+            });
         }
 
         function renderNewLeases() {
@@ -5733,13 +6340,37 @@
         // URGENCY MANAGEMENT
         // ============================================
         function openAddUrgentModal() {
-            const title = prompt('What needs to be done urgently?');
-            if (title) {
-                const priority = confirm('Is this an EMERGENCY? (OK = Emergency, Cancel = Must Do Today)');
-                state.urgent.push({ title, priority: priority ? 'emergency' : 'today' });
-                saveState(state);
-                renderDashboard();
-            }
+            const existing = document.getElementById('urgent-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'urgent-modal';
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `<div class="modal-box">
+                <div class="modal-title">🚨 Add Urgent Item</div>
+                <div class="modal-field"><label class="modal-label">What needs to be done?</label>
+                    <textarea id="urg-title" class="modal-textarea" rows="2" placeholder="Describe the urgent item…"></textarea></div>
+                <div class="modal-field"><label class="modal-label">Priority</label>
+                    <select id="urg-priority" class="modal-select">
+                        <option value="today">Must Do Today</option>
+                        <option value="emergency">🚨 Emergency</option>
+                    </select></div>
+                <div class="modal-actions">
+                    <button class="btn" onclick="document.getElementById(\'urgent-modal\').remove()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitUrgentModal()">Add</button>
+                </div>
+            </div>`;
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => document.getElementById('urg-title').focus(), 0);
+        }
+        function submitUrgentModal() {
+            const title = (document.getElementById('urg-title').value || '').trim();
+            const priority = document.getElementById('urg-priority').value;
+            if (!title) { document.getElementById('urg-title').focus(); return; }
+            state.urgent.push({ title, priority });
+            saveState(state);
+            document.getElementById('urgent-modal').remove();
+            renderDashboard();
         }
 
         function removeUrgent(idx) {
@@ -5937,7 +6568,7 @@
                 const typeLabel = r.type === 'pending' ? 'Pending' : 'Renewing';
                 const typeColor = r.type === 'pending' ? 'var(--accent)' : 'var(--success)';
                 return `
-                    <div style="padding:10px 12px; background:var(--bg); border-radius:6px; margin-bottom:6px; cursor:pointer; border-left:3px solid ${color};" onclick="navigateTo('lease-renewals')">
+                    <div style="padding:10px 12px; background:var(--bg); border-radius:6px; margin-bottom:6px; cursor:pointer; border-left:3px solid ${color};" onclick="navigateTo(\'lease-renewals\')">
                         <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px;">
                             <div style="font-weight:600; font-size:13px; color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">🏠 ${r.property || '(no property)'}</div>
                             <span class="task-pill" style="background:${typeColor}; color:#fff;">${typeLabel}</span>
@@ -5959,6 +6590,8 @@
         // DASHBOARD RENDERING
         // ============================================
         function renderDashboard() {
+            // Render My HQ first so stat elements exist in DOM
+            renderMyHQ();
             // Date display
             const dateEl = document.getElementById('dashDate');
             const now = new Date();
@@ -6382,25 +7015,51 @@
         ];
 
         function addWorkOrder() {
-            const address = prompt('Property address:');
-            if (!address) return;
-            const unit = prompt('Unit # (leave blank if single-family):') || '';
-            const issue = prompt('Describe the issue:');
-            if (!issue) return;
-            const priority = prompt('Priority: emergency, urgent, routine, or scheduled?') || 'routine';
-
+            const existing = document.getElementById('work-order-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'work-order-modal';
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `<div class="modal-box">
+                <div class="modal-title">🔧 New Work Order</div>
+                <div class="modal-field"><label class="modal-label">Property Address</label>
+                    <input id="wo-address" class="modal-input" type="text" placeholder="e.g. 123 Main St"></div>
+                <div class="modal-field"><label class="modal-label">Unit # <span style="font-weight:400; text-transform:none; letter-spacing:0;">(leave blank if single-family)</span></label>
+                    <input id="wo-unit" class="modal-input" type="text" placeholder="e.g. 2B"></div>
+                <div class="modal-field"><label class="modal-label">Issue Description</label>
+                    <textarea id="wo-issue" class="modal-textarea" rows="3" placeholder="Describe the maintenance issue…"></textarea></div>
+                <div class="modal-field"><label class="modal-label">Priority</label>
+                    <select id="wo-priority" class="modal-select">
+                        <option value="routine">Routine</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="emergency">🚨 Emergency</option>
+                        <option value="scheduled">Scheduled</option>
+                    </select></div>
+                <div class="modal-actions">
+                    <button class="btn" onclick="document.getElementById(\'work-order-modal\').remove()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitWorkOrderModal()">Create Work Order</button>
+                </div>
+            </div>`;
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => document.getElementById('wo-address').focus(), 0);
+        }
+        function submitWorkOrderModal() {
+            const address = (document.getElementById('wo-address').value || '').trim();
+            const unit = (document.getElementById('wo-unit').value || '').trim();
+            const issue = (document.getElementById('wo-issue').value || '').trim();
+            const priority = document.getElementById('wo-priority').value;
+            if (!address) { document.getElementById('wo-address').focus(); return; }
+            if (!issue) { document.getElementById('wo-issue').focus(); return; }
             const wo = {
-                id: Date.now(),
-                address: address,
-                unit: unit,
-                issue: issue,
-                priority: priority.toLowerCase(),
+                id: Date.now(), address, unit, issue, priority,
                 dateCreated: new Date().toLocaleDateString(),
                 steps: workOrderSteps.map(s => ({ text: s, done: false })),
                 collapsed: true
             };
             state.workOrders.push(attributeItem(wo));
             saveState(state);
+            document.getElementById('work-order-modal').remove();
             renderWorkOrders();
         }
 
@@ -6423,10 +7082,11 @@
         }
 
         function removeWorkOrder(id) {
-            if (!confirm('Remove this work order?')) return;
-            state.workOrders = state.workOrders.filter(w => w.id !== id);
-            saveState(state);
-            renderWorkOrders();
+            showConfirmModal('Remove this work order?', () => {
+                state.workOrders = state.workOrders.filter(w => w.id !== id);
+                saveState(state);
+                renderWorkOrders();
+            });
         }
 
         function updateWorkOrderNotes(woId, value) {
@@ -6540,24 +7200,45 @@
         ];
 
         function addApplication() {
-            const property = prompt('Property address:');
-            if (!property) return;
-            const applicants = prompt('Applicant name(s) — separate multiple with commas:');
-            if (!applicants) return;
+            const existing = document.getElementById('application-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'application-modal';
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `<div class="modal-box">
+                <div class="modal-title">📋 New Application</div>
+                <div class="modal-field"><label class="modal-label">Property Address</label>
+                    <input id="app-property" class="modal-input" type="text" placeholder="e.g. 123 Main St, Unit 2B"></div>
+                <div class="modal-field"><label class="modal-label">Applicant Name(s)</label>
+                    <input id="app-applicants" class="modal-input" type="text" placeholder="Separate multiple names with commas"></div>
+                <div class="modal-field"><label class="modal-label">Showing Agent <span style="font-weight:400; text-transform:none;">(optional)</span></label>
+                    <input id="app-agent" class="modal-input" type="text" placeholder="Agent name"></div>
+                <div class="modal-actions">
+                    <button class="btn" onclick="document.getElementById(\'application-modal\').remove()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitApplicationModal()">Add Application</button>
+                </div>
+            </div>`;
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => document.getElementById('app-property').focus(), 0);
+        }
+        function submitApplicationModal() {
+            const property = (document.getElementById('app-property').value || '').trim();
+            const applicantsRaw = (document.getElementById('app-applicants').value || '').trim();
+            const showingAgent = (document.getElementById('app-agent').value || '').trim();
+            if (!property) { document.getElementById('app-property').focus(); return; }
+            if (!applicantsRaw) { document.getElementById('app-applicants').focus(); return; }
             if (!state.applications) state.applications = [];
             state.applications.push(attributeItem({
-                id: Date.now(),
-                property: property.trim(),
-                applicants: applicants.split(',').map(n => n.trim()).filter(n => n),
+                id: Date.now(), property,
+                applicants: applicantsRaw.split(',').map(n => n.trim()).filter(n => n),
                 steps: applicationSteps.map(s => ({ text: s, done: false })),
                 docs: applicationDocs.map(d => ({ text: d, received: false })),
-                collapsed: true,
-                dateCreated: new Date().toLocaleDateString(),
-                summary: '',
-                notes: '',
-                showingAgent: ''
+                collapsed: true, dateCreated: new Date().toLocaleDateString(),
+                summary: '', notes: '', showingAgent
             }));
             saveState(state);
+            document.getElementById('application-modal').remove();
             renderApplications();
         }
 
@@ -6586,10 +7267,11 @@
         }
 
         function removeApplication(id) {
-            if (!confirm('Remove this application?')) return;
-            state.applications = state.applications.filter(a => a.id !== id);
-            saveStateKey('applications', state.applications);
-            renderApplications();
+            showConfirmModal('Remove this application?', () => {
+                state.applications = state.applications.filter(a => a.id !== id);
+                saveStateKey('applications', state.applications);
+                renderApplications();
+            });
         }
 
         function updateApplicationNotes(appId, value) {
@@ -6817,23 +7499,42 @@
         };
 
         function addRenewal(type) {
-            const property = prompt('Property address:');
-            if (!property) return;
-            const tenant = prompt('Tenant name(s):');
-            if (!tenant) return;
-            const leaseExp = type === 'pending' ? (prompt('Lease expiration date (e.g. 8/31/2026):') || '') : '';
+            const existing = document.getElementById('renewal-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'renewal-modal';
+            overlay.className = 'modal-overlay';
+            const leaseExpField = type === 'pending'
+                ? '<div class="modal-field"><label class="modal-label">Lease Expiration Date</label><input id="ren-lease-exp" class="modal-input" type="text" placeholder="e.g. 8/31/2026"></div>'
+                : '';
+            overlay.innerHTML = '<div class="modal-box">'
+                + '<div class="modal-title">🔄 Add Renewal</div>'
+                + '<div class="modal-field"><label class="modal-label">Property Address</label><input id="ren-property" class="modal-input" type="text" placeholder="e.g. 123 Main St, Unit 2B"></div>'
+                + '<div class="modal-field"><label class="modal-label">Tenant Name(s)</label><input id="ren-tenant" class="modal-input" type="text" placeholder="Full name(s)"></div>'
+                + leaseExpField
+                + '<div class="modal-actions">'
+                + '<button class="btn" onclick="document.getElementById(\'renewal-modal\').remove()">Cancel</button>'
+                + '<button class="btn btn-primary" onclick="submitRenewalModal(\'' + type + '\')">Add Renewal</button>'
+                + '</div></div>';
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => { const el = document.getElementById('ren-property'); if (el) el.focus(); }, 0);
+        }
+        function submitRenewalModal(type) {
+            const property = (document.getElementById('ren-property').value || '').trim();
+            const tenant = (document.getElementById('ren-tenant').value || '').trim();
+            const leaseExpEl = document.getElementById('ren-lease-exp');
+            const leaseExp = leaseExpEl ? leaseExpEl.value.trim() : '';
+            if (!property) { document.getElementById('ren-property').focus(); return; }
+            if (!tenant) { document.getElementById('ren-tenant').focus(); return; }
             if (!state.renewals) state.renewals = [];
             state.renewals.push(attributeItem({
-                id: Date.now(),
-                property: property.trim(),
-                tenant: tenant.trim(),
-                type: type,
-                leaseExp: leaseExp.trim(),
+                id: Date.now(), property, tenant, type, leaseExp,
                 steps: renewalSteps[type].map(s => ({ text: s, done: false })),
-                collapsed: true,
-                dateCreated: new Date().toLocaleDateString()
+                collapsed: true, dateCreated: new Date().toLocaleDateString()
             }));
             saveState(state);
+            document.getElementById('renewal-modal').remove();
             renderRenewals();
         }
 
@@ -6874,10 +7575,11 @@
         }
 
         function removeRenewal(id) {
-            if (!confirm('Remove this renewal?')) return;
-            state.renewals = state.renewals.filter(r => r.id !== id);
-            saveState(state);
-            renderRenewals();
+            showConfirmModal('Remove this renewal?', () => {
+                state.renewals = state.renewals.filter(r => r.id !== id);
+                saveState(state);
+                renderRenewals();
+            });
         }
 
         function updateRenewalNotes(rId, value) {
@@ -7388,11 +8090,12 @@
             renderPortfolio();
         }
 
-        async function deleteProperty(id) {
-            if (!confirm('Delete this property from the directory?')) return;
-            await sbData.from('properties').delete().eq('id', id);
-            await fetchPortfolio();
-            renderPortfolio();
+        function deleteProperty(id) {
+            showConfirmModal('Delete this property from the directory?', async () => {
+                await sbData.from('properties').delete().eq('id', id);
+                await fetchPortfolio();
+                renderPortfolio();
+            });
         }
 
         function renderPortfolio() {
@@ -7544,11 +8247,12 @@
             renderRentalLicenses();
         }
 
-        async function deleteRentalLicense(id) {
-            if (!confirm('Delete this rental license record?')) return;
-            await sbData.from('rental_licenses').delete().eq('id', id);
-            await fetchRentalLicenses();
-            renderRentalLicenses();
+        function deleteRentalLicense(id) {
+            showConfirmModal('Delete this rental license record?', async () => {
+                await sbData.from('rental_licenses').delete().eq('id', id);
+                await fetchRentalLicenses();
+                renderRentalLicenses();
+            });
         }
 
         async function updateRLNotes(id, value) {
@@ -7729,50 +8433,71 @@
         };
 
         function addPropertyOnboarding() {
-            const address = prompt('Property address:');
-            if (!address) return;
-            if (!state.onboardingProperties) state.onboardingProperties = [];
-            state.onboardingProperties.push(attributeItem({
-                id: Date.now(),
-                name: address,
-                type: 'property',
-                steps: onboardingTemplates.property.map(s => ({ text: s, done: false })),
-                collapsed: true
-            }));
-            saveState(state);
-            renderOnboarding();
+            showOnboardingModal('property', '🏠 Add Property', [
+                { id: 'ob-address', label: 'Property Address', placeholder: 'e.g. 123 Main St' }
+            ], (vals) => {
+                if (!state.onboardingProperties) state.onboardingProperties = [];
+                state.onboardingProperties.push(attributeItem({
+                    id: Date.now(), name: vals[0], type: 'property',
+                    steps: onboardingTemplates.property.map(s => ({ text: s, done: false })), collapsed: true
+                }));
+                saveState(state); renderOnboarding();
+            });
         }
 
         function addTenantOnboarding() {
-            const name = prompt('Tenant name:');
-            if (!name) return;
-            const address = prompt('Property address:');
-            if (!address) return;
-            if (!state.onboardingTenants) state.onboardingTenants = [];
-            state.onboardingTenants.push(attributeItem({
-                id: Date.now(),
-                name: name + ' — ' + address,
-                type: 'tenant',
-                steps: onboardingTemplates.tenant.map(s => ({ text: s, done: false })),
-                collapsed: true
-            }));
-            saveState(state);
-            renderOnboarding();
+            showOnboardingModal('tenant', '🧑 Add Tenant Onboarding', [
+                { id: 'ob-name', label: 'Tenant Name', placeholder: 'Full name' },
+                { id: 'ob-address', label: 'Property Address', placeholder: 'e.g. 123 Main St, Unit 2B' }
+            ], (vals) => {
+                if (!state.onboardingTenants) state.onboardingTenants = [];
+                state.onboardingTenants.push(attributeItem({
+                    id: Date.now(), name: vals[0] + ' — ' + vals[1], type: 'tenant',
+                    steps: onboardingTemplates.tenant.map(s => ({ text: s, done: false })), collapsed: true
+                }));
+                saveState(state); renderOnboarding();
+            });
         }
 
         function addOwnerOnboarding() {
-            const name = prompt('Owner name:');
-            if (!name) return;
-            if (!state.onboardingOwners) state.onboardingOwners = [];
-            state.onboardingOwners.push(attributeItem({
-                id: Date.now(),
-                name: name,
-                type: 'owner',
-                steps: onboardingTemplates.owner.map(s => ({ text: s, done: false })),
-                collapsed: true
-            }));
-            saveState(state);
-            renderOnboarding();
+            showOnboardingModal('owner', '👤 Add Owner Onboarding', [
+                { id: 'ob-name', label: 'Owner Name', placeholder: 'Full name' }
+            ], (vals) => {
+                if (!state.onboardingOwners) state.onboardingOwners = [];
+                state.onboardingOwners.push(attributeItem({
+                    id: Date.now(), name: vals[0], type: 'owner',
+                    steps: onboardingTemplates.owner.map(s => ({ text: s, done: false })), collapsed: true
+                }));
+                saveState(state); renderOnboarding();
+            });
+        }
+
+        function showOnboardingModal(type, title, fields, onSubmit) {
+            const existing = document.getElementById('onboarding-modal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'onboarding-modal';
+            overlay.className = 'modal-overlay';
+            const fieldsHtml = fields.map(f =>
+                '<div class="modal-field"><label class="modal-label">' + f.label + '</label>'
+                + '<input id="' + f.id + '-' + type + '" class="modal-input" type="text" placeholder="' + f.placeholder + '"></div>'
+            ).join('');
+            overlay.innerHTML = '<div class="modal-box" style="max-width:420px;">'
+                + '<div class="modal-title">' + title + '</div>'
+                + fieldsHtml
+                + '<div class="modal-actions">'
+                + '<button class="btn" onclick="document.getElementById(\'onboarding-modal\').remove()">Cancel</button>'
+                + '<button class="btn btn-primary" id="ob-submit-btn">Add</button>'
+                + '</div></div>';
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            document.getElementById('ob-submit-btn').onclick = () => {
+                const vals = fields.map(f => (document.getElementById(f.id + '-' + type).value || '').trim());
+                if (vals.some(v => !v)) { document.getElementById(fields[vals.indexOf('')].id + '-' + type).focus(); return; }
+                overlay.remove();
+                onSubmit(vals);
+            };
+            setTimeout(() => { const el = document.getElementById(fields[0].id + '-' + type); if (el) el.focus(); }, 0);
         }
 
         function toggleOnboarding(type, id) {
@@ -7797,12 +8522,13 @@
         }
 
         function removeOnboarding(type, id) {
-            if (!confirm('Remove this onboarding item?')) return;
-            if (type === 'property') state.onboardingProperties = state.onboardingProperties.filter(i => i.id !== id);
-            else if (type === 'tenant') state.onboardingTenants = state.onboardingTenants.filter(i => i.id !== id);
-            else state.onboardingOwners = state.onboardingOwners.filter(i => i.id !== id);
-            saveState(state);
-            renderOnboarding();
+            showConfirmModal('Remove this onboarding item?', () => {
+                if (type === 'property') state.onboardingProperties = state.onboardingProperties.filter(i => i.id !== id);
+                else if (type === 'tenant') state.onboardingTenants = state.onboardingTenants.filter(i => i.id !== id);
+                else state.onboardingOwners = state.onboardingOwners.filter(i => i.id !== id);
+                saveState(state);
+                renderOnboarding();
+            });
         }
 
         function renderOnboardingList(containerId, items, type) {
@@ -8168,6 +8894,11 @@
     </script>
 
     <!-- SCRATCHPAD: floating button + slide-out drawer -->
+    <!-- SPEAK UP FAB -->
+    <button id="speakUpFab" onclick="openSpeakUpModal()" title="Speak Up" aria-label="Share feedback">
+        <span>💬</span>
+    </button>
+
     <button id="scratchpadFab" onclick="toggleScratchpadDrawer()" title="Scratchpad" aria-label="Open scratchpad">
         <span style="font-size:18px;">📌</span>
     </button>
