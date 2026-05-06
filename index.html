@@ -1174,13 +1174,13 @@
 
                 <!-- HQ TAB SWITCHER -->
                 <div class="hq-tabs">
-                    <div class="hq-tab active" data-tab="my-hq" onclick="switchHQTab('my-hq')">My HQ</div>
-                    <div class="hq-tab" data-tab="company-hq" onclick="switchHQTab('company-hq')">Company HQ</div>
+                    <div class="hq-tab active" data-tab="company-hq" onclick="switchHQTab('company-hq')">Company HQ</div>
+                    <div class="hq-tab" data-tab="my-hq" onclick="switchHQTab('my-hq')">My HQ</div>
                     <div class="hq-tab disabled">Team performance <span>· soon</span></div>
                 </div>
 
                 <!-- MY HQ PANEL -->
-                <div id="hq-panel-my-hq" class="hq-panel active">
+                <div id="hq-panel-my-hq" class="hq-panel">
 
                 <!-- SECTION QUICK-NAV -->
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; padding:12px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
@@ -1193,59 +1193,29 @@
                     <a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" class="btn" style="font-size:12px; padding:5px 12px; text-decoration:none; color:var(--text);">🏢 AppFolio ↗</a>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card" style="cursor:pointer;" onclick="document.getElementById('dashboard-tasks-panel').scrollIntoView({behavior:'smooth'})" title="Jump to My Tasks">
+                <!-- PERSONAL STATS: Tasks / Approvals / Follow-Ups only -->
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px;">
+                    <div class="stat-card" style="cursor:pointer;" onclick="navigateTo('tasks')" title="Go to My Tasks">
                         <div class="stat-label">MY TASKS</div>
                         <div class="stat-value" id="stat-tasks">0</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">APPROVALS</div>
+                        <div class="stat-label">AWAITING APPROVAL</div>
                         <div class="stat-value" id="stat-approvals">0</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">FOLLOW-UPS</div>
                         <div class="stat-value" id="stat-waiting">0</div>
                     </div>
-                    <div class="stat-card" id="stat-workorders-card">
-                        <div class="stat-label">OPEN WORK ORDERS</div>
-                        <div class="stat-value" id="stat-workorders">0</div>
-                        <div id="stat-workorders-overdue" style="display:none; font-size:11px; font-weight:600; color:var(--danger); margin-top:2px;"></div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">ACTIVE APPLICATIONS</div>
-                        <div class="stat-value" id="stat-applications">0</div>
-                    </div>
-                    <div class="stat-card" id="stat-delinquencies-card" style="border-left-color:var(--danger); cursor:pointer;" onclick="navigateTo('finance'); setTimeout(() => switchSubtab('finance','delinquency'), 50);" title="Go to Finance → Delinquency tracker">
-                        <div class="stat-label">DELINQUENCIES</div>
-                        <div class="stat-value" id="stat-delinquencies">0</div>
-                    </div>
                 </div>
-
-                <!-- TODAY'S CALENDAR + UPCOMING RENEWALS -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-                    <div class="panel" style="margin-bottom:0; padding:14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div class="panel-title" style="margin-bottom:0; font-size:15px;">✅ EPG Daily Schedule</div>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span id="dashboard-calendar-synced" style="font-size:11px; color:var(--text-sm);"></span>
-                                <button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo('team-calendar')">Week view →</button>
-                            </div>
-                        </div>
-                        <div id="dashboard-calendar-tasks" style="max-height:340px; overflow-y:auto;"></div>
-                    </div>
-                    <!-- RIGHT: My Tasks snapshot -->
-                    <div id="dashboard-tasks-panel" class="panel" style="margin-bottom:0; padding:14px; min-height:280px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <div style="display:flex; align-items:baseline; gap:10px;">
-                                <div class="panel-title" style="margin-bottom:0; font-size:15px;">📋 My Tasks</div>
-                                <span id="dashboard-tasks-count" style="font-size:11px; color:var(--text-sm);"></span>
-                            </div>
-                            <div style="display:flex; gap:6px; align-items:center;">
-                                <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="openAddTaskModal('tasks')">+ Add Task</button>
-                            </div>
-                        </div>
-                        <div id="dashboard-tasks"></div>
-                    </div>
+                <!-- Hidden elements kept for JS compat -->
+                <div style="display:none;">
+                    <span id="stat-workorders">0</span>
+                    <span id="stat-workorders-overdue"></span>
+                    <div id="stat-workorders-card"></div>
+                    <span id="stat-applications">0</span>
+                    <span id="stat-delinquencies">0</span>
+                    <div id="stat-delinquencies-card"></div>
                 </div>
 
                 <div id="eodNudge" style="display:none; margin-bottom:16px; padding:12px 16px; background:rgba(200,160,60,0.1); border:1px solid rgba(200,160,60,0.3); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
@@ -1261,8 +1231,8 @@
 
 
 
-                <!-- APPROVALS + FOLLOW-UPS: compact stacked right column -->
-                <div style="max-width:420px; margin-left:auto; display:flex; flex-direction:column; gap:12px;">
+                <!-- APPROVALS + FOLLOW-UPS -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                     <div class="panel" style="margin-bottom:0; border-left:4px solid var(--danger); background:rgba(184,50,50,0.02);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <div class="panel-title" style="margin-bottom:0; font-size:14px;">⏳ Awaiting Approval</div>
@@ -1283,7 +1253,7 @@
                 </div><!-- /hq-panel-my-hq -->
 
                 <!-- COMPANY HQ PANEL -->
-                <div id="hq-panel-company-hq" class="hq-panel">
+                <div id="hq-panel-company-hq" class="hq-panel active">
                     <div id="company-hq-root"></div>
                 </div>
 
@@ -3814,7 +3784,7 @@
             });
             const panel = document.getElementById('hq-panel-' + tab);
             if (panel) panel.classList.add('active');
-            if (tab === 'company-hq') renderCompanyHQ();
+            if (tab === 'company-hq') { renderCompanyHQ(); setTimeout(renderDashboardCalendarTasks, 0); }
         }
 
 
@@ -4042,8 +4012,21 @@
                 </div>
             </div>
 
-            <!-- MOVE-INS / MOVE-OUTS -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+            <!-- EPG DAILY SCHEDULE -->
+            <div style="display:grid; grid-template-columns:55fr 45fr; gap:16px; margin-bottom:16px; align-items:start;">
+                <div class="panel" style="margin-bottom:0; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="font-size:14px; font-weight:700; color:var(--text);">✅ EPG Daily Schedule</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span id="dashboard-calendar-synced" style="font-size:11px; color:var(--text-sm);"></span>
+                            <button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo('team-calendar')">Week view →</button>
+                        </div>
+                    </div>
+                    <div id="dashboard-calendar-tasks" style="max-height:380px; overflow-y:auto;"></div>
+                </div>
+
+                <!-- MOVE-INS / MOVE-OUTS stacked right -->
+                <div style="display:flex; flex-direction:column; gap:12px;">
                 <div class="panel" style="margin-bottom:0; padding:16px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <div>
@@ -4068,7 +4051,8 @@
                         ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:16px 0;">No move-outs in next 14 days</p>'
                         : moveOuts.map(m => chqMoveOutRow(m)).join('')}
                 </div>
-            </div>
+                </div><!-- /stacked right col -->
+            </div><!-- /calendar+moveins grid -->
 
             <!-- TEAM TASK ROLLUP -->
             <div class="panel" style="margin-bottom:16px; padding:16px;">
@@ -4624,7 +4608,8 @@
 
             const { data, error } = await sbData.rpc('get_team_personal_state');
             if (error) {
-                container.innerHTML = `<p style="color:var(--danger); padding:16px;">Error loading team data: ${error.message}</p>`;
+                // (calendar rendered after innerHTML is set)
+            container.innerHTML = `<p style="color:var(--danger); padding:16px;">Error loading team data: ${error.message}</p>`;
                 console.error('Team overview error:', error);
                 return;
             }
@@ -4747,7 +4732,8 @@
         // ============================================
         function renderTaskList(container, tasks, type) {
             if (tasks.length === 0) {
-                container.innerHTML = `<p style="color: var(--text-sm); padding: 16px; text-align: center;">No ${type}s yet</p>`;
+                // (calendar rendered after innerHTML is set)
+            container.innerHTML = `<p style="color: var(--text-sm); padding: 16px; text-align: center;">No ${type}s yet</p>`;
                 return;
             }
 
@@ -5854,7 +5840,8 @@
                 eodNudge.style.display = (isWeekday && inWindow && !hasSubmittedToday) ? 'flex' : 'none';
             }
 
-            renderDashboardCalendarTasks();
+            renderCompanyHQ();
+            setTimeout(renderDashboardCalendarTasks, 0);
             renderDashboardTasksSnapshot();
             renderTaskList(document.getElementById('dashboard-approvals'), state.approvals, 'Approval');
             renderFollowUpsPanel();
@@ -6807,7 +6794,8 @@
             const emptyLabels = { pending: 'pending responses', renewing: 'renewals', notRenewing: 'non-renewals' };
 
             if (items.length === 0) {
-                container.innerHTML = `<p style="color:var(--text-sm); text-align:center; padding:20px;">No active ${emptyLabels[type] || 'items'}. Click the button above to add one.</p>`;
+                // (calendar rendered after innerHTML is set)
+            container.innerHTML = `<p style="color:var(--text-sm); text-align:center; padding:20px;">No active ${emptyLabels[type] || 'items'}. Click the button above to add one.</p>`;
                 return;
             }
 
@@ -7241,6 +7229,7 @@
                 return;
             }
 
+            // (calendar rendered after innerHTML is set)
             container.innerHTML = `
                 <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'} · ${items.reduce((sum, p) => sum + (p.units||0), 0)} total units — click any row to expand</div>
                 <div style="overflow-x:auto;">
@@ -7455,6 +7444,7 @@
                 return;
             }
 
+            // (calendar rendered after innerHTML is set)
             container.innerHTML = `
                 <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'} · click any row to expand notes</div>
                 <div style="overflow-x:auto;">
@@ -7640,7 +7630,8 @@
 
             if (!items || items.length === 0) {
                 const labels = { property: 'properties', tenant: 'tenants', owner: 'owners' };
-                container.innerHTML = `<p style="color:var(--text-sm); text-align:center; padding:20px;">No ${labels[type]} being onboarded. Click the + button to add one.</p>`;
+                // (calendar rendered after innerHTML is set)
+            container.innerHTML = `<p style="color:var(--text-sm); text-align:center; padding:20px;">No ${labels[type]} being onboarded. Click the + button to add one.</p>`;
                 return;
             }
 
