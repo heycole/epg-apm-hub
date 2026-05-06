@@ -1031,6 +1031,40 @@
             width: 100%;
         }
         .logout-btn:hover { background: rgba(203,121,47,0.1); }
+
+        /* ── HQ Tab Switcher ────────────────────────────── */
+        .hq-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0;
+        }
+        .hq-tab {
+            padding: 8px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sm);
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            border: 2px solid transparent;
+            border-bottom: none;
+            margin-bottom: -2px;
+            transition: color 0.15s, background 0.15s;
+            white-space: nowrap;
+        }
+        .hq-tab:hover:not(.disabled) { color: var(--text); background: var(--surface); }
+        .hq-tab.active {
+            color: var(--accent);
+            border-color: var(--border);
+            border-bottom-color: var(--bg);
+            background: var(--bg);
+        }
+        .hq-tab.disabled { cursor: default; opacity: 0.45; pointer-events: none; }
+        .hq-tab.disabled span { font-weight: 400; font-size: 11px; }
+        .hq-panel { display: none; }
+        .hq-panel.active { display: block; }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1138,6 +1172,16 @@
                     <div class="greeting-date" id="dashDate"></div>
                 </div>
 
+                <!-- HQ TAB SWITCHER -->
+                <div class="hq-tabs">
+                    <div class="hq-tab active" data-tab="my-hq" onclick="switchHQTab('my-hq')">My HQ</div>
+                    <div class="hq-tab" data-tab="company-hq" onclick="switchHQTab('company-hq')">Company HQ</div>
+                    <div class="hq-tab disabled">Team performance <span>· soon</span></div>
+                </div>
+
+                <!-- MY HQ PANEL -->
+                <div id="hq-panel-my-hq" class="hq-panel active">
+
                 <!-- SECTION QUICK-NAV -->
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; padding:12px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
                     <span style="font-size:11px; font-weight:600; color:var(--text-sm); align-self:center; margin-right:4px;">Jump to:</span>
@@ -1233,6 +1277,26 @@
                             <button class="btn" style="font-size:11px; padding:3px 8px;" onclick="openAddTaskModal('waiting')">+ Add</button>
                         </div>
                         <div id="dashboard-waiting"></div>
+                    </div>
+                </div>
+
+                </div><!-- /hq-panel-my-hq -->
+
+                <!-- COMPANY HQ PANEL -->
+                <div id="hq-panel-company-hq" class="hq-panel">
+                    <div class="panel" style="padding:48px 32px; text-align:center;">
+                        <div style="font-size:28px; margin-bottom:12px;">🏢</div>
+                        <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px;">Company HQ</div>
+                        <div style="font-size:13px; color:var(--text-sm); max-width:360px; margin:0 auto;">Portfolio KPIs, move-ins/outs, lease renewals, and team task rollup — coming next.</div>
+                    </div>
+                </div>
+
+                <!-- TEAM PERFORMANCE PANEL -->
+                <div id="hq-panel-team-performance" class="hq-panel">
+                    <div class="panel" style="padding:48px 32px; text-align:center;">
+                        <div style="font-size:28px; margin-bottom:12px;">📊</div>
+                        <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px;">Team Performance</div>
+                        <div style="font-size:13px; color:var(--text-sm);">Coming soon.</div>
                     </div>
                 </div>
 
@@ -3744,6 +3808,18 @@
         });
 
         // Updates sidebar avatar / name / greeting based on the loaded profile.
+
+        function switchHQTab(tab) {
+            document.querySelectorAll('.hq-tab[data-tab]').forEach(el => {
+                el.classList.toggle('active', el.dataset.tab === tab);
+            });
+            document.querySelectorAll('.hq-panel').forEach(el => {
+                el.classList.remove('active');
+            });
+            const panel = document.getElementById('hq-panel-' + tab);
+            if (panel) panel.classList.add('active');
+        }
+
         function applyUserChrome() {
             const name = displayName();
             const role = (currentProfile && currentProfile.role) || 'member';
