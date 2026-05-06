@@ -1327,52 +1327,75 @@
             <div class="page" data-page="eod">
                 <div class="panel">
                     <div class="panel-title">📝 End of Day Report</div>
-                    <form id="eodForm" style="display: flex; flex-direction: column; gap: 14px;">
+                    <form id="eodForm" style="display: flex; flex-direction: column; gap: 16px;">
+
+                        <!-- ROW 1: Name + Date -->
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
                             <div>
-                                <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Your Name</label>
+                                <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">Your Name</label>
                                 <input type="text" id="eodSubmittedBy" class="form-input" placeholder="e.g. Sarah" oninput="renderEODRoleQuestions(this.value.trim())" required>
                             </div>
                             <div>
-                                <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What's today's date?</label>
+                                <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">Today's Date</label>
                                 <input type="text" id="eodDate" class="form-input" placeholder="e.g. Monday 3/31" required>
                             </div>
                         </div>
-                        <div>
-                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What did you complete today?</label>
-                            <textarea id="eodCompleted" placeholder="List what you finished today..." class="form-input" style="min-height:80px;" required></textarea>
-                        </div>
-                        <div>
-                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What is currently in progress?</label>
-                            <textarea id="eodInProgress" placeholder="What's still being worked on..." class="form-input" style="min-height:80px;" required></textarea>
-                        </div>
-                        <div>
-                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What did you learn today?</label>
-                            <textarea id="eodLearned" placeholder="New knowledge, processes, or insights..." class="form-input" style="min-height:60px;"></textarea>
+
+                        <!-- ROW 2: 2-col body -->
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
+
+                            <!-- LEFT: What you did -->
+                            <div style="display:flex; flex-direction:column; gap:14px;">
+                                <div style="font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:-6px;">📋 Today</div>
+                                <div>
+                                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">What did you complete today?</label>
+                                    <textarea id="eodCompleted" placeholder="List what you finished today..." class="form-input" style="min-height:140px;" required></textarea>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">What is currently in progress?</label>
+                                    <textarea id="eodInProgress" placeholder="What's still being worked on..." class="form-input" style="min-height:120px;" required></textarea>
+                                </div>
+                            </div>
+
+                            <!-- RIGHT: Focus area + what's next -->
+                            <div style="display:flex; flex-direction:column; gap:14px;">
+                                <div style="font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:-6px;">🔭 What's Next</div>
+
+                                <!-- Role-specific questions injected here -->
+                                <div id="eod-role-questions"></div>
+
+                                <div>
+                                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">Tomorrow's top 3 priorities</label>
+                                    <textarea id="eodPriorities" placeholder="1. &#10;2. &#10;3." class="form-input" style="min-height:100px;" required></textarea>
+                                </div>
+                                <div>
+                                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">What did you learn today?</label>
+                                    <textarea id="eodLearned" placeholder="New knowledge, processes, or insights..." class="form-input" style="min-height:80px;"></textarea>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <!-- Role-specific questions injected here -->
-                        <div id="eod-role-questions"></div>
+                        <!-- ROW 3: Bottom strip — blockers + notes -->
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; padding-top:4px; border-top:1px solid var(--border);">
+                            <div>
+                                <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">Waiting on Elan or Cole?</label>
+                                <textarea id="eodBlocked" placeholder="Anything stuck or blocked..." class="form-input" style="min-height:70px;"></textarea>
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">Additional Notes</label>
+                                <textarea id="eodNotes" placeholder="Anything else to flag..." class="form-input" style="min-height:70px;"></textarea>
+                            </div>
+                        </div>
 
-                        <div>
-                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What are tomorrow's top 3 priorities?</label>
-                            <textarea id="eodPriorities" placeholder="1. &#10;2. &#10;3." class="form-input" style="min-height:80px;" required></textarea>
+                        <!-- ROW 4: Recipients + Submit -->
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding-top:4px;">
+                            <div style="font-size:12px; color:var(--text-sm);">
+                                📧 <span style="color:var(--text);">cole@heycolerealestate.com</span> · elan@elkaimpropertygroup.com · diana@elkaimpropertygroup.com
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="white-space:nowrap; flex-shrink:0;">Submit &amp; Email EOD</button>
                         </div>
-                        <div>
-                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Is anything stuck because you are waiting for Elan or Cole?</label>
-                            <textarea id="eodBlocked" placeholder="Any blockers or items waiting on someone else..." class="form-input" style="min-height:60px;"></textarea>
-                        </div>
-                        <div>
-                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Additional Notes</label>
-                            <textarea id="eodNotes" placeholder="Anything else you'd like to add..." class="form-input" style="min-height:60px;"></textarea>
-                        </div>
-                        <div style="background:var(--bg); border-radius:8px; padding:12px;">
-                            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">📧 Email report to:</label>
-                            <div style="font-size:13px; color:var(--text-sm); padding:10px; background:white; border:1px solid var(--border); border-radius:6px;">cole@heycolerealestate.com, elan@elkaimpropertygroup.com, diana@elkaimpropertygroup.com</div>
-                        </div>
-                        <div class="button-group">
-                            <button type="submit" class="btn btn-primary">Submit & Email EOD Report</button>
-                        </div>
+
                     </form>
                 </div>
 
