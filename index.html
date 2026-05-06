@@ -1728,6 +1728,37 @@
                     </div>
                 </div>
 
+                <!-- SECURITY DEPOSIT EXPLAINER -->
+                <div class="panel">
+                    <div class="panel-title">💰 Security Deposits — How It Works</div>
+                    <p style="color:var(--text-sm); font-size:13px; margin-bottom:16px;">Pennsylvania law limits landlords to holding one month's rent as a security deposit after the first year of tenancy. Here's how our current policy handles this:</p>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
+                        <div style="background:rgba(203,121,47,0.06); border:1px solid rgba(203,121,47,0.2); border-radius:10px; padding:14px;">
+                            <div style="font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">⬅️ Old Terminology</div>
+                            <ul style="margin-left:16px; font-size:13px; line-height:1.8; color:var(--text);">
+                                <li>First month's rent</li>
+                                <li>Last month's rent</li>
+                                <li>Security deposit</li>
+                            </ul>
+                            <div style="font-size:12px; color:var(--text-sm); margin-top:8px;">After year 1, the "last month's rent" was credited back to the tenant's ledger.</div>
+                        </div>
+                        <div style="background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.25); border-radius:10px; padding:14px;">
+                            <div style="font-size:11px; font-weight:700; color:#16a34a; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">✅ Current Terminology</div>
+                            <ul style="margin-left:16px; font-size:13px; line-height:1.8; color:var(--text);">
+                                <li>First month's rent</li>
+                                <li>Security Deposit #1 (one month)</li>
+                                <li>Security Deposit #2 (one month)</li>
+                            </ul>
+                            <div style="font-size:12px; color:var(--text-sm); margin-top:8px;">After year 1, Security Deposit #2 is credited back to the tenant's ledger.</div>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--bg); border-radius:10px; padding:14px; border-left:3px solid var(--accent); font-size:13px; line-height:1.7;">
+                        <strong>How it plays out:</strong> At lease signing, two months of security are collected (Security Deposit #1 + Security Deposit #2). After the first year of tenancy, Security Deposit #2 is credited back to the tenant's ledger — leaving only one month held as the ongoing security deposit. If the tenant renews, we continue holding just that one month going forward.
+                    </div>
+                </div>
+
                 <!-- LEASING TIPS -->
                 <div class="panel">
                     <div class="panel-title">💡 Leasing Tips & Reminders</div>
@@ -1735,7 +1766,7 @@
                         <li><strong>Verify lease terms match the approved application</strong> — rent, start date, term length, and any special conditions</li>
                         <li><strong>Double-check tenant name spellings and contact info</strong> before sending</li>
                         <li><strong>Attach all addendums</strong> — pet addendum, parking, utilities, etc. depending on the unit</li>
-                        <li><strong>Collect funds BEFORE move-in</strong> — first month's rent, last month's rent if applicable, and security deposit</li>
+                        <li><strong>Collect funds BEFORE move-in</strong> — first month's rent, Security Deposit #1, and Security Deposit #2 (two months total). SD #2 is credited back after year one per PA law.</li>
                         <li><strong>Save the signed lease to Google Drive</strong> in the appropriate property folder and link it in this tracker</li>
                     </ul>
                 </div>
@@ -8840,10 +8871,7 @@
                 term: 'COI (Certificate of Insurance)',
                 definition: 'Proof of insurance required from vendors showing they have appropriate coverage for their work.'
             },
-            {
-                term: 'Move-In Funds',
-                definition: 'All payments required before a tenant takes possession including first month rent, security deposit, and applicable fees.'
-            },
+
             {
                 term: 'Grace Period',
                 definition: 'The number of days after rent is due before a late fee applies per lease terms.'
@@ -8867,6 +8895,14 @@
             {
                 term: 'Normal Wear and Tear',
                 definition: 'Expected deterioration of a unit from regular use that is not deductible from a security deposit.'
+            },
+            {
+                term: 'Security Deposit #2',
+                definition: 'An additional one-month security deposit collected at lease signing (alongside Security Deposit #1). Under Pennsylvania law, landlords may only hold one month as a security deposit after the first year of tenancy. SD #2 is credited back to the tenant ledger at the end of year one, leaving only SD #1 going forward. This replaces what was previously called last month rent.'
+            },
+            {
+                term: 'Move-In Funds',
+                definition: 'All payments collected before a tenant takes possession: first month rent, Security Deposit #1, and Security Deposit #2 (two months total security). Security Deposit #2 is credited back after year one per Pennsylvania law.'
             }
         ];
 
@@ -8921,6 +8957,14 @@
             {
                 q: 'What if a tenant refuses to let me in for an inspection?',
                 a: 'Per lease terms, tenant must allow access with proper notice (typically 24-48 hours). If they refuse, document and escalate to Property Manager immediately.'
+            },
+            {
+                q: 'What is Security Deposit #2 and why do we collect it?',
+                a: 'Security Deposit #2 replaces what was previously called last month rent. At lease signing, tenants pay first month rent plus two months of security (SD #1 and SD #2). Pennsylvania law limits landlords to holding one month as a security deposit after the first year of tenancy. Security Deposit #2 is credited back to the tenant ledger at the end of year one, leaving only Security Deposit #1 going forward. If the tenant renews, we continue holding just that one month.'
+            },
+            {
+                q: 'Why did you stop collecting last month rent?',
+                a: 'Pennsylvania law prohibits landlords from holding more than one month rent as a security deposit after the first year of tenancy. Collecting a separate last month rent created confusion and required crediting it back anyway. The new Security Deposit #2 terminology clarifies exactly what the funds are and how they are handled at year one.'
             }
         ];
 
