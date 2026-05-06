@@ -1331,7 +1331,7 @@
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
                             <div>
                                 <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">Your Name</label>
-                                <input type="text" id="eodSubmittedBy" class="form-input" placeholder="e.g. Sarah" required>
+                                <input type="text" id="eodSubmittedBy" class="form-input" placeholder="e.g. Sarah" oninput="renderEODRoleQuestions(this.value.trim())" required>
                             </div>
                             <div>
                                 <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What's today's date?</label>
@@ -1350,6 +1350,10 @@
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What did you learn today?</label>
                             <textarea id="eodLearned" placeholder="New knowledge, processes, or insights..." class="form-input" style="min-height:60px;"></textarea>
                         </div>
+
+                        <!-- Role-specific questions injected here -->
+                        <div id="eod-role-questions"></div>
+
                         <div>
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">What are tomorrow's top 3 priorities?</label>
                             <textarea id="eodPriorities" placeholder="1. &#10;2. &#10;3." class="form-input" style="min-height:80px;" required></textarea>
@@ -1364,7 +1368,7 @@
                         </div>
                         <div style="background:var(--bg); border-radius:8px; padding:12px;">
                             <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">📧 Email report to:</label>
-                            <div style="font-size:13px; color:var(--text-sm); padding:10px; background:white; border:1px solid var(--border); border-radius:6px;">cole@heycolerealestate.com, elan@elkaimpropertygroup.com</div>
+                            <div style="font-size:13px; color:var(--text-sm); padding:10px; background:white; border:1px solid var(--border); border-radius:6px;">cole@heycolerealestate.com, elan@elkaimpropertygroup.com, diana@elkaimpropertygroup.com</div>
                         </div>
                         <div class="button-group">
                             <button type="submit" class="btn btn-primary">Submit & Email EOD Report</button>
@@ -4087,6 +4091,9 @@
             if (!state.companyTasks) state.companyTasks = [];
             state.companyTasks.push({ id: Date.now(), title, assignedTo, status, dueDate, urgent, completed: false, createdAt: new Date().toISOString() });
             saveStateKey('companyTasks', state.companyTasks);
+            // If urgent and assigned to me, log as a priority for today's EOD
+            const myFirstName = displayName().split(/\s+/)[0];
+            if (urgent && (!assignedTo || assignedTo === myFirstName)) logEODPriority(title);
             closeCompanyTaskModal();
             renderCompanyHQ();
         }
@@ -4107,6 +4114,21 @@
             const cycle = ['not-started', 'in-progress', 'stalled'];
             const cur = cycle.indexOf(t.status || 'not-started');
             t.status = cycle[(cur + 1) % cycle.length];
+            saveStateKey('companyTasks', state.companyTasks);
+            const myHQActive = document.getElementById('hq-panel-my-hq') && document.getElementById('hq-panel-my-hq').classList.contains('active');
+            if (myHQActive) { renderMyHQ(); } else { renderCompanyHQ(); }
+        }
+
+        function markCompanyTaskDone(id) {
+            const t = (state.companyTasks || []).find(t => String(t.id) === String(id));
+            if (!t) return;
+            t.completed = true;
+            t.completedAt = new Date().toISOString();
+            // Log to EOD daily log for the assigned person (if that's current user)
+            const firstName = displayName().split(/\s+/)[0];
+            if (!t.assignedTo || t.assignedTo === firstName) {
+                logEODCompletion(t.title);
+            }
             saveStateKey('companyTasks', state.companyTasks);
             const myHQActive = document.getElementById('hq-panel-my-hq') && document.getElementById('hq-panel-my-hq').classList.contains('active');
             if (myHQActive) { renderMyHQ(); } else { renderCompanyHQ(); }
@@ -4593,7 +4615,12 @@
                         </div></td>
                         <td style="padding:9px 8px;font-size:12px;color:var(--text-sm);width:72px;white-space:nowrap;">${t.assignedTo || '—'}</td>
                         <td style="padding:9px 8px;font-size:12px;width:68px;white-space:nowrap;color:${t.dueDate && t.dueDate < todayStr ? 'var(--danger)' : 'var(--text-sm)'};">${t.dueDate ? new Date(t.dueDate + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</td>
-                        <td style="padding:9px 8px;width:110px;text-align:right;">${statusBadge(t)}</td>
+                        <td style="padding:9px 8px;width:130px;text-align:right;">
+                            <div style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">
+                                ${statusBadge(t)}
+                                <button onclick="markCompanyTaskDone('${t.id}')" title="Mark done" style="font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid rgba(45,122,79,0.4);background:transparent;color:var(--success);cursor:pointer;white-space:nowrap;">✓</button>
+                            </div>
+                        </td>
                     </tr>`).join('');
 
             return `
@@ -4603,7 +4630,7 @@
                         <th style="text-align:left;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px 5px 4px;">Task</th>
                         <th style="text-align:left;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:72px;">Assignee</th>
                         <th style="text-align:left;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:68px;">Due</th>
-                        <th style="text-align:right;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:110px;">Status</th>
+                        <th style="text-align:right;font-size:11px;font-weight:600;color:var(--text-sm);padding:5px 8px;width:130px;">Status</th>
                     </tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
@@ -4828,6 +4855,7 @@
             urgent: [],
             checklists: {},
             eodReports: [],
+            eodDailyLog: {},
             trainingChecks: [],
             delinquencies: [],
             reconciliationNotes: '',
@@ -5154,6 +5182,11 @@
                         const mmdd = (now.getMonth() + 1) + '/' + now.getDate();
                         dateField.value = dayName + ' ' + mmdd;
                     }
+                    // Render role questions for this person
+                    const name = (document.getElementById('eodSubmittedBy') || {}).value || '';
+                    renderEODRoleQuestions(name.trim());
+                    // Pre-fill completed + priorities from daily log
+                    prefillEODFromDailyLog();
                 }, 0);
             }
 
@@ -5167,6 +5200,8 @@
             const key = type === 'Task' ? 'tasks' : type === 'Approval' ? 'approvals' : type === 'Waiting' ? 'waiting' : type;
             if (!state[key] || !state[key][idx]) return;
             state[key][idx].urgent = !state[key][idx].urgent;
+            // If now urgent, log as EOD priority
+            if (state[key][idx].urgent) logEODPriority(state[key][idx].title);
             saveStateKey(key, state[key]);
             renderAllTasksPage();
             renderDashboard();
@@ -5752,6 +5787,8 @@
                 item.completedByName = displayName();
                 item.completedAt = new Date().toISOString();
                 item.originalType = type;
+                // Log to EOD daily log
+                logEODCompletion(item.title);
                 // Remove from source array
                 state[key].splice(idx, 1);
                 // Add to archivedTasks
@@ -5876,6 +5913,84 @@
         }
 
         // ============================================
+        // EOD ROLE-SPECIFIC QUESTIONS
+        // ============================================
+        const EOD_ROLE_QUESTIONS = {
+            Mark: [
+                { id: 'eodWorkOrders',  label: 'Work orders — what came in today and what\'s the status?',
+                  placeholder: 'New WOs received, in progress, completed, pending parts/vendor...', h: 80 },
+                { id: 'eodVendors',     label: 'Any vendor coordination or follow-ups needed?',
+                  placeholder: 'Contractors contacted, estimates requested, scheduled work, invoices pending...', h: 60 }
+            ],
+            Chris: [
+                { id: 'eodRenewals',      label: 'Lease renewals — any updates or tenant responses?',
+                  placeholder: 'Renewals sent, signed, declined, follow-ups needed, upcoming expirations...', h: 80 },
+                { id: 'eodApplications',  label: 'Rental applications & showings — pipeline update',
+                  placeholder: 'New apps received, showings scheduled/completed, approvals, denials, move-in dates...', h: 60 }
+            ],
+            Diana: [
+                { id: 'eodOwnerComms',  label: 'Owner communications — any calls, emails, or action items?',
+                  placeholder: 'Owner inquiries handled, distribution questions, property updates relayed, escalations...', h: 70 }
+            ]
+        };
+
+        function renderEODRoleQuestions(name) {
+            const container = document.getElementById('eod-role-questions');
+            if (!container) return;
+            const questions = EOD_ROLE_QUESTIONS[name] || [];
+            if (!questions.length) { container.innerHTML = ''; return; }
+            container.innerHTML = '<div style="background:rgba(203,121,47,0.04); border:1px solid rgba(203,121,47,0.25); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:13px;">'
+                + '<div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:-4px;">📋 ' + name + '\'s focus area</div>'
+                + questions.map(q =>
+                    '<div>'
+                    + '<label style="display:block; font-weight:600; margin-bottom:6px; font-size:13px;">' + q.label + '</label>'
+                    + '<textarea id="' + q.id + '" class="form-input" placeholder="' + q.placeholder + '" style="min-height:' + q.h + 'px;"></textarea>'
+                    + '</div>'
+                ).join('')
+                + '</div>';
+        }
+
+        // ============================================
+        // EOD DAILY LOG — auto-track completed + priorities
+        // ============================================
+        function logEODCompletion(title) {
+            if (!title) return;
+            const today = todayIsoDate();
+            if (!state.eodDailyLog) state.eodDailyLog = {};
+            if (!state.eodDailyLog[today]) state.eodDailyLog[today] = { completed: [], priorities: [] };
+            if (!state.eodDailyLog[today].completed.includes(title)) {
+                state.eodDailyLog[today].completed.push(title);
+                saveState(state);
+            }
+        }
+
+        function logEODPriority(title) {
+            if (!title) return;
+            const today = todayIsoDate();
+            if (!state.eodDailyLog) state.eodDailyLog = {};
+            if (!state.eodDailyLog[today]) state.eodDailyLog[today] = { completed: [], priorities: [] };
+            if (!state.eodDailyLog[today].priorities.includes(title)) {
+                state.eodDailyLog[today].priorities.push(title);
+                saveState(state);
+            }
+        }
+
+        function prefillEODFromDailyLog() {
+            const today = todayIsoDate();
+            const log = ((state.eodDailyLog || {})[today]) || { completed: [], priorities: [] };
+
+            const completedEl = document.getElementById('eodCompleted');
+            if (completedEl && !completedEl.value.trim() && log.completed.length) {
+                completedEl.value = log.completed.map(t => '• ' + t).join('\n');
+            }
+
+            const prioritiesEl = document.getElementById('eodPriorities');
+            if (prioritiesEl && !prioritiesEl.value.trim() && log.priorities.length) {
+                prioritiesEl.value = log.priorities.slice(0, 3).map((t, i) => (i + 1) + '. ' + t).join('\n');
+            }
+        }
+
+        // ============================================
         // END OF DAY
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
@@ -5883,27 +5998,42 @@
             if (eodForm) {
                 eodForm.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    const submittedBy = document.getElementById('eodSubmittedBy').value.trim();
+
+                    // Collect role-specific question answers
+                    const roleQs = EOD_ROLE_QUESTIONS[submittedBy] || [];
+                    const roleAnswers = {};
+                    roleQs.forEach(q => {
+                        const el = document.getElementById(q.id);
+                        if (el && el.value.trim()) roleAnswers[q.id] = { label: q.label, value: el.value.trim() };
+                    });
+
                     const report = {
-                        submittedBy: document.getElementById('eodSubmittedBy').value,
+                        submittedBy,
                         date: document.getElementById('eodDate').value,
                         completed: document.getElementById('eodCompleted').value,
                         inProgress: document.getElementById('eodInProgress').value,
                         learned: document.getElementById('eodLearned').value,
                         priorities: document.getElementById('eodPriorities').value,
                         blocked: document.getElementById('eodBlocked').value,
-                        notes: document.getElementById('eodNotes').value
+                        notes: document.getElementById('eodNotes').value,
+                        roleAnswers
                     };
                     state.eodReports.push(report);
                     saveState(state);
                     renderEODHistory();
 
                     // Build email body
-                    const eodRecipient = 'cole@heycolerealestate.com,elan@elkaimpropertygroup.com';
+                    const eodRecipient = 'cole@heycolerealestate.com,elan@elkaimpropertygroup.com,diana@elkaimpropertygroup.com';
                     let body = 'EOD REPORT — ' + report.date + '\n';
                     body += 'Submitted by: ' + report.submittedBy + '\n\n';
                     body += 'COMPLETED TODAY:\n' + report.completed + '\n\n';
                     body += 'CURRENTLY IN PROGRESS:\n' + report.inProgress + '\n\n';
                     if (report.learned) body += 'WHAT I LEARNED:\n' + report.learned + '\n\n';
+                    // Role-specific answers inserted here
+                    Object.values(roleAnswers).forEach(a => {
+                        body += a.label.toUpperCase() + ':\n' + a.value + '\n\n';
+                    });
                     body += "TOMORROW'S TOP 3 PRIORITIES:\n" + report.priorities + '\n\n';
                     if (report.blocked) body += 'WAITING ON ELAN/COLE:\n' + report.blocked + '\n\n';
                     if (report.notes) body += 'ADDITIONAL NOTES:\n' + report.notes + '\n\n';
@@ -5914,7 +6044,15 @@
 
                     // Remember the name for next time
                     localStorage.setItem('eodLastName', report.submittedBy);
-                    ['eodDate','eodCompleted','eodInProgress','eodLearned','eodPriorities','eodBlocked','eodNotes'].forEach(id => document.getElementById(id).value = '');
+                    // Clear standard fields
+                    ['eodDate','eodCompleted','eodInProgress','eodLearned','eodPriorities','eodBlocked','eodNotes'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = '';
+                    });
+                    // Clear role-specific fields
+                    roleQs.forEach(q => { const el = document.getElementById(q.id); if (el) el.value = ''; });
+                    // Clear the role questions container
+                    renderEODRoleQuestions('');
                 });
             }
             // Auto-fill name from last submission
@@ -6330,6 +6468,7 @@
                             </div>
                             ${report.blocked ? '<div style="margin-top:10px;"><div style="font-size:11px; font-weight:700; color:var(--danger); text-transform:uppercase; margin-bottom:4px;">Waiting on Elan/Cole</div><div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">' + report.blocked + '</div></div>' : ''}
                             ${report.notes ? '<div style="margin-top:10px;"><div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Notes</div><div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">' + report.notes + '</div></div>' : ''}
+                            ${report.roleAnswers && Object.keys(report.roleAnswers).length ? '<div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--border);">' + Object.values(report.roleAnswers).map(a => '<div style="margin-bottom:8px;"><div style="font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; margin-bottom:3px;">' + a.label + '</div><div style="font-size:13px; color:var(--text-sm); white-space:pre-line;">' + a.value + '</div></div>').join('') + '</div>' : ''}
                         </div>
                     </div>
                 </div>`;
