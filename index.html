@@ -1131,15 +1131,8 @@
             <!-- DASHBOARD PAGE -->
             <div class="page active" data-page="dashboard">
                 <div class="greeting-banner">
-                    <div>
-                        <div class="greeting-text">Welcome Back</div>
-                        <div class="greeting-subtitle">EPG Management — Assistant Property Manager</div>
-                    </div>
+                    <div class="greeting-text">EPG Management</div>
                     <div class="greeting-date" id="dashDate"></div>
-                    <a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); border-radius:6px; font-size:11px; font-weight:600; color:#fff; text-decoration:none; white-space:nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                        <img src="https://www.appfolio.com/favicon.ico" alt="" style="height:11px; width:11px; object-fit:contain;">
-                        AppFolio ↗
-                    </a>
                 </div>
 
                 <!-- SECTION QUICK-NAV -->
@@ -1150,6 +1143,7 @@
                     <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('lease-renewals')">🔄 Lease Renewals</button>
                     <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('finance')">💰 Finance</button>
                     <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="navigateTo('eod')">📝 End of Day</button>
+                    <a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" class="btn" style="font-size:12px; padding:5px 12px; text-decoration:none; color:var(--text);">🏢 AppFolio ↗</a>
                 </div>
 
                 <div class="stats-grid">
@@ -3759,8 +3753,7 @@
             if (userNameEl) {
                 userNameEl.textContent = name + (role === 'admin' ? ' · Admin' : '');
             }
-            const greetTextEl = document.querySelector('.greeting-banner .greeting-text');
-            if (greetTextEl) greetTextEl.textContent = 'Welcome back, ' + (name.split(' ')[0] || name);
+
             document.querySelectorAll('[data-admin-only]').forEach(el => {
                 el.style.display = role === 'admin' ? '' : 'none';
             });
@@ -3775,7 +3768,7 @@
         const PERSONAL_KEYS = new Set([
             'tasks', 'urgent', 'scratchpad',
             'approvals', 'waiting', 'eodReports',
-            'calendarChecks', 'archivedTasks'
+            'calendarChecks', 'archivedTasks', 'archivedWaiting'
         ]);
         const SHARED_KEYS = new Set([
             'workOrders', 'applications', 'renewals', 'delinquencies',
@@ -3807,7 +3800,8 @@
             onboardingProperties: [],
             onboardingTenants: [],
             onboardingOwners: [],
-            archivedTasks: []
+            archivedTasks: [],
+            archivedWaiting: []
         };
 
         let saveTimeout = null;
@@ -4408,6 +4402,91 @@
                 </div>
                 `;
             }).join('');
+        }
+
+
+        // ── Follow-Ups panel: checkbox + archive ──────────────────────────────
+        function renderFollowUpsPanel() {
+            const container = document.getElementById('dashboard-waiting');
+            if (!container) return;
+            const tasks = state.waiting || [];
+            const archived = state.archivedWaiting || [];
+
+            let html = '';
+
+            if (tasks.length === 0) {
+                html += '<p style="color:var(--text-sm); padding:16px; text-align:center; font-size:13px;">No follow-ups yet</p>';
+            } else {
+                const sorted = tasks.map((t, i) => ({ task: t, idx: i }))
+                    .sort((a, b) => {
+                        if (!!a.task.urgent !== !!b.task.urgent) return a.task.urgent ? -1 : 1;
+                        return 0;
+                    });
+                html += sorted.map(({ task, idx }) => {
+                    const pill = taskPillHtml(task);
+                    return `
+                    <div style="padding:9px 12px; background:${task.urgent ? 'rgba(184,50,50,0.04)' : 'var(--bg)'}; border-radius:6px; margin-bottom:5px; display:flex; align-items:center; gap:8px; ${task.urgent ? 'border-left:3px solid var(--danger);' : ''}">
+                        <button onclick="archiveFollowUp(${idx})" title="Mark done & archive" style="flex-shrink:0; width:16px; height:16px; border-radius:3px; border:2px solid var(--border); background:transparent; cursor:pointer; padding:0; transition:all 0.2s;" onmouseover="this.style.borderColor='var(--success)'; this.style.background='rgba(45,122,79,0.12)'" onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent'"></button>
+                        <span style="font-size:13px; color:var(--text); flex:1;">${task.title}</span>
+                        ${task.assignedTo ? `<span style="font-size:11px; color:var(--text-sm); background:var(--bg); border:1px solid var(--border); padding:2px 6px; border-radius:4px; flex-shrink:0;">${task.assignedTo}</span>` : ''}
+                        ${pill}
+                        <div style="display:flex; gap:3px; flex-shrink:0;">
+                            <button class="btn" style="padding:3px 7px; font-size:11px; background:transparent; border:1px solid var(--border); color:var(--text-sm);" onclick="editTask('Waiting', ${idx})" title="Edit">✏️</button>
+                            <button class="btn" style="padding:3px 7px; font-size:11px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeTask('Waiting', ${idx}); renderFollowUpsPanel();" title="Remove">✕</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // Archived section
+            if (archived.length > 0) {
+                html += `
+                <div style="margin-top:10px; border-top:1px solid var(--border); padding-top:8px;">
+                    <button onclick="toggleFollowUpArchive()" style="background:none; border:none; cursor:pointer; font-size:11px; color:var(--text-sm); padding:2px 0; display:flex; align-items:center; gap:5px; width:100%;">
+                        <span id="followup-archive-chevron" style="transition:transform 0.2s; display:inline-block;">▶</span>
+                        <span>Archived (${archived.length})</span>
+                    </button>
+                    <div id="followup-archive-list" style="display:none; margin-top:6px;">
+                        ${archived.map((item, i) => `
+                        <div style="padding:7px 10px; background:var(--bg); border-radius:5px; margin-bottom:4px; display:flex; align-items:center; gap:8px; opacity:0.65;">
+                            <span style="color:var(--success); font-size:12px;">✓</span>
+                            <span style="font-size:12px; color:var(--text-sm); flex:1; text-decoration:line-through;">${item.title}</span>
+                            <span style="font-size:10px; color:var(--text-sm);">${item.archivedAt ? new Date(item.archivedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : ''}</span>
+                            <button class="btn" style="padding:2px 6px; font-size:10px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeArchivedFollowUp(${i})" title="Delete">✕</button>
+                        </div>`).join('')}
+                    </div>
+                </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function archiveFollowUp(idx) {
+            if (!state.waiting || !state.waiting[idx]) return;
+            const item = state.waiting.splice(idx, 1)[0];
+            item.archivedAt = new Date().toISOString();
+            if (!state.archivedWaiting) state.archivedWaiting = [];
+            state.archivedWaiting.unshift(item);
+            saveStateKey('waiting', state.waiting);
+            saveStateKey('archivedWaiting', state.archivedWaiting);
+            document.getElementById('stat-waiting').textContent = state.waiting.length;
+            renderFollowUpsPanel();
+        }
+
+        function removeArchivedFollowUp(idx) {
+            if (!state.archivedWaiting) return;
+            state.archivedWaiting.splice(idx, 1);
+            saveStateKey('archivedWaiting', state.archivedWaiting);
+            renderFollowUpsPanel();
+        }
+
+        function toggleFollowUpArchive() {
+            const list = document.getElementById('followup-archive-list');
+            const chevron = document.getElementById('followup-archive-chevron');
+            if (!list) return;
+            const isOpen = list.style.display !== 'none';
+            list.style.display = isOpen ? 'none' : 'block';
+            if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
         }
 
         // Dashboard 'My Tasks' panel: compact snapshot of the top 5
@@ -5398,7 +5477,7 @@
             renderDashboardCalendarTasks();
             renderDashboardTasksSnapshot();
             renderTaskList(document.getElementById('dashboard-approvals'), state.approvals, 'Approval');
-            renderTaskList(document.getElementById('dashboard-waiting'), state.waiting, 'Waiting');
+            renderFollowUpsPanel();
 
             // Load scratchpad
             const scratchpadEl = document.getElementById('scratchpad');
