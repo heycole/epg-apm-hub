@@ -4012,93 +4012,107 @@
                 </div>
             </div>
 
-            <!-- EPG DAILY SCHEDULE -->
-            <div style="display:grid; grid-template-columns:55fr 45fr; gap:16px; margin-bottom:16px; align-items:start;">
-                <div class="panel" style="margin-bottom:0; padding:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <div style="font-size:14px; font-weight:700; color:var(--text);">✅ EPG Daily Schedule</div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span id="dashboard-calendar-synced" style="font-size:11px; color:var(--text-sm);"></span>
-                            <button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo('team-calendar')">Week view →</button>
-                        </div>
-                    </div>
-                    <div id="dashboard-calendar-tasks" style="max-height:380px; overflow-y:auto;"></div>
-                </div>
+            <!-- MAIN 2-COL GRID -->
+            <div style="display:grid; grid-template-columns:55fr 45fr; gap:16px; align-items:start;">
 
-                <!-- MOVE-INS / MOVE-OUTS stacked right -->
+                <!-- LEFT COL: Calendar + Team Tasks -->
                 <div style="display:flex; flex-direction:column; gap:12px;">
-                <div class="panel" style="margin-bottom:0; padding:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <div>
-                            <span style="font-size:14px; font-weight:700; color:var(--text);">Move-ins</span>
-                            <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">Next 14 days · ${moveIns.length}</span>
-                        </div>
-                        <button class="btn" style="font-size:11px; padding:3px 10px;" onclick="navigateTo('leasing')">+ Add →</button>
-                    </div>
-                    ${moveIns.length === 0
-                        ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:16px 0;">No move-ins in next 14 days</p>'
-                        : moveIns.map(l => chqMoveInRow(l)).join('')}
-                </div>
-                <div class="panel" style="margin-bottom:0; padding:16px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <div>
-                            <span style="font-size:14px; font-weight:700; color:var(--text);">Move-outs</span>
-                            <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">Next 14 days · ${moveOuts.length}</span>
-                        </div>
-                        <button class="btn" style="font-size:11px; padding:3px 10px;" onclick="addMoveOut()">+ Add</button>
-                    </div>
-                    ${moveOuts.length === 0
-                        ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:16px 0;">No move-outs in next 14 days</p>'
-                        : moveOuts.map(m => chqMoveOutRow(m)).join('')}
-                </div>
-                </div><!-- /stacked right col -->
-            </div><!-- /calendar+moveins grid -->
 
-            <!-- TEAM TASK ROLLUP -->
-            <div class="panel" style="margin-bottom:16px; padding:16px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                    <div>
-                        <span style="font-size:14px; font-weight:700; color:var(--text);">Team Tasks</span>
-                        <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">${companyTasks.length} open</span>
+                    <!-- EPG Daily Schedule (compact) -->
+                    <div class="panel" style="margin-bottom:0; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="font-size:13px; font-weight:700; color:var(--text);">✅ EPG Daily Schedule</div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span id="dashboard-calendar-synced" style="font-size:11px; color:var(--text-sm);"></span>
+                                <button class="btn" style="font-size:11px; padding:3px 9px;" onclick="navigateTo('team-calendar')">Week view →</button>
+                            </div>
+                        </div>
+                        <div id="dashboard-calendar-tasks" style="max-height:260px; overflow-y:auto;"></div>
                     </div>
-                    <button class="btn" style="font-size:12px; padding:5px 12px;" onclick="addCompanyTask()">+ Add Task</button>
-                </div>
-                ${companyTasks.length === 0 && companyTasksDone.length === 0
-                    ? '<p style="color:var(--text-sm); font-size:13px; text-align:center; padding:16px 0;">No team tasks yet — click + Add Task to create one.</p>'
-                    : companyTasks.map(t => `
-                    <div style="padding:9px 12px; background:var(--bg); border-radius:6px; margin-bottom:6px; display:flex; align-items:center; gap:8px; ${t.urgent ? 'border-left:3px solid var(--danger);' : ''}">
-                        <button onclick="toggleCompanyTask('${t.id}')" style="flex-shrink:0; width:16px; height:16px; border-radius:3px; border:2px solid var(--border); background:transparent; cursor:pointer; padding:0;" title="Complete"></button>
-                        <span style="font-size:13px; color:var(--text); flex:1;">${t.title}</span>
-                        ${t.assignedTo ? `<span style="font-size:11px; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); padding:2px 8px; border-radius:4px; flex-shrink:0;">${t.assignedTo}</span>` : ''}
-                        <button class="btn" style="padding:2px 7px; font-size:10px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeCompanyTask('${t.id}')">✕</button>
-                    </div>`).join('')}
-                ${companyTasksDone.length > 0 ? `<p style="font-size:11px; color:var(--text-sm); margin-top:8px; text-align:right;">${companyTasksDone.length} completed task${companyTasksDone.length !== 1 ? 's' : ''} hidden</p>` : ''}
-            </div>
 
-            <!-- WHAT THE TEAM IS FIXING -->
-            <div class="panel" style="margin-bottom:0; padding:16px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                    <div style="font-size:14px; font-weight:700; color:var(--text);">What the team is fixing this week</div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span style="font-size:11px; color:var(--text-sm);">Week of ${weekLabel} · ${weekFixes.length} submitted</span>
-                        <button class="btn" style="font-size:11px; padding:3px 10px;" onclick="addWeeklyFix()">+ Add</button>
+                    <!-- Team Tasks -->
+                    <div class="panel" style="margin-bottom:0; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <div>
+                                <span style="font-size:13px; font-weight:700; color:var(--text);">Team Tasks</span>
+                                <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">${companyTasks.length} open</span>
+                            </div>
+                            <button class="btn" style="font-size:11px; padding:3px 9px;" onclick="addCompanyTask()">+ Add Task</button>
+                        </div>
+                        ${companyTasks.length === 0 && companyTasksDone.length === 0
+                            ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:12px 0;">No team tasks yet — click + Add Task to create one.</p>'
+                            : companyTasks.map(t => `
+                            <div style="padding:8px 10px; background:var(--bg); border-radius:6px; margin-bottom:5px; display:flex; align-items:center; gap:8px; ${t.urgent ? 'border-left:3px solid var(--danger);' : ''}">
+                                <button onclick="toggleCompanyTask('${t.id}')" style="flex-shrink:0; width:16px; height:16px; border-radius:3px; border:2px solid var(--border); background:transparent; cursor:pointer; padding:0;" title="Complete"></button>
+                                <span style="font-size:13px; color:var(--text); flex:1;">${t.title}</span>
+                                ${t.assignedTo ? `<span style="font-size:11px; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); padding:2px 8px; border-radius:4px; flex-shrink:0;">${t.assignedTo}</span>` : ''}
+                                <button class="btn" style="padding:2px 7px; font-size:10px; background:transparent; border:1px solid rgba(220,38,38,0.3); color:var(--danger);" onclick="removeCompanyTask('${t.id}')">✕</button>
+                            </div>`).join('')}
+                        ${companyTasksDone.length > 0 ? `<p style="font-size:11px; color:var(--text-sm); margin-top:6px; text-align:right;">${companyTasksDone.length} completed task${companyTasksDone.length !== 1 ? 's' : ''} hidden</p>` : ''}
                     </div>
-                </div>
-                <p style="font-size:12px; color:var(--text-sm); margin-bottom:14px;">One thing that's broken or inefficient — and how you're addressing it.</p>
-                ${weekFixes.length === 0
-                    ? '<p style="font-size:13px; color:var(--text-sm); text-align:center; padding:16px 0;">No submissions yet this week.</p>'
-                    : `<table style="width:100%; border-collapse:collapse;">
-                        ${weekFixes.map(f => `
-                        <tr style="border-bottom:1px solid var(--border);">
-                            <td style="padding:10px 8px; font-size:13px; font-weight:700; color:var(--text); width:80px; white-space:nowrap;">${f.name}</td>
-                            <td style="padding:10px 8px; font-size:13px; color:var(--text); flex:1;">${f.item}</td>
-                            <td style="padding:10px 8px; text-align:right; white-space:nowrap;">
-                                <span onclick="toggleFixStatus('${f.id}')" title="Click to cycle status">${statusBadge(f.status)}</span>
-                            </td>
-                        </tr>`).join('')}
-                    </table>`}
-            </div>`;
+
+                </div><!-- /left col -->
+
+                <!-- RIGHT COL: Weekly Fixes + Move-ins + Move-outs -->
+                <div style="display:flex; flex-direction:column; gap:12px;">
+
+                    <!-- What the team is fixing this week -->
+                    <div class="panel" style="margin-bottom:0; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+                            <div style="font-size:13px; font-weight:700; color:var(--text);">What the team is fixing this week</div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:11px; color:var(--text-sm);">Week of ${weekLabel} · ${weekFixes.length}</span>
+                                <button class="btn" style="font-size:11px; padding:3px 9px;" onclick="addWeeklyFix()">+ Add</button>
+                            </div>
+                        </div>
+                        <p style="font-size:11px; color:var(--text-sm); margin-bottom:12px;">One thing that's broken or inefficient — and how you're addressing it.</p>
+                        ${weekFixes.length === 0
+                            ? '<p style="font-size:12px; color:var(--text-sm); text-align:center; padding:12px 0;">No submissions yet this week.</p>'
+                            : `<table style="width:100%; border-collapse:collapse;">
+                                ${weekFixes.map(f => `
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <td style="padding:8px 6px; font-size:12px; font-weight:700; color:var(--text); width:72px; white-space:nowrap;">${f.name}</td>
+                                    <td style="padding:8px 6px; font-size:12px; color:var(--text);">${f.item}</td>
+                                    <td style="padding:8px 6px; text-align:right; white-space:nowrap;">
+                                        <span onclick="toggleFixStatus('${f.id}')" title="Click to cycle status">${statusBadge(f.status)}</span>
+                                    </td>
+                                </tr>`).join('')}
+                            </table>`}
+                    </div>
+
+                    <!-- Move-ins -->
+                    <div class="panel" style="margin-bottom:0; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div>
+                                <span style="font-size:13px; font-weight:700; color:var(--text);">Move-ins</span>
+                                <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">Next 14 days · ${moveIns.length}</span>
+                            </div>
+                            <button class="btn" style="font-size:11px; padding:3px 9px;" onclick="navigateTo('leasing')">+ Add →</button>
+                        </div>
+                        ${moveIns.length === 0
+                            ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:10px 0;">No move-ins in next 14 days</p>'
+                            : moveIns.map(l => chqMoveInRow(l)).join('')}
+                    </div>
+
+                    <!-- Move-outs -->
+                    <div class="panel" style="margin-bottom:0; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div>
+                                <span style="font-size:13px; font-weight:700; color:var(--text);">Move-outs</span>
+                                <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">Next 14 days · ${moveOuts.length}</span>
+                            </div>
+                            <button class="btn" style="font-size:11px; padding:3px 9px;" onclick="addMoveOut()">+ Add</button>
+                        </div>
+                        ${moveOuts.length === 0
+                            ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:10px 0;">No move-outs in next 14 days</p>'
+                            : moveOuts.map(m => chqMoveOutRow(m)).join('')}
+                    </div>
+
+                </div><!-- /right col -->
+
+            </div><!-- /main 2-col grid -->`;
         }
+
 
         function applyUserChrome() {
             const name = displayName();
