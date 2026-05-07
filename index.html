@@ -7508,14 +7508,8 @@
             'Must have job verification and landlord references — you can do this directly from AppFolio',
             'Once complete, put together information to review with the Property Manager. To make things easier use this <a href="https://chatgpt.com/g/g-69b8642bd5a08191b5f8fc3addcf85b7-rental-application-review-assistant" target="_blank" style="color:var(--accent);font-weight:600;">GPT</a> — download all documents that are part of the application including the application itself, all screening documents, and all attached documents',
             'Once Property Manager approves, draft email to send to owner for approval',
-            'If approved, send a congratulations email with a lease summary',
-            'Draft lease in AppFolio',
-            'For the time being, have Cole or Diana review the lease',
-            'Send lease out',
-            'Send wire instructions for 1st month\'s rent only — to be sent directly to the brokerage, KW Empower',
-            'Lease is fully executed',
-            'Remaining move-in funds must be wired directly to EPG Management — tenant is NOT permitted to pay any move-in funds through AppFolio',
-            'Send move-in instructions email and schedule a move-in inspection'
+            '\u2705 If approved: Send a congratulations email with a lease summary \u2014 then begin the Lease Execution Checklist on the Leasing page',
+            '\u274c If denied: Deny the application and send denial notification in AppFolio'
         ];
 
         const applicationDocs = [
@@ -7670,6 +7664,23 @@
         }
 
         function renderApplications() {
+            // Migrate existing apps: trim old lease-execution steps, keep only application-phase steps
+            if (state.applications) {
+                let migrated = false;
+                state.applications.forEach(app => {
+                    if (app.steps && app.steps.length > applicationSteps.length) {
+                        // Keep done-state for first 7 matching steps, add 2 new final steps
+                        const kept = app.steps.slice(0, 7);
+                        app.steps = [
+                            ...kept,
+                            { text: applicationSteps[7], done: false },
+                            { text: applicationSteps[8], done: false }
+                        ];
+                        migrated = true;
+                    }
+                });
+                if (migrated) saveStateKey('applications', state.applications);
+            }
             const container = document.getElementById('applicationList');
             const archivedContainer = document.getElementById('archivedApplicationList');
             const archivedCountEl = document.getElementById('archivedCount');
