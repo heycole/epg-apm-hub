@@ -5208,6 +5208,7 @@
 
             // Render page-specific content
             if (pageName === 'tasks') renderAllTasksPage();
+            if (pageName === 'rental-applications' || pageName === 'leasing') populateChecklists();
             if (pageName === 'team-overview') renderTeamOverview();
             if (pageName === 'portfolio') fetchPortfolio().then(renderPortfolio);
             if (pageName === 'rental-licenses') fetchRentalLicenses().then(renderRentalLicenses);
@@ -7649,19 +7650,19 @@
         }
 
         function renderApplications() {
-            // Migrate existing apps: trim old lease-execution steps, keep only application-phase steps
+            // Sync app steps to current template (preserves done state by position)
             if (state.applications) {
                 let migrated = false;
                 state.applications.forEach(app => {
-                    if (app.steps && app.steps.length > applicationSteps.length) {
-                        // Keep done-state for first 7 matching steps, add 2 new final steps
-                        const kept = app.steps.slice(0, 7);
-                        app.steps = [
-                            ...kept,
-                            { text: applicationSteps[7], done: false },
-                            { text: applicationSteps[8], done: false }
-                        ];
-                        migrated = true;
+                    if (app.steps) {
+                        const synced = applicationSteps.map((text, i) => ({
+                            text: text,
+                            done: (app.steps[i] && app.steps[i].done) ? true : false
+                        }));
+                        if (app.steps.length !== synced.length || app.steps.some((s, i) => s.text !== synced[i].text)) {
+                            app.steps = synced;
+                            migrated = true;
+                        }
                     }
                 });
                 if (migrated) saveStateKey('applications', state.applications);
