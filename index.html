@@ -1674,7 +1674,7 @@
 
                 <div class="panel" style="padding-bottom:0;">
                     <div class="panel-title" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="document.getElementById('leaseChecklistBody').classList.toggle('hidden'); this.querySelector('.chevron').textContent = document.getElementById('leaseChecklistBody').classList.contains('hidden') ? '▸' : '▾';">
-                        ✓ Application-to-Lease Checklist <span class="chevron" style="font-size:14px; color:var(--muted);">▸</span>
+                        ✓ Application Checklist <span class="chevron" style="font-size:14px; color:var(--muted);">▸</span>
                     </div>
                     <div id="leaseChecklistBody" class="hidden" style="padding-bottom:16px;">
                         <div class="checklist" id="newLeaseChecklist"></div>
@@ -1763,9 +1763,9 @@
                 <div class="panel" style="padding-bottom:0;">
                     <div class="panel-title" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="document.getElementById('leaseDraftChecklistBody').classList.toggle('hidden'); this.querySelector('.chevron').textContent = document.getElementById('leaseDraftChecklistBody').classList.contains('hidden') ? '&#9658;' : '&#9660;';">
                         <span>✍️ Lease Execution Checklist</span>
-                        <span class="chevron" style="font-size:14px; color:var(--muted);">&#9658;</span>
+                        <span class="chevron" style="font-size:14px; color:var(--muted);">&#9660;</span>
                     </div>
-                    <div id="leaseDraftChecklistBody" class="hidden" style="padding-bottom:16px; padding-top:8px;">
+                    <div id="leaseDraftChecklistBody" style="padding-bottom:16px; padding-top:8px;">
                         <p style="color:var(--text-sm); font-size:12px; margin-bottom:12px;">Run this checklist once an application is approved and you're ready to draft and execute the lease.</p>
                         <div class="checklist" id="leaseDraftChecklist"></div>
                         <div class="button-group" style="margin-top:10px;">
@@ -6313,7 +6313,7 @@
                     + resolvedNote + '</div></div>'
                     + '<div style="display:flex; align-items:center; gap:8px; flex-shrink:0;" onclick="event.stopPropagation()">'
                     + '<div style="display:flex; flex-direction:column; align-items:center; gap:1px;">'
-                    + '<span style="font-size:9px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.3px;">Handler</span>'
+                    + '<span style="font-size:9px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.3px;">Assigned To</span>'
                     + '<select onchange="updateDelinquencyField(' + d.id + ',\'assignedTo\',this.value)" style="padding:3px 6px; border:1px solid var(--border); border-radius:6px; font-family:\'DM Sans\',sans-serif; font-size:12px; font-weight:600; background:white; cursor:pointer;">' + teamOptions + '</select>'
                     + '</div>'
                     + '<div style="display:flex; flex-direction:column; align-items:center; gap:1px;">'
