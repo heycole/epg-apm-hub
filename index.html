@@ -7418,7 +7418,8 @@
                 return;
             }
 
-            container.innerHTML = state.workOrders.map(wo => {
+            const sortedWOs = state.workOrders.slice().sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+            container.innerHTML = sortedWOs.map(wo => {
                 const completedSteps = wo.steps.filter(s => s.done).length;
                 const totalSteps = wo.steps.length;
                 const pct = Math.round((completedSteps / totalSteps) * 100);
@@ -7673,7 +7674,7 @@
             if (!container) return;
 
             const allApps = state.applications || [];
-            const activeApps = allApps.filter(a => a.status !== 'denied' && a.status !== 'cancelled');
+            const activeApps = allApps.filter(a => a.status !== 'denied' && a.status !== 'cancelled').sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
             const archivedApps = allApps.filter(a => a.status === 'denied' || a.status === 'cancelled');
 
             if (archivedCountEl) archivedCountEl.textContent = archivedApps.length;
@@ -7998,7 +7999,7 @@
 
         function renderRenewalList(type, container) {
             if (!container) return;
-            const items = (state.renewals || []).filter(r => r.type === type);
+            const items = (state.renewals || []).filter(r => r.type === type).sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
             const emptyLabels = { pending: 'pending responses', renewing: 'renewals', notRenewing: 'non-renewals' };
 
             if (items.length === 0) {
@@ -8867,7 +8868,8 @@
                 return;
             }
 
-            container.innerHTML = items.map(item => {
+            const sortedItems = items.slice().sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+            container.innerHTML = sortedItems.map(item => {
                 const completed = item.steps.filter(s => s.done).length;
                 const total = item.steps.length;
                 const pct = Math.round((completed / total) * 100);
