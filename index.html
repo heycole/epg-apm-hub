@@ -1759,6 +1759,21 @@
                     </div>
                 </div>
 
+                <!-- LEASE EXECUTION CHECKLIST -->
+                <div class="panel" style="padding-bottom:0;">
+                    <div class="panel-title" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="document.getElementById('leaseDraftChecklistBody').classList.toggle('hidden'); this.querySelector('.chevron').textContent = document.getElementById('leaseDraftChecklistBody').classList.contains('hidden') ? '&#9658;' : '&#9660;';">
+                        <span>✍️ Lease Execution Checklist</span>
+                        <span class="chevron" style="font-size:14px; color:var(--muted);">&#9658;</span>
+                    </div>
+                    <div id="leaseDraftChecklistBody" class="hidden" style="padding-bottom:16px; padding-top:8px;">
+                        <p style="color:var(--text-sm); font-size:12px; margin-bottom:12px;">Run this checklist once an application is approved and you're ready to draft and execute the lease.</p>
+                        <div class="checklist" id="leaseDraftChecklist"></div>
+                        <div class="button-group" style="margin-top:10px;">
+                            <button class="btn btn-secondary" onclick="resetChecklist('leaseDraft')">Reset Checklist</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- LEASING TIPS -->
                 <div class="panel">
                     <div class="panel-title">💡 Leasing Tips & Reminders</div>
@@ -6204,7 +6219,7 @@
                     ? [{ text: d.notes.trim(), ts: d.lastUpdated || new Date().toISOString(), by: 'Legacy' }]
                     : [];
             }
-            const firstName = (d.assignedTo || displayName().split(/\s+/)[0] || 'Cole');
+            const firstName = displayName().split(/\s+/)[0] || d.assignedTo || 'Team';
             d.noteLog.unshift({ text, ts: new Date().toISOString(), by: firstName });
             d.notes = text; // keep for backward compat
             d.lastUpdated = new Date().toISOString();
@@ -6261,9 +6276,14 @@
             const list = document.getElementById('delinquencyList');
             if (!list) return;
             const items = state.delinquencies || [];
-            const active = items.filter(d => d.status !== 'resolved').sort((a,b) => (b.amount||0)-(a.amount||0));
+            // Active: newest first; Resolved: most recently resolved first
+            const active = items.filter(d => d.status !== 'resolved').sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
             const resolved = items.filter(d => d.status === 'resolved').sort((a,b) => new Date(b.resolvedAt||b.lastUpdated) - new Date(a.resolvedAt||a.lastUpdated));
             const TEAM = ['Cole','Elan','Diana','Vance','Chris','Stu','Mark'];
+            function fmtAmt(n) {
+                const v = parseFloat(n) || 0;
+                return '$' + v.toLocaleString('en-US', {minimumFractionDigits: v % 1 !== 0 ? 2 : 0, maximumFractionDigits: 2});
+            }
             function cardHtml(d) {
                 const isResolved = d.status === 'resolved';
                 const borderColor = isResolved ? 'var(--success)' : 'var(--danger)';
@@ -6271,14 +6291,14 @@
                 const lastUpd = d.lastUpdated ? new Date(d.lastUpdated).toLocaleDateString() : '';
                 const assignedTo = d.assignedTo || 'Cole';
                 const noteLog = Array.isArray(d.noteLog) ? d.noteLog
-                    : (d.notes && d.notes.trim() ? [{text: d.notes.trim(), ts: d.lastUpdated || d.createdAt || new Date().toISOString(), by: d.assignedTo || 'Legacy'}] : []);
+                    : (d.notes && d.notes.trim() ? [{text: d.notes.trim(), ts: d.lastUpdated || d.createdAt || new Date().toISOString(), by: 'Team'}] : []);
                 const resolvedNote = isResolved && d.resolvedBy
                     ? '<div style="font-size:11px; color:var(--success); font-weight:600; margin-top:4px;">&#10003; Resolved by ' + d.resolvedBy + ' on ' + new Date(d.resolvedAt).toLocaleDateString() + '</div>'
                     : '';
                 const stageOptions = ['Day 5 - Friendly Reminder','Day 6 - Late Fee Applied','Day 8/9 - Urgent Warning','Day 10 - 10-Day Notice to Quit','Day 15 - Eviction Process','Payment Plan in Place','Waiting on Tenant Response','Escalated to PM/Elan'];
                 const teamOptions = TEAM.map(n => '<option value="' + n + '"' + (assignedTo===n?' selected':'') + '>' + n + '</option>').join('');
                 const stageOpts = stageOptions.map(s => '<option' + (d.currentStage===s?' selected':'') + '>' + s + '</option>').join('');
-                const amtDisplay = '$' + (d.amount||0).toLocaleString();
+                const amtDisplay = fmtAmt(d.amount);
                 const nameStyle = isResolved ? 'font-weight:700; font-size:14px; text-decoration:line-through; color:var(--muted);' : 'font-weight:700; font-size:14px;';
                 const amtColor = isResolved ? 'var(--muted)' : 'var(--danger)';
                 const resolveBtn = isResolved
@@ -6292,9 +6312,15 @@
                     + '<div style="font-size:12px; color:var(--text-sm);">' + d.property + '</div>'
                     + resolvedNote + '</div></div>'
                     + '<div style="display:flex; align-items:center; gap:8px; flex-shrink:0;" onclick="event.stopPropagation()">'
-                    + '<select onchange="updateDelinquencyField(' + d.id + ',\'assignedTo\',this.value)" style="padding:4px 6px; border:1px solid var(--border); border-radius:6px; font-family:\'DM Sans\',sans-serif; font-size:12px; font-weight:600; background:white; cursor:pointer;">' + teamOptions + '</select>'
-                    + '<div style="display:flex; align-items:center; gap:3px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:3px 7px;">'
-                    + '&#128197;<input type="date" value="' + (d.followUpDate||'') + '" onchange="updateDelinquencyField(' + d.id + ',\'followUpDate\',this.value)" title="Next follow-up date" style="border:none; background:transparent; font-family:\'DM Sans\',sans-serif; font-size:12px; font-weight:600; color:var(--text); width:90px; cursor:pointer; outline:none;"></div>'
+                    + '<div style="display:flex; flex-direction:column; align-items:center; gap:1px;">'
+                    + '<span style="font-size:9px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.3px;">Handler</span>'
+                    + '<select onchange="updateDelinquencyField(' + d.id + ',\'assignedTo\',this.value)" style="padding:3px 6px; border:1px solid var(--border); border-radius:6px; font-family:\'DM Sans\',sans-serif; font-size:12px; font-weight:600; background:white; cursor:pointer;">' + teamOptions + '</select>'
+                    + '</div>'
+                    + '<div style="display:flex; flex-direction:column; align-items:center; gap:1px;">'
+                    + '<span style="font-size:9px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.3px;">Follow-Up</span>'
+                    + '<div style="display:flex; align-items:center; gap:3px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:2px 6px;">'
+                    + '<input type="date" value="' + (d.followUpDate||'') + '" onchange="updateDelinquencyField(' + d.id + ',\'followUpDate\',this.value)" title="Next follow-up date" style="border:none; background:transparent; font-family:\'DM Sans\',sans-serif; font-size:12px; font-weight:600; color:var(--text); width:90px; cursor:pointer; outline:none;"></div>'
+                    + '</div>'
                     + '<div style="font-weight:700; font-size:15px; color:' + amtColor + '; min-width:64px; text-align:right;">' + amtDisplay + '</div>'
                     + resolveBtn
                     + '<button onclick="deleteDelinquency(' + d.id + ')" title="Delete" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:4px 8px; border-radius:4px;">&#10005;</button>'
@@ -6397,6 +6423,26 @@
             saveState(state);
         }
 
+        function archiveNewLease(id) {
+            const l = state.newLeases.find(x => x.id === id);
+            if (!l) return;
+            l.archived = true;
+            l.archivedAt = new Date().toISOString();
+            l.lastUpdated = new Date().toISOString();
+            saveState(state);
+            renderNewLeases();
+        }
+
+        function unarchiveNewLease(id) {
+            const l = state.newLeases.find(x => x.id === id);
+            if (!l) return;
+            l.archived = false;
+            l.archivedAt = null;
+            l.lastUpdated = new Date().toISOString();
+            saveState(state);
+            renderNewLeases();
+        }
+
         function deleteNewLease(id) {
             showConfirmModal('Remove this lease from the tracker?', () => {
                 state.newLeases = state.newLeases.filter(x => x.id !== id);
@@ -6453,19 +6499,21 @@
             const list = document.getElementById('newLeaseList');
             if (!list) return;
             const items = state.newLeases || [];
-            if (items.length === 0) {
+            const active = items.filter(l => !l.archived);
+            const archived = items.filter(l => l.archived).sort((a,b) => new Date(b.archivedAt||0) - new Date(a.archivedAt||0));
+            if (active.length === 0 && archived.length === 0) {
                 list.innerHTML = '<p style="color:var(--text-sm); text-align:center; padding:20px; font-size:13px;">No active leases. Click + Add Lease to start tracking one.</p>';
                 return;
             }
-            // Sort: by status (Draft > Sent > Signed), then by target send-by date
             const statusOrder = { 'Draft': 0, 'Sent': 1, 'Signed': 2 };
-            const sorted = items.slice().sort((a, b) => {
+            const sorted = active.slice().sort((a, b) => {
                 const sa = statusOrder[a.status] ?? 0;
                 const sb = statusOrder[b.status] ?? 0;
                 if (sa !== sb) return sa - sb;
                 return (a.targetSendBy || '').localeCompare(b.targetSendBy || '');
             });
-            list.innerHTML = sorted.map(l => {
+
+            function buildCard(l, isArchived) {
                 const statusColors = {
                     'Draft': { border: 'var(--warning)', bg: 'rgba(245,158,11,0.05)', badge: 'var(--warning)' },
                     'Sent': { border: 'var(--accent)', bg: 'rgba(203,121,47,0.05)', badge: 'var(--accent)' },
@@ -6480,8 +6528,11 @@
                         <button onclick="removeLeaseDocument(${l.id}, ${idx})" title="Remove link" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; padding:2px 6px;">✕</button>
                     </div>
                 `).join('');
+                const archiveBtnHtml = isArchived
+                    ? `<button onclick="event.stopPropagation(); unarchiveNewLease(${l.id})" title="Restore" style="background:none; border:1px solid var(--muted); color:var(--muted); cursor:pointer; font-size:11px; padding:3px 9px; border-radius:5px; margin-right:6px;">Restore</button>`
+                    : `<button onclick="event.stopPropagation(); archiveNewLease(${l.id})" title="Archive" style="background:none; border:1px solid var(--muted); color:var(--muted); cursor:pointer; font-size:11px; padding:3px 9px; border-radius:5px; margin-right:6px;">Archive</button>`;
                 return `
-                <div style="background:${c.bg}; border:1px solid ${c.border}; border-radius:8px; margin-bottom:10px; overflow:hidden;">
+                <div style="background:${c.bg}; border:1px solid ${c.border}; border-radius:8px; margin-bottom:10px; overflow:hidden; ${isArchived ? 'opacity:0.75;' : ''}">
                     <div onclick="this.parentElement.classList.toggle('lease-open')" style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; cursor:pointer; user-select:none;">
                         <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
                             <span class="lease-chevron" style="font-size:14px; transition:transform .2s;">▸</span>
@@ -6490,8 +6541,9 @@
                                 <div style="font-size:12px; color:var(--text-sm);">${l.property}</div>
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:14px; flex-shrink:0;">
+                        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                             <span style="background:${c.badge}; color:white; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700;">${l.status.toUpperCase()}</span>
+                            ${archiveBtnHtml}
                             <button onclick="event.stopPropagation(); deleteNewLease(${l.id})" title="Delete" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:4px 8px;">✕</button>
                         </div>
                     </div>
@@ -6529,10 +6581,34 @@
                         </div>
                     </div>
                 </div>`;
-            }).join('');
+            }
+
+            let html = '';
+            if (sorted.length > 0) {
+                html += sorted.map(l => buildCard(l, false)).join('');
+            } else {
+                html += '<p style="color:var(--text-sm); text-align:center; padding:16px 0; font-size:13px;">No active leases. Click + Add Lease to start tracking one.</p>';
+            }
+
+            if (archived.length > 0) {
+                const archivedId = 'newLeaseArchived';
+                html += `
+                <div style="margin-top:16px; border-top:1px solid var(--border); padding-top:12px;">
+                    <div onclick="var b=document.getElementById('${archivedId}'); b.classList.toggle('hidden'); this.querySelector('.arch-chev').textContent = b.classList.contains('hidden') ? '▸' : '▾';" style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; padding:4px 0; margin-bottom:8px;">
+                        <span class="arch-chev" style="font-size:13px; color:var(--muted);">▸</span>
+                        <span style="font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;">Archived (${archived.length})</span>
+                    </div>
+                    <div id="${archivedId}" class="hidden">
+                        ${archived.map(l => buildCard(l, true)).join('')}
+                    </div>
+                </div>`;
+            }
+
+            list.innerHTML = html;
         }
 
-        function renderEODHistory() {
+
+                function renderEODHistory() {
             const history = document.getElementById('eodHistory');
             if (!history) return;
 
@@ -6967,10 +7043,13 @@
                 'Must have job verification and landlord references — you can do this directly from AppFolio',
                 'Once complete, put together information to review with the Property Manager. To make things easier use this <a href="https://chatgpt.com/g/g-69b8642bd5a08191b5f8fc3addcf85b7-rental-application-review-assistant" target="_blank" style="color:var(--accent);font-weight:600;">GPT</a> — download all documents that are part of the application including the application itself, all screening documents, and all attached documents',
                 'Once Property Manager approves, draft email to send to owner for approval',
-                'If approved, send a congratulations email with a lease summary',
+                '✅ If approved: Send a congratulations email with a lease summary — then begin the Lease Execution Checklist on the Leasing page',
+                '❌ If denied: Deny the application and send denial notification in AppFolio'
+            ],
+            leaseDraft: [
                 'Draft lease in AppFolio',
                 'For the time being, have Cole or Diana review the lease',
-                'Send lease out',
+                'Send lease out via DocuSign',
                 'Send wire instructions for 1st month\'s rent only — to be sent directly to the brokerage, KW Empower',
                 'Lease is fully executed',
                 'Remaining move-in funds must be wired directly to EPG Management — tenant is NOT permitted to pay any move-in funds through AppFolio',
