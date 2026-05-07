@@ -6393,7 +6393,8 @@
                 notes: '',
                 documents: [],
                 createdAt: new Date().toISOString(),
-                lastUpdated: new Date().toISOString()
+                lastUpdated: new Date().toISOString(),
+                steps: checklistItems.leaseDraft.map(t => ({ text: t, done: false }))
             };
             if (!state.newLeases) state.newLeases = [];
             state.newLeases.push(attributeItem(entry));
@@ -6407,6 +6408,15 @@
             l[field] = value;
             l.lastUpdated = new Date().toISOString();
             saveState(state);
+        }
+
+        function toggleLeaseStep(id, idx) {
+            const l = state.newLeases.find(x => x.id === id);
+            if (!l || !l.steps) return;
+            l.steps[idx].done = !l.steps[idx].done;
+            l.lastUpdated = new Date().toISOString();
+            saveState(state);
+            renderNewLeases();
         }
 
         function archiveNewLease(id) {
@@ -6485,6 +6495,16 @@
             const list = document.getElementById('newLeaseList');
             if (!list) return;
             const items = state.newLeases || [];
+            // Migrate: ensure all leases have steps
+            let leasesMigrated = false;
+            items.forEach(l => {
+                if (!l.steps || l.steps.length !== checklistItems.leaseDraft.length) {
+                    const prev = l.steps || [];
+                    l.steps = checklistItems.leaseDraft.map((t, i) => ({ text: t, done: prev[i] ? prev[i].done : false }));
+                    leasesMigrated = true;
+                }
+            });
+            if (leasesMigrated) saveState(state);
             const active = items.filter(l => !l.archived);
             const archived = items.filter(l => l.archived).sort((a,b) => new Date(b.archivedAt||0) - new Date(a.archivedAt||0));
             if (active.length === 0 && archived.length === 0) {
@@ -6559,6 +6579,15 @@
                                     <button onclick="addLeaseDocument(${l.id})" style="background:var(--accent); color:white; border:none; padding:5px 12px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">+ Add Link</button>
                                 </div>
                                 ${docsHtml || '<div style="color:var(--muted); font-size:12px; padding:8px; text-align:center;">No documents linked yet. Click + Add Link to attach a Google Drive URL.</div>'}
+                            </div>
+                            <div style="margin-top:12px;">
+                                <div style="font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Lease Execution Checklist</div>
+                                ${(l.steps || []).map((step, idx) => `
+                                    <div style="display:flex; align-items:flex-start; gap:8px; padding:5px 0; cursor:pointer;" onclick="toggleLeaseStep(${l.id}, ${idx})">
+                                        <input type="checkbox" ${step.done ? 'checked' : ''} style="margin-top:3px; accent-color:var(--accent); width:15px; height:15px; pointer-events:none; flex-shrink:0;">
+                                        <span style="font-size:13px; line-height:1.5; ${step.done ? 'text-decoration:line-through; color:var(--muted);' : ''}">${step.text}</span>
+                                    </div>
+                                `).join('')}
                             </div>
                             <div style="margin-top:12px;">
                                 <label style="display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Notes</label>
