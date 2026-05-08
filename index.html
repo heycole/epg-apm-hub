@@ -3976,6 +3976,7 @@
                 'signed': '#2d7a4f', 'confirmed': '#2d7a4f', 'on-track': '#2d7a4f', 'done': '#2d7a4f',
                 'sent': '#3b6dbf', 'notice received': '#3b6dbf', 'walkthrough completed': '#3b6dbf', 'in progress': '#3b6dbf',
                 'draft': '#d97706', 'awaiting deposit': '#d97706', 'pending': '#d97706', 'stalled': '#b83232',
+                'waiting on owner to sign': '#7c3aed', 'waiting on tenants to sign': '#cb792f', 'fully executed': '#2d7a4f',
             };
             const color = map[(status || '').toLowerCase()] || '#94a3b8';
             return `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${color}; flex-shrink:0;"></span>`;
@@ -4158,7 +4159,18 @@
         }
 
         function cycleCompanyTaskStatus(id) {
-            if (String(id).startsWith('p-')) return; // personal tasks — no status cycling
+            if (String(id).startsWith('p-')) {
+                const idx = parseInt(String(id).replace('p-', ''));
+                if (state.tasks && state.tasks[idx]) {
+                    const cycle = ['not-started', 'in-progress', 'stalled'];
+                    const cur = cycle.indexOf(state.tasks[idx].status || 'not-started');
+                    state.tasks[idx].status = cycle[(cur + 1) % cycle.length];
+                    saveStateKey('tasks', state.tasks);
+                    const myHQActive = document.getElementById('hq-panel-my-hq') && document.getElementById('hq-panel-my-hq').classList.contains('active');
+                    if (myHQActive) { renderMyHQ(); } else { renderCompanyHQ(); }
+                }
+                return;
+            }
             const t = (state.companyTasks || []).find(t => String(t.id) === String(id));
             if (!t) return;
             const cycle = ['not-started', 'in-progress', 'stalled'];
@@ -4202,6 +4214,21 @@
         function removeCompanyTask(id) {
             state.companyTasks = (state.companyTasks || []).filter(t => String(t.id) !== String(id));
             saveStateKey('companyTasks', state.companyTasks);
+            renderCompanyHQ();
+        }
+
+        function restoreCompanyTask(id) {
+            if (String(id).startsWith('p-')) {
+                const idx = parseInt(String(id).replace('p-', ''));
+                if (state.tasks && state.tasks[idx]) {
+                    state.tasks[idx].completed = false;
+                    delete state.tasks[idx].completedAt;
+                    saveStateKey('tasks', state.tasks);
+                }
+            } else {
+                const t = (state.companyTasks || []).find(t => String(t.id) === String(id));
+                if (t) { t.completed = false; delete t.completedAt; saveStateKey('companyTasks', state.companyTasks); }
+            }
             renderCompanyHQ();
         }
 
@@ -4703,7 +4730,18 @@
                     </tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
-                ${companyTasksDone.length > 0 ? `<p style="font-size:11px;color:var(--text-sm);margin-top:8px;text-align:right;">${companyTasksDone.length} completed hidden</p>` : ''}
+                ${companyTasksDone.length > 0 ? `
+                <div style="margin-top:12px; border-top:1px solid var(--border); padding-top:8px;">
+                    <div onclick="var b=document.getElementById('ct-archive'); b.classList.toggle('hidden'); this.querySelector('.ct-chev').textContent=b.classList.contains('hidden')?'▸':'▾';" style="display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; padding:4px 0;">
+                        <span class="ct-chev" style="font-size:12px; color:var(--muted);">▸</span>
+                        <span style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;">Completed (${companyTasksDone.length})</span>
+                    </div>
+                    <div id="ct-archive" class="hidden">
+                        <table style="width:100%; border-collapse:collapse; margin-top:4px; opacity:0.65;">
+                            <tbody>${companyTasksDone.map(t => '<tr style="border-bottom:1px solid var(--border);"><td style="padding:7px 8px 7px 4px; font-size:12px; color:var(--muted); text-decoration:line-through;">' + t.title + '</td><td style="padding:7px 8px; font-size:11px; color:var(--muted); width:72px;">' + (t.assignedTo||'—') + '</td><td style="padding:7px 8px; width:100px; text-align:right;"><button onclick="restoreCompanyTask(\'' + t.id + '\')" style="font-size:10px; padding:2px 7px; border-radius:4px; border:1px solid var(--border); background:transparent; color:var(--text-sm); cursor:pointer;">Restore</button></td></tr>').join('')}</tbody>
+                        </table>
+                    </div>
+                </div>` : ''}
             `;
         }
 
@@ -6430,6 +6468,24 @@
             saveState(state);
         }
 
+        function updateLeaseStatusBadge(id, newStatus) {
+            // Update the badge in the header without full re-render (keeps card open)
+            const statusColors = {
+                'Draft': { border: 'var(--warning)', badge: 'var(--warning)' },
+                'Waiting on owner to sign': { border: '#a78bfa', badge: '#7c3aed' },
+                'Waiting on tenants to sign': { border: 'var(--accent)', badge: 'var(--accent)' },
+                'Fully executed': { border: 'var(--success)', badge: 'var(--success)' }
+            };
+            const c = statusColors[newStatus] || statusColors['Draft'];
+            // Find the card container and update its border color
+            const cards = document.querySelectorAll('[data-lease-id="' + id + '"]');
+            cards.forEach(card => {
+                card.style.borderColor = c.border;
+                const badge = card.querySelector('[data-lease-badge]');
+                if (badge) { badge.style.background = c.badge; badge.textContent = newStatus.toUpperCase(); }
+            });
+        }
+
         function toggleLeaseStep(id, idx) {
             const l = state.newLeases.find(x => x.id === id);
             if (!l || !l.steps) return;
@@ -6542,8 +6598,9 @@
             function buildCard(l, isArchived) {
                 const statusColors = {
                     'Draft': { border: 'var(--warning)', bg: 'rgba(245,158,11,0.05)', badge: 'var(--warning)' },
-                    'Sent': { border: 'var(--accent)', bg: 'rgba(203,121,47,0.05)', badge: 'var(--accent)' },
-                    'Signed': { border: 'var(--success)', bg: 'rgba(34,197,94,0.05)', badge: 'var(--success)' }
+                    'Waiting on owner to sign': { border: '#a78bfa', bg: 'rgba(167,139,250,0.05)', badge: '#7c3aed' },
+                    'Waiting on tenants to sign': { border: 'var(--accent)', bg: 'rgba(203,121,47,0.05)', badge: 'var(--accent)' },
+                    'Fully executed': { border: 'var(--success)', bg: 'rgba(34,197,94,0.05)', badge: 'var(--success)' }
                 };
                 const c = statusColors[l.status] || statusColors['Draft'];
                 const docsHtml = (l.documents || []).map((d, idx) => `
@@ -6558,7 +6615,7 @@
                     ? `<button onclick="event.stopPropagation(); unarchiveNewLease(${l.id})" title="Restore" style="background:none; border:1px solid var(--muted); color:var(--muted); cursor:pointer; font-size:11px; padding:3px 9px; border-radius:5px; margin-right:6px;">Restore</button>`
                     : `<button onclick="event.stopPropagation(); archiveNewLease(${l.id})" title="Archive" style="background:none; border:1px solid var(--muted); color:var(--muted); cursor:pointer; font-size:11px; padding:3px 9px; border-radius:5px; margin-right:6px;">Archive</button>`;
                 return `
-                <div style="background:${c.bg}; border:1px solid ${c.border}; border-radius:8px; margin-bottom:10px; overflow:hidden; ${isArchived ? 'opacity:0.75;' : ''}">
+                <div data-lease-id="${l.id}" style="background:${c.bg}; border:1px solid ${c.border}; border-radius:8px; margin-bottom:10px; overflow:hidden; ${isArchived ? 'opacity:0.75;' : ''}">
                     <div onclick="this.parentElement.classList.toggle('lease-open')" style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; cursor:pointer; user-select:none;">
                         <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
                             <span class="lease-chevron" style="font-size:14px; transition:transform .2s;">▸</span>
@@ -6568,7 +6625,7 @@
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
-                            <span style="background:${c.badge}; color:white; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700;">${l.status.toUpperCase()}</span>
+                            <span data-lease-badge style="background:${c.badge}; color:white; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700;">${l.status.toUpperCase()}</span>
                             ${archiveBtnHtml}
                             <button onclick="event.stopPropagation(); deleteNewLease(${l.id})" title="Delete" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:4px 8px;">✕</button>
                         </div>
@@ -6578,10 +6635,8 @@
                             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:12px;">
                                 <div>
                                     <label style="display:block; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:4px;">Status</label>
-                                    <select onchange="updateNewLeaseField(${l.id}, 'status', this.value); renderNewLeases();" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:white;">
-                                        <option ${l.status === 'Draft' ? 'selected' : ''}>Draft</option>
-                                        <option ${l.status === 'Sent' ? 'selected' : ''}>Sent</option>
-                                        <option ${l.status === 'Signed' ? 'selected' : ''}>Signed</option>
+                                    <select onchange="updateNewLeaseField(${l.id}, 'status', this.value); updateLeaseStatusBadge(${l.id}, this.value);" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:white;">
+                                        ${['Draft','Waiting on owner to sign','Waiting on tenants to sign','Fully executed'].map(s => '<option value="' + s + '" ' + (l.status === s ? 'selected' : '') + '>' + s + '</option>').join('')}
                                     </select>
                                 </div>
                                 <div>
@@ -7083,12 +7138,14 @@
             ],
             leaseDraft: [
                 'Draft lease in AppFolio',
-                'For the time being, have Cole or Diana review the lease',
-                'Send lease out via DocuSign',
+                'Have Cole or Diana review the lease before sending',
                 'Send wire instructions for 1st month\'s rent only — to be sent directly to the brokerage, KW Empower',
-                'Lease is fully executed',
+                'Confirm 1st month wire received by KW Empower',
                 'Remaining move-in funds must be wired directly to EPG Management — tenant is NOT permitted to pay any move-in funds through AppFolio',
-                'Send move-in instructions email and schedule a move-in inspection'
+                'Confirm all move-in funds received by EPG Management',
+                'Record move-in funds in AppFolio',
+                'Send move-in instructions email to tenant',
+                'Schedule move-in inspection'
             ],
             renewal: [
                 'Pull 90-day lease expiration report from AppFolio',
