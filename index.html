@@ -3795,9 +3795,8 @@
             // Always re-fetch these on every hydration (not guarded by appInitialized)
             fetchPortfolio().then(() => {
                 if (typeof renderPortfolio === 'function') renderPortfolio();
-                // Refresh Company HQ KPI cards now that portfolio data is loaded
-                const companyHQActive = document.getElementById('hq-panel-company-hq') && document.getElementById('hq-panel-company-hq').classList.contains('active');
-                if (companyHQActive && typeof renderCompanyHQ === 'function') renderCompanyHQ();
+                // Always refresh Company HQ KPI cards once portfolio data is loaded
+                if (typeof renderCompanyHQ === 'function') renderCompanyHQ();
             });
             fetchRentalLicenses().then(() => { if (typeof renderRentalLicenses === 'function') renderRentalLicenses(); });
         }
