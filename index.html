@@ -4158,6 +4158,7 @@
         }
 
         function cycleCompanyTaskStatus(id) {
+            if (String(id).startsWith('p-')) return; // personal tasks — no status cycling
             const t = (state.companyTasks || []).find(t => String(t.id) === String(id));
             if (!t) return;
             const cycle = ['not-started', 'in-progress', 'stalled'];
@@ -4169,6 +4170,21 @@
         }
 
         function markCompanyTaskDone(id) {
+            if (String(id).startsWith('p-')) {
+                const idx = parseInt(String(id).replace('p-', ''));
+                if (state.tasks && state.tasks[idx]) {
+                    const firstName = displayName().split(/\s+/)[0];
+                    if (!state.tasks[idx].assignedTo || state.tasks[idx].assignedTo === firstName) {
+                        logEODCompletion(state.tasks[idx].title);
+                    }
+                    state.tasks[idx].completed = true;
+                    state.tasks[idx].completedAt = new Date().toISOString();
+                    saveStateKey('tasks', state.tasks);
+                }
+                const myHQActive = document.getElementById('hq-panel-my-hq') && document.getElementById('hq-panel-my-hq').classList.contains('active');
+                if (myHQActive) { renderMyHQ(); } else { renderCompanyHQ(); }
+                return;
+            }
             const t = (state.companyTasks || []).find(t => String(t.id) === String(id));
             if (!t) return;
             t.completed = true;
@@ -4625,7 +4641,10 @@
 
         function buildTeamTasksHtml(companyTasksDone) {
             const todayStr = todayIsoDate();
-            const allOpen = (state.companyTasks || []).filter(t => !t.completed);
+            const _personalNorm = (state.tasks || [])
+                .map((t, i) => ({ ...t, id: 'p-' + i, _personal: true, status: t.today ? 'not-started' : 'not-started' }))
+                .filter(t => !t.completed);
+            const allOpen = [...(state.companyTasks || []).filter(t => !t.completed), ..._personalNorm];
             const teamMembers = ['Cole','Diana','Chris','Mark','Vance','Elan'];
             const curUser = (typeof displayName === 'function') ? displayName().split(' ')[0] : 'Cole';
             const activeFilter = window._ctFilter || 'all';
@@ -4661,6 +4680,7 @@
                         <td style="padding:9px 8px 9px 4px;"><div style="display:flex;align-items:center;gap:7px;">
                             ${t.urgent ? '<span style="color:var(--danger);font-size:11px;flex-shrink:0;" title="Urgent">▲</span>' : ''}
                             <span style="font-size:13px;color:var(--text);">${t.title}</span>
+                            ${t._personal ? '<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--bg);border:1px solid var(--border);color:var(--text-sm);margin-left:4px;flex-shrink:0;">My Tasks</span>' : ''}
                         </div></td>
                         <td style="padding:9px 8px;font-size:12px;color:var(--text-sm);width:72px;white-space:nowrap;">${t.assignedTo || '—'}</td>
                         <td style="padding:9px 8px;font-size:12px;width:68px;white-space:nowrap;color:${t.dueDate && t.dueDate < todayStr ? 'var(--danger)' : 'var(--text-sm)'};">${t.dueDate ? new Date(t.dueDate + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</td>
