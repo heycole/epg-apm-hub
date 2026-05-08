@@ -6574,9 +6574,15 @@
             // Migrate: ensure all leases have steps
             let leasesMigrated = false;
             items.forEach(l => {
-                if (!l.steps || l.steps.length !== checklistItems.leaseDraft.length) {
+                const needsMigration = !l.steps
+                    || l.steps.length !== checklistItems.leaseDraft.length
+                    || l.steps.some((s, i) => s.text !== checklistItems.leaseDraft[i]);
+                if (needsMigration) {
                     const prev = l.steps || [];
-                    l.steps = checklistItems.leaseDraft.map((t, i) => ({ text: t, done: prev[i] ? prev[i].done : false }));
+                    // Preserve done state by matching old text where possible
+                    const prevDoneByText = {};
+                    prev.forEach(s => { if (s.done) prevDoneByText[s.text] = true; });
+                    l.steps = checklistItems.leaseDraft.map(t => ({ text: t, done: prevDoneByText[t] || false }));
                     leasesMigrated = true;
                 }
             });
@@ -7005,8 +7011,14 @@
         // DASHBOARD RENDERING
         // ============================================
         function renderDashboard() {
-            // Render My HQ first so stat elements exist in DOM
-            renderMyHQ();
+            // Render the active HQ tab on load — Company HQ is the default
+            const activeHQTab = (document.querySelector('.hq-tab.active') || {}).dataset || {};
+            if ((activeHQTab.tab || 'company-hq') === 'my-hq') {
+                renderMyHQ();
+            } else {
+                renderCompanyHQ();
+                setTimeout(renderDashboardCalendarTasks, 0);
+            }
             // Date display
             const dateEl = document.getElementById('dashDate');
             const now = new Date();
