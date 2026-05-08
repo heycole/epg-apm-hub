@@ -3793,7 +3793,12 @@
             if (typeof renderRenewals === 'function') renderRenewals();
             if (typeof renderOnboarding === 'function') renderOnboarding();
             // Always re-fetch these on every hydration (not guarded by appInitialized)
-            fetchPortfolio().then(() => { if (typeof renderPortfolio === 'function') renderPortfolio(); });
+            fetchPortfolio().then(() => {
+                if (typeof renderPortfolio === 'function') renderPortfolio();
+                // Refresh Company HQ KPI cards now that portfolio data is loaded
+                const companyHQActive = document.getElementById('hq-panel-company-hq') && document.getElementById('hq-panel-company-hq').classList.contains('active');
+                if (companyHQActive && typeof renderCompanyHQ === 'function') renderCompanyHQ();
+            });
             fetchRentalLicenses().then(() => { if (typeof renderRentalLicenses === 'function') renderRentalLicenses(); });
         }
 
@@ -4750,7 +4755,12 @@
             if (!root) return;
 
             const kpis = state.portfolioKPIs || { totalUnits: 0, totalProperties: 0, occupiedUnits: 0 };
-            const totalUnits = kpis.totalUnits || 0;
+            // Derive totals from the live properties database when loaded
+            const _liveProperties = (typeof portfolioData !== 'undefined' && portfolioData.length > 0) ? portfolioData : null;
+            const totalUnits = _liveProperties
+                ? _liveProperties.reduce((sum, p) => sum + (parseInt(p.units) || 0), 0)
+                : (kpis.totalUnits || 0);
+            const totalProperties = _liveProperties ? _liveProperties.length : (kpis.totalProperties || 0);
             const occupiedUnits = kpis.occupiedUnits || 0;
             const vacantUnits = Math.max(0, totalUnits - occupiedUnits);
             const occupancy = totalUnits > 0 ? ((occupiedUnits / totalUnits) * 100).toFixed(1) : '—';
@@ -4798,10 +4808,10 @@
             root.innerHTML = `
             <!-- KPI CARDS -->
             <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;">
-                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer;" onclick="editPortfolioKPI('totalUnits')" title="Click to edit">
+                <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer;" onclick="navigateTo('portfolio')" title="View portfolio">
                     <div style="font-size:11px; font-weight:700; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">Total Units</div>
-                    <div style="font-size:28px; font-weight:800; color:var(--text); line-height:1;">${totalUnits || '<span style="font-size:16px; color:var(--text-sm);">click to set</span>'}</div>
-                    <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">Across ${kpis.totalProperties || '—'} properties <span style="color:var(--accent);">✎</span></div>
+                    <div style="font-size:28px; font-weight:800; color:var(--text); line-height:1;">${totalUnits || '—'}</div>
+                    <div style="font-size:11px; color:var(--text-sm); margin-top:4px;">Across ${totalProperties || '—'} propert${totalProperties === 1 ? 'y' : 'ies'} · <span style="color:var(--accent);">view →</span></div>
                 </div>
                 <div class="panel" style="margin-bottom:0; padding:16px; cursor:pointer;" onclick="editPortfolioKPI('occupiedUnits')" title="Click to edit occupied units">
                     <div style="font-size:11px; font-weight:700; color:var(--text-sm); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">Occupancy</div>
