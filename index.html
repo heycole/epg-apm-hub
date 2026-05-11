@@ -6909,59 +6909,52 @@
             const container = document.getElementById('dashboard-calendar-tasks');
             const synced = document.getElementById('dashboard-calendar-synced');
             if (!container) return;
-            const events = (state.todayCalendar || []).filter(e => e && e.title);
 
-            // Sync timestamp
+            const tasks = checklistItems.daily || [];
+            const total = tasks.length;
+            const done = tasks.filter(function(t) { return isCalendarTaskChecked('DAILY', t); }).length;
+
             if (synced) {
-                if (state.todayCalendarSyncedAt) {
-                    try {
-                        const d = new Date(state.todayCalendarSyncedAt);
-                        if (!isNaN(d.getTime())) {
-                            const sameDay = d.toDateString() === new Date().toDateString();
-                            synced.textContent = sameDay
-                                ? 'Synced ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-                                : 'Synced ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-                        }
-                    } catch(e) {}
-                } else {
-                    synced.textContent = 'Not synced yet';
-                }
+                synced.textContent = done + '/' + total + ' done today';
+                synced.style.color = done === total ? 'var(--success)' : 'var(--text-sm)';
             }
 
-            if (events.length === 0) {
-                container.innerHTML = '<p style="color:var(--text-sm); padding:18px 12px; text-align:center; font-size:13px;">No tasks on the EPGMGMT calendar today.</p>';
+            if (tasks.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-sm); padding:18px 12px; text-align:center; font-size:13px;">No daily tasks configured.</p>';
                 return;
             }
 
-            // Group by role
-            const groups = {};
-            for (const ev of events) {
-                const { role, label } = parseCalendarTask(ev.title);
-                if (!groups[role]) groups[role] = [];
-                groups[role].push(label);
-            }
-
-            // Stable role order: anything role-prefixed first (alphabetical), GENERAL last
-            const roleOrder = Object.keys(groups).filter(r => r !== 'GENERAL').sort();
-            if (groups['GENERAL']) roleOrder.push('GENERAL');
-
-            // Compact rows: one summary row per category
-            container.innerHTML = roleOrder.map(role => {
-                const items = groups[role];
-                const total = items.length;
-                const done = items.filter(l => isCalendarTaskChecked(role, l)).length;
-                const allDone = done === total;
-                const roleLabel = role === 'GENERAL' ? 'General' : role;
-                const summary = items.join(' · ');
-                const truncated = summary.length > 72 ? summary.slice(0, 70) + '…' : summary;
-                return `
-                    <div style="display:flex; align-items:baseline; gap:10px; padding:7px 10px; margin-bottom:4px; background:var(--bg); border-radius:6px; ${allDone ? 'opacity:0.55;' : ''}">
-                        <span style="flex-shrink:0; font-size:11px; font-weight:700; letter-spacing:0.5px; color:var(--accent); text-transform:uppercase; min-width:68px;">${roleLabel}</span>
-                        <span style="font-size:12px; color:${allDone ? 'var(--text-sm)' : 'var(--text)'}; flex:1; line-height:1.4; ${allDone ? 'text-decoration:line-through;' : ''}">${truncated}</span>
-                        <span style="flex-shrink:0; font-size:10px; color:${done > 0 ? 'var(--success)' : 'var(--text-sm)'}; font-weight:600; margin-left:8px;">${done}/${total}</span>
-                    </div>
-                `;
+            var rows = tasks.map(function(task) {
+                var isDone = isCalendarTaskChecked('DAILY', task);
+                var escapedTask = task.replace(/'/g, "\\'");
+                var checkBox = isDone
+                    ? '<div style="flex-shrink:0;margin-top:2px;width:15px;height:15px;border-radius:3px;border:2px solid var(--success);background:var(--success);display:flex;align-items:center;justify-content:center;"><span style="color:white;font-size:10px;font-weight:900;">✓</span></div>'
+                    : '<div style="flex-shrink:0;margin-top:2px;width:15px;height:15px;border-radius:3px;border:2px solid var(--border);background:transparent;"></div>';
+                var textStyle = 'font-size:12px;line-height:1.5;color:' + (isDone ? 'var(--text-sm)' : 'var(--text)') + ';' + (isDone ? 'text-decoration:line-through;' : '');
+                return '<div onclick="toggleCalendarTask(\'DAILY\', \'' + escapedTask + '\'); renderDashboardCalendarTasks();" '
+                     + 'style="display:flex;align-items:flex-start;gap:10px;padding:7px 10px;margin-bottom:3px;background:var(--bg);border-radius:6px;cursor:pointer;user-select:none;' + (isDone ? 'opacity:0.5;' : '') + '">'
+                     + checkBox
+                     + '<span style="' + textStyle + '">' + task + '</span>'
+                     + '</div>';
             }).join('');
+
+            var footer = '<div style="padding:8px 10px;margin-top:4px;display:flex;justify-content:space-between;align-items:center;">'
+                + '<span style="font-size:11px;color:var(--text-sm);">Resets daily at midnight</span>'
+                + (done > 0 ? '<button onclick="resetDailySchedule();event.stopPropagation();" style="font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-sm);cursor:pointer;">Reset</button>' : '')
+                + '</div>';
+
+            container.innerHTML = rows + footer;
+        }
+
+        function resetDailySchedule() {
+            var today = todayIsoDate();
+            if (state.calendarChecks && state.calendarChecks[today]) {
+                Object.keys(state.calendarChecks[today]).forEach(function(k) {
+                    if (k.startsWith('DAILY|')) delete state.calendarChecks[today][k];
+                });
+                saveStateKey('calendarChecks', state.calendarChecks);
+            }
+            renderDashboardCalendarTasks();
         }
 
         function renderDashboardRenewals() {
