@@ -3415,6 +3415,10 @@
                             <div>
                                 <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); margin-bottom:12px;">Ongoing Operations</div>
                                 <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;">
+                                    <div onclick="openSOP('rent-delinquency')" class="sop-flow-box" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:14px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                                        <div style="font-size:22px; line-height:1;">⚠️</div>
+                                        <div style="font-size:12px; font-weight:600; color:var(--text);">Rent Delinquency</div>
+                                    </div>
                                     <div onclick="openSOP('onboarding')" class="sop-flow-box" style="cursor:pointer; display:flex; align-items:center; gap:10px; padding:14px 14px; background:var(--bg); border-radius:10px; border:1px solid var(--border); transition:all 0.2s;" onmouseover="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)';this.style.boxShadow='0 2px 8px rgba(203,121,47,0.12)'" onmouseout="this.style.background='var(--bg)';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
                                         <div style="font-size:22px; line-height:1;">🏠</div>
                                         <div style="font-size:12px; font-weight:600; color:var(--text);">Onboarding</div>
@@ -3538,6 +3542,7 @@
                                 <div>
                                     <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); text-align:center; margin-bottom:14px; padding-bottom:8px; border-bottom:2px solid var(--accent);">Ongoing Operations</div>
                                     <div class="sop-vert-narrow list">
+                                        <div onclick="openSOP('rent-delinquency')" class="sop-vert-box"><div style="font-size:18px;">⚠️</div><div style="font-size:12px; font-weight:600;">Rent Delinquency</div></div>
                                         <div onclick="openSOP('maintenance')" class="sop-vert-box"><div style="font-size:18px;">🔧</div><div style="font-size:12px; font-weight:600;">Maintenance</div></div>
                                         <div onclick="openSOP('onboarding')" class="sop-vert-box"><div style="font-size:18px;">🏠</div><div style="font-size:12px; font-weight:600;">Onboarding</div></div>
                                         <div onclick="openSOP('rental-licenses')" class="sop-vert-box"><div style="font-size:18px;">📋</div><div style="font-size:12px; font-weight:600;">Rental Licenses</div></div>
@@ -9612,6 +9617,7 @@
             renewals:       { icon: '🔄', title: 'Lease Renewals', category: 'Tenant Lifecycle' },
             moveout:        { icon: '📦', title: 'Move-Out Process', category: 'Tenant Lifecycle' },
             deposits:       { icon: '💰', title: 'Security Deposits 1 & 2', category: 'Tenant Lifecycle' },
+            'rent-delinquency': { icon: '⚠️', title: 'Rent Delinquency', category: 'Ongoing Operations' },
             onboarding:     { icon: '🏠', title: 'Onboarding', category: 'Ongoing Operations' },
             'rental-licenses': { icon: '📋', title: 'Rental Licenses', category: 'Ongoing Operations' },
             utilities:      { icon: '⚡', title: 'Utility Management', category: 'Ongoing Operations' },
