@@ -4541,34 +4541,153 @@
             }).join('');
         }
 
+        // ── Name → calendar role mapping (update here when roles change) ────
+        const CALENDAR_ROLE_MAP = {
+            'chris':  'FINANCE',
+            'mark':   'LEAD COORDINATOR',
+            'vance':  'LEASING COORDINATOR',
+            'sarah':  'LEASING COORDINATOR',
+            'diana':  null,   // admin — sees all
+            'cole':   null,   // admin — sees all
+            'elan':   null,
+        };
+
+        // ── Role → quick-launch buttons mapping ───────────────────────────
+        const ROLE_QUICK_LINKS = {
+            'FINANCE': [
+                { icon: '💰', label: 'Finance',      page: 'finance' },
+                { icon: '📋', label: 'Applications', page: 'rental-applications' },
+                { icon: '📝', label: 'End of Day',   page: 'eod' },
+                { icon: '🔧', label: 'Work Orders',  page: 'maintenance' },
+            ],
+            'LEASING COORDINATOR': [
+                { icon: '📝', label: 'Leasing',      page: 'leasing' },
+                { icon: '📋', label: 'Applications', page: 'rental-applications' },
+                { icon: '🔄', label: 'Renewals',     page: 'lease-renewals' },
+                { icon: '🏘️', label: 'Listings',     page: 'listings' },
+                { icon: '📝', label: 'End of Day',   page: 'eod' },
+            ],
+            'LEAD COORDINATOR': [
+                { icon: '🔧', label: 'Work Orders',  page: 'maintenance' },
+                { icon: '📋', label: 'Applications', page: 'rental-applications' },
+                { icon: '🚚', label: 'Move-In/Out',  page: 'move-in-out' },
+                { icon: '📝', label: 'End of Day',   page: 'eod' },
+            ],
+            'BILLING COORDINATOR': [
+                { icon: '💰', label: 'Finance',      page: 'finance' },
+                { icon: '📝', label: 'End of Day',   page: 'eod' },
+            ],
+            '_admin': [
+                { icon: '🔧', label: 'Work Orders',  page: 'maintenance' },
+                { icon: '📋', label: 'Applications', page: 'rental-applications' },
+                { icon: '💰', label: 'Finance',      page: 'finance' },
+                { icon: '📝', label: 'Leasing',      page: 'leasing' },
+                { icon: '📝', label: 'End of Day',   page: 'eod' },
+            ],
+        };
+
+        function getMyCalendarRole() {
+            const name = displayName().split(' ')[0].toLowerCase();
+            if (name in CALENDAR_ROLE_MAP) return CALENDAR_ROLE_MAP[name]; // null = admin/all
+            return null;
+        }
+
         function buildMyHQHtml() {
             const name = displayName();
             const firstName = name.split(' ')[0];
-            const role = (currentProfile && currentProfile.role) || 'member';
-            const roleLabel = role === 'admin' ? 'Administrator' : 'Team Member';
-            const initials = name.split(/\s+/).map(p => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ME';
+            const profileRole = (currentProfile && currentProfile.role) || 'member';
+            const calRole = getMyCalendarRole();
+            const isAdmin = (profileRole === 'admin') || (calRole === null);
 
+            const initials = name.split(/\s+/).map(p => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ME';
             const hour = new Date().getHours();
             const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-            const openTasks = (state.tasks || []).filter(t => !t.completed).length;
-            const approvals = (state.approvals || []).length;
-            const followUps = (state.waiting || []).length;
+            // ── Stats ─────────────────────────────────────────────────
+            const openTasks   = (state.tasks || []).filter(t => !t.completed).length;
+            const urgentTasks = (state.tasks || []).filter(t => !t.completed && t.urgent).length;
+            const urgentWOs   = (state.workOrders || []).filter(wo => {
+                const done = (wo.steps || []).filter(s => s.done).length;
+                return done < (wo.steps || []).length && (wo.priority === 'emergency' || wo.priority === 'urgent');
+            }).length;
+            const urgentTotal = urgentTasks + urgentWOs;
+            const approvals   = (state.approvals || []).length;
+            const followUps   = (state.waiting || []).length;
 
-            const weekOf = getMondayOfWeek();
-            const weekLabel = new Date(weekOf + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-            const fixesHtml = buildMyHQFixesHtml(firstName, weekOf);
-            const needsHelpHtml = buildMyHQNeedsHelpHtml(firstName);
-
-            // EOD nudge check
             const now = new Date();
-            const eodHour = now.getHours(); const eodMinute = now.getMinutes(); const eodDay = now.getDay();
-            const eodVisible = eodDay >= 1 && eodDay <= 5 && ((eodHour > 16) || (eodHour === 16 && eodMinute >= 30)) && eodHour < 18;
             const todayKey = now.toLocaleDateString();
             const hasEodToday = (state.eodReports || []).some(r => r.date === todayKey);
-            const eodNudgeHtml = (eodVisible && !hasEodToday)
-                ? '<div style="margin-bottom:16px; padding:11px 16px; background:rgba(200,160,60,0.08); border:1px solid rgba(200,160,60,0.3); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">'
+            const eodDay = now.getDay();
+            const eodHour = now.getHours();
+            const isWorkday = eodDay >= 1 && eodDay <= 5;
+            const eodDue = isWorkday && eodHour >= 16 && eodHour < 22;
+            const eodColor = hasEodToday ? 'var(--success)' : (eodDue ? 'var(--danger)' : 'var(--text-sm)');
+            const eodLabel = hasEodToday ? '✓ Done' : (eodDue ? 'Due!' : '—');
+
+            // ── Today's schedule from EPGMGMT calendar ────────────────
+            const todayEvents = (state.todayCalendar || []);
+            const myEvents = calRole
+                ? todayEvents.filter(e => e.role === calRole)
+                : todayEvents; // admin sees all
+            const myDone = myEvents.filter(e => isCalendarTaskChecked(e.role, e.label)).length;
+
+            // ── Role label ────────────────────────────────────────────
+            const roleBadgeText = calRole || (isAdmin ? 'Admin' : 'Team Member');
+            const roleLinks = ROLE_QUICK_LINKS[calRole] || ROLE_QUICK_LINKS['_admin'];
+
+            // ── Quick links HTML ──────────────────────────────────────
+            const quickLinksHtml = roleLinks.map(l =>
+                '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'' + l.page + '\')">' + l.icon + ' ' + l.label + '</button>'
+            ).join('') + '<a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" class="btn" style="font-size:11px; padding:4px 10px; text-decoration:none; color:var(--text);">🏢 AppFolio ↗</a>';
+
+            // ── Today's schedule HTML ─────────────────────────────────
+            let scheduleHtml;
+            if (todayEvents.length === 0 && !state.calendarSyncedDate) {
+                scheduleHtml = '<div style="padding:10px; text-align:center;">'
+                    + '<p style="font-size:12px; color:var(--text-sm); margin-bottom:8px;">Schedule not loaded yet.</p>'
+                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="fetchCalendarAndRenderSchedule(true); renderMyHQ();">⟳ Sync Calendar</button>'
+                    + '</div>';
+            } else if (myEvents.length === 0) {
+                scheduleHtml = '<p style="font-size:12px; color:var(--text-sm); padding:8px 4px;">No events for your role today.</p>';
+            } else {
+                // Group by role (admin sees multiple groups)
+                var groups = {}; var roleOrder = [];
+                myEvents.forEach(function(ev) {
+                    if (!groups[ev.role]) { groups[ev.role] = []; roleOrder.push(ev.role); }
+                    groups[ev.role].push(ev.label);
+                });
+                scheduleHtml = '';
+                roleOrder.forEach(function(role) {
+                    var tasks = groups[role];
+                    var roleDone = tasks.filter(function(t) { return isCalendarTaskChecked(role, t); }).length;
+                    scheduleHtml += '<div style="margin-bottom:6px;">';
+                    if (!calRole) { // admin — show role headers
+                        scheduleHtml += '<div style="font-size:10px; font-weight:800; letter-spacing:.07em; color:var(--accent); padding:3px 0 2px;">' + role + ' <span style="font-weight:400; color:var(--text-sm);">(' + roleDone + '/' + tasks.length + ')</span></div>';
+                    }
+                    tasks.forEach(function(task) {
+                        var isDone = isCalendarTaskChecked(role, task);
+                        var safeRole = role.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                        var safeTask = task.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                        var box = isDone
+                            ? '<div style="flex-shrink:0;width:14px;height:14px;border-radius:3px;border:2px solid var(--success);background:var(--success);display:flex;align-items:center;justify-content:center;"><span style="color:white;font-size:9px;font-weight:900;">&#10003;</span></div>'
+                            : '<div style="flex-shrink:0;width:14px;height:14px;border-radius:3px;border:2px solid var(--border);background:transparent;"></div>';
+                        scheduleHtml += '<div onclick="toggleCalendarTask(\'' + safeRole + '\', \'' + safeTask + '\')" '
+                            + 'style="display:flex;align-items:center;gap:9px;padding:5px 4px;border-radius:5px;cursor:pointer;user-select:none;' + (isDone ? 'opacity:0.45;' : '') + '">'
+                            + box
+                            + '<span style="font-size:12px;color:' + (isDone ? 'var(--text-sm)' : 'var(--text)') + ';' + (isDone ? 'text-decoration:line-through;' : '') + '">' + task + '</span>'
+                            + '</div>';
+                    });
+                    scheduleHtml += '</div>';
+                });
+            }
+
+            const syncedLabel = state.calendarSyncedDate
+                ? ('Synced ' + (function(){ var mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; var d=new Date(state.calendarSyncedDate+'T12:00:00'); return mo[d.getMonth()]+' '+d.getDate(); })())
+                : '';
+
+            // ── EOD nudge ─────────────────────────────────────────────
+            const eodNudgeHtml = (eodDue && !hasEodToday)
+                ? '<div style="margin-bottom:14px; padding:11px 16px; background:rgba(200,160,60,0.08); border:1px solid rgba(200,160,60,0.3); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">'
                     + '<div style="display:flex; align-items:center; gap:10px;"><span style="font-size:16px;">📝</span>'
                     + '<div><div style="font-weight:600; font-size:13px; color:var(--text);">Time to submit your End of Day report</div>'
                     + '<div style="font-size:12px; color:var(--text-sm);">Log today\'s progress before wrapping up.</div></div></div>'
@@ -4576,49 +4695,74 @@
                     + '</div>'
                 : '';
 
+            const weekOf = getMondayOfWeek();
+            const weekLabel = new Date(weekOf + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const fixesHtml = buildMyHQFixesHtml(firstName, weekOf);
+            const needsHelpHtml = buildMyHQNeedsHelpHtml(firstName);
+
             return '<div>'
 
-                // ── Personal card ──
-                + '<div style="display:flex; align-items:center; gap:16px; padding:16px 18px; background:var(--surface); border:1px solid var(--border); border-radius:10px; margin-bottom:14px;">'
-                    + '<div style="flex-shrink:0; width:48px; height:48px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:#fff; letter-spacing:0.5px;">' + initials + '</div>'
-                    + '<div style="flex:1; min-width:0;">'
-                        + '<div style="font-size:15px; font-weight:700; color:var(--text); margin-bottom:1px;">' + greeting + ', ' + firstName + '</div>'
-                        + '<div style="font-size:12px; color:var(--text-sm);">' + roleLabel + ' · EPG Management</div>'
+                // ── Personal card ─────────────────────────────────────
+                + '<div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin-bottom:14px;">'
+                    + '<div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">'
+                        + '<div style="flex-shrink:0; width:46px; height:46px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:#fff;">' + initials + '</div>'
+                        + '<div style="flex:1; min-width:0;">'
+                            + '<div style="font-size:15px; font-weight:700; color:var(--text);">' + greeting + ', ' + firstName + ' 👋</div>'
+                            + '<div style="display:flex; align-items:center; gap:6px; margin-top:3px;">'
+                                + '<span style="font-size:11px; font-weight:700; letter-spacing:.06em; background:rgba(203,121,47,0.12); color:var(--accent); padding:2px 8px; border-radius:20px;">' + roleBadgeText + '</span>'
+                                + '<span style="font-size:11px; color:var(--text-sm);">EPG Management</span>'
+                            + '</div>'
+                        + '</div>'
                     + '</div>'
-                    // Stats row
-                    + '<div style="display:flex; gap:20px; flex-shrink:0;">'
-                        + '<div style="text-align:center; cursor:pointer;" onclick="navigateTo(\'tasks\')" title="My Tasks">'
-                            + '<div style="font-size:20px; font-weight:700; color:' + (openTasks > 0 ? 'var(--accent)' : 'var(--text)') + '; line-height:1;" id="stat-tasks">' + openTasks + '</div>'
-                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); letter-spacing:0.4px; text-transform:uppercase; margin-top:2px;">Tasks</div>'
+                    // 4-stat row
+                    + '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">'
+                        + '<div style="background:var(--bg); border-radius:8px; padding:10px 12px; cursor:pointer; text-align:center;" onclick="navigateTo(\'tasks\')">'
+                            + '<div style="font-size:22px; font-weight:800; color:' + (openTasks > 0 ? 'var(--accent)' : 'var(--text-sm)') + '; line-height:1;">' + openTasks + '</div>'
+                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); margin-top:3px; text-transform:uppercase; letter-spacing:.04em;">My Tasks</div>'
                         + '</div>'
-                        + '<div style="text-align:center;">'
-                            + '<div style="font-size:20px; font-weight:700; color:' + (approvals > 0 ? 'var(--danger)' : 'var(--text)') + '; line-height:1;" id="stat-approvals">' + approvals + '</div>'
-                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); letter-spacing:0.4px; text-transform:uppercase; margin-top:2px;">Approvals</div>'
+                        + '<div style="background:var(--bg); border-radius:8px; padding:10px 12px; text-align:center; cursor:pointer;" onclick="navigateTo(\'maintenance\')">'
+                            + '<div style="font-size:22px; font-weight:800; color:' + (urgentTotal > 0 ? 'var(--danger,#ef4444)' : 'var(--text-sm)') + '; line-height:1;">' + urgentTotal + '</div>'
+                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); margin-top:3px; text-transform:uppercase; letter-spacing:.04em;">Urgent</div>'
                         + '</div>'
-                        + '<div style="text-align:center;">'
-                            + '<div style="font-size:20px; font-weight:700; color:var(--text); line-height:1;" id="stat-waiting">' + followUps + '</div>'
-                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); letter-spacing:0.4px; text-transform:uppercase; margin-top:2px;">Follow-Ups</div>'
+                        + '<div style="background:var(--bg); border-radius:8px; padding:10px 12px; text-align:center;">'
+                            + '<div style="font-size:22px; font-weight:800; color:' + (myEvents.length > 0 ? 'var(--text)' : 'var(--text-sm)') + '; line-height:1;">' + myDone + '/' + myEvents.length + '</div>'
+                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); margin-top:3px; text-transform:uppercase; letter-spacing:.04em;">Schedule</div>'
+                        + '</div>'
+                        + '<div style="background:var(--bg); border-radius:8px; padding:10px 12px; text-align:center; cursor:pointer;" onclick="navigateTo(\'eod\')">'
+                            + '<div style="font-size:22px; font-weight:800; color:' + eodColor + '; line-height:1;">' + eodLabel + '</div>'
+                            + '<div style="font-size:10px; font-weight:600; color:var(--text-sm); margin-top:3px; text-transform:uppercase; letter-spacing:.04em;">EOD</div>'
                         + '</div>'
                     + '</div>'
                 + '</div>'
 
-                // ── Quick nav ──
-                + '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">'
-                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'maintenance\')">🔧 Work Orders</button>'
-                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'rental-applications\')">📋 Applications</button>'
-                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'lease-renewals\')">🔄 Renewals</button>'
-                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'finance\')">💰 Finance</button>'
-                    + '<button class="btn" style="font-size:11px; padding:4px 10px;" onclick="navigateTo(\'eod\')">📝 End of Day</button>'
-                    + '<a href="https://elkaim.appfolio.com" target="_blank" rel="noopener" class="btn" style="font-size:11px; padding:4px 10px; text-decoration:none; color:var(--text);">🏢 AppFolio ↗</a>'
+                // ── Quick launch + Today's schedule (2 col) ───────────
+                + '<div style="display:grid; grid-template-columns:1fr 1.4fr; gap:14px; margin-bottom:14px;">'
+
+                    // Left: quick launch
+                    + '<div class="panel" style="margin-bottom:0; padding:14px;">'
+                        + '<div style="font-size:12px; font-weight:700; color:var(--text); margin-bottom:10px;">Quick Launch</div>'
+                        + '<div style="display:flex; flex-wrap:wrap; gap:6px;">' + quickLinksHtml + '</div>'
+                    + '</div>'
+
+                    // Right: today's schedule
+                    + '<div class="panel" style="margin-bottom:0; padding:14px;">'
+                        + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">'
+                            + '<div style="display:flex; align-items:center; gap:7px;">'
+                                + '<div style="font-size:12px; font-weight:700; color:var(--text);">📅 Today\'s Schedule</div>'
+                                + (syncedLabel ? '<span style="font-size:10px; color:var(--text-sm);">' + syncedLabel + '</span>' : '')
+                            + '</div>'
+                            + '<button style="font-size:10px; padding:2px 7px; border-radius:5px; border:1px solid var(--border); background:transparent; color:var(--text-sm); cursor:pointer;" onclick="fetchCalendarAndRenderSchedule(true).then && fetchCalendarAndRenderSchedule(true); setTimeout(function(){ renderMyHQ(); }, 800);">⟳</button>'
+                        + '</div>'
+                        + '<div id="my-hq-schedule">' + scheduleHtml + '</div>'
+                    + '</div>'
+
                 + '</div>'
 
-                // ── EOD nudge ──
+                // ── EOD nudge ─────────────────────────────────────────
                 + eodNudgeHtml
 
-                // ── 2-col: Fixing this week + Team needs my help ──
+                // ── 2-col: Fixing this week + Team needs my help ──────
                 + '<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">'
-
-                    // Left: fixing this week
                     + '<div class="panel" style="margin-bottom:0;">'
                         + '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">'
                             + '<div>'
@@ -4629,18 +4773,15 @@
                         + '</div>'
                         + fixesHtml
                     + '</div>'
-
-                    // Right: team needs my help
                     + '<div class="panel" style="margin-bottom:0; border-left:4px solid #3b6dbf;">'
                         + '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">'
                             + '<div class="panel-title" style="margin-bottom:0; font-size:13px;">🙋 Team needs my help</div>'
                         + '</div>'
                         + needsHelpHtml
                     + '</div>'
-
                 + '</div>'
 
-                // ── Approvals + Follow-Ups ──
+                // ── 2-col: Approvals + Follow-Ups ─────────────────────
                 + '<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">'
                     + '<div class="panel" style="margin-bottom:0; border-left:4px solid var(--danger); background:rgba(184,50,50,0.02);">'
                         + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">'
@@ -4661,6 +4802,7 @@
             + '</div>';
         }
 
+
         function renderMyHQ() {
             const root = document.getElementById('my-hq-root');
             if (!root) return;
@@ -4668,6 +4810,11 @@
             // Render approval + follow-up lists into freshly created divs
             renderTaskList(document.getElementById('dashboard-approvals'), state.approvals, 'Approval');
             renderFollowUpsPanel();
+            // Fetch today's calendar if not yet loaded for today
+            const today = todayIsoDate();
+            if (state.calendarSyncedDate !== today || !state.todayCalendar || state.todayCalendar.length === 0) {
+                fetchCalendarAndRenderSchedule(false);
+            }
         }
 
         function buildTeamTasksHtml(companyTasksDone) {
@@ -6911,6 +7058,9 @@
             }
             saveStateKey('calendarChecks', state.calendarChecks);
             renderDashboardCalendarTasks();
+            // Also refresh My HQ schedule if it's the active panel
+            var myHQSchedule = document.getElementById('my-hq-schedule');
+            if (myHQSchedule) renderMyHQ();
         }
 
         // ── ICS parser: extract today's events, expanding RRULE recurrences ──
