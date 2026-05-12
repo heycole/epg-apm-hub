@@ -4541,63 +4541,89 @@
             }).join('');
         }
 
-        // ── Name → calendar role mapping (update here when roles change) ────
-        const CALENDAR_ROLE_MAP = {
-            'chris':  'FINANCE',
-            'mark':   'LEAD COORDINATOR',
-            'vance':  'LEASING COORDINATOR',
-            'sarah':  'LEASING COORDINATOR',
-            'diana':  null,   // admin — sees all
-            'cole':   null,   // admin — sees all
-            'elan':   null,
+        // ── Staff profile config — update this when roles or staff change ────
+        // calRoles: array of calendar role names to show on My HQ schedule.
+        //           null = sees ALL roles (ops manager / admin overview).
+        // title:    display badge shown in the personal card.
+        // links:    quick-launch buttons on My HQ, in order.
+        const STAFF_CONFIG = {
+            'cole': {
+                title: 'Ops Manager',
+                calRoles: null,  // sees every role on the daily schedule
+                links: [
+                    { icon: '🔧', label: 'Work Orders',   page: 'maintenance' },
+                    { icon: '📋', label: 'Applications',  page: 'rental-applications' },
+                    { icon: '💰', label: 'Finance',       page: 'finance' },
+                    { icon: '📝', label: 'Leasing',       page: 'leasing' },
+                    { icon: '🔄', label: 'Renewals',      page: 'lease-renewals' },
+                    { icon: '🚚', label: 'Move-In/Out',   page: 'move-in-out' },
+                    { icon: '📝', label: 'End of Day',    page: 'eod' },
+                ],
+            },
+            'diana': {
+                title: 'Property Manager',
+                calRoles: null,  // sees all
+                links: [
+                    { icon: '🔧', label: 'Work Orders',   page: 'maintenance' },
+                    { icon: '📋', label: 'Applications',  page: 'rental-applications' },
+                    { icon: '💰', label: 'Finance',       page: 'finance' },
+                    { icon: '📝', label: 'Leasing',       page: 'leasing' },
+                    { icon: '📝', label: 'End of Day',    page: 'eod' },
+                ],
+            },
+            'chris': {
+                title: 'Lead Coordinator',
+                calRoles: ['LEAD COORDINATOR'],
+                links: [
+                    { icon: '🔧', label: 'Work Orders',   page: 'maintenance' },
+                    { icon: '🏘️', label: 'Listings',      page: 'listings' },
+                    { icon: '📋', label: 'Applications',  page: 'rental-applications' },
+                    { icon: '🚚', label: 'Move-In/Out',   page: 'move-in-out' },
+                    { icon: '📝', label: 'End of Day',    page: 'eod' },
+                ],
+            },
+            'mark': {
+                title: 'Finance & Renewals',
+                calRoles: ['FINANCE'],
+                links: [
+                    { icon: '💰', label: 'Finance',       page: 'finance' },
+                    { icon: '🔄', label: 'Renewals',      page: 'lease-renewals' },
+                    { icon: '📋', label: 'Applications',  page: 'rental-applications' },
+                    { icon: '📝', label: 'End of Day',    page: 'eod' },
+                ],
+            },
+            'vance': {
+                title: 'Leasing Coordinator',
+                calRoles: ['LEASING COORDINATOR'],
+                links: [
+                    { icon: '📝', label: 'Leasing',       page: 'leasing' },
+                    { icon: '📋', label: 'Applications',  page: 'rental-applications' },
+                    { icon: '🔄', label: 'Renewals',      page: 'lease-renewals' },
+                    { icon: '🏘️', label: 'Listings',      page: 'listings' },
+                    { icon: '📝', label: 'End of Day',    page: 'eod' },
+                ],
+            },
+            '_default': {
+                title: 'Team Member',
+                calRoles: null,
+                links: [
+                    { icon: '🔧', label: 'Work Orders',   page: 'maintenance' },
+                    { icon: '📋', label: 'Applications',  page: 'rental-applications' },
+                    { icon: '📝', label: 'End of Day',    page: 'eod' },
+                ],
+            },
         };
 
-        // ── Role → quick-launch buttons mapping ───────────────────────────
-        const ROLE_QUICK_LINKS = {
-            'FINANCE': [
-                { icon: '💰', label: 'Finance',      page: 'finance' },
-                { icon: '📋', label: 'Applications', page: 'rental-applications' },
-                { icon: '📝', label: 'End of Day',   page: 'eod' },
-                { icon: '🔧', label: 'Work Orders',  page: 'maintenance' },
-            ],
-            'LEASING COORDINATOR': [
-                { icon: '📝', label: 'Leasing',      page: 'leasing' },
-                { icon: '📋', label: 'Applications', page: 'rental-applications' },
-                { icon: '🔄', label: 'Renewals',     page: 'lease-renewals' },
-                { icon: '🏘️', label: 'Listings',     page: 'listings' },
-                { icon: '📝', label: 'End of Day',   page: 'eod' },
-            ],
-            'LEAD COORDINATOR': [
-                { icon: '🔧', label: 'Work Orders',  page: 'maintenance' },
-                { icon: '📋', label: 'Applications', page: 'rental-applications' },
-                { icon: '🚚', label: 'Move-In/Out',  page: 'move-in-out' },
-                { icon: '📝', label: 'End of Day',   page: 'eod' },
-            ],
-            'BILLING COORDINATOR': [
-                { icon: '💰', label: 'Finance',      page: 'finance' },
-                { icon: '📝', label: 'End of Day',   page: 'eod' },
-            ],
-            '_admin': [
-                { icon: '🔧', label: 'Work Orders',  page: 'maintenance' },
-                { icon: '📋', label: 'Applications', page: 'rental-applications' },
-                { icon: '💰', label: 'Finance',      page: 'finance' },
-                { icon: '📝', label: 'Leasing',      page: 'leasing' },
-                { icon: '📝', label: 'End of Day',   page: 'eod' },
-            ],
-        };
-
-        function getMyCalendarRole() {
+        function getStaffConfig() {
             const name = displayName().split(' ')[0].toLowerCase();
-            if (name in CALENDAR_ROLE_MAP) return CALENDAR_ROLE_MAP[name]; // null = admin/all
-            return null;
+            return STAFF_CONFIG[name] || STAFF_CONFIG['_default'];
         }
 
         function buildMyHQHtml() {
             const name = displayName();
             const firstName = name.split(' ')[0];
-            const profileRole = (currentProfile && currentProfile.role) || 'member';
-            const calRole = getMyCalendarRole();
-            const isAdmin = (profileRole === 'admin') || (calRole === null);
+            const cfg = getStaffConfig();
+            const calRoles = cfg.calRoles; // null = all, array = specific calendar roles
 
             const initials = name.split(/\s+/).map(p => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ME';
             const hour = new Date().getHours();
@@ -4626,14 +4652,14 @@
 
             // ── Today's schedule from EPGMGMT calendar ────────────────
             const todayEvents = (state.todayCalendar || []);
-            const myEvents = calRole
-                ? todayEvents.filter(e => e.role === calRole)
-                : todayEvents; // admin sees all
+            const myEvents = calRoles
+                ? todayEvents.filter(e => calRoles.includes(e.role))
+                : todayEvents; // null = sees all roles
             const myDone = myEvents.filter(e => isCalendarTaskChecked(e.role, e.label)).length;
 
-            // ── Role label ────────────────────────────────────────────
-            const roleBadgeText = calRole || (isAdmin ? 'Admin' : 'Team Member');
-            const roleLinks = ROLE_QUICK_LINKS[calRole] || ROLE_QUICK_LINKS['_admin'];
+            // ── Role label & links ────────────────────────────────────
+            const roleBadgeText = cfg.title;
+            const roleLinks = cfg.links;
 
             // ── Quick links HTML ──────────────────────────────────────
             const quickLinksHtml = roleLinks.map(l =>
@@ -4661,7 +4687,7 @@
                     var tasks = groups[role];
                     var roleDone = tasks.filter(function(t) { return isCalendarTaskChecked(role, t); }).length;
                     scheduleHtml += '<div style="margin-bottom:6px;">';
-                    if (!calRole) { // admin — show role headers
+                    if (!calRoles) { // null = admin/ops — show role headers
                         scheduleHtml += '<div style="font-size:10px; font-weight:800; letter-spacing:.07em; color:var(--accent); padding:3px 0 2px;">' + role + ' <span style="font-weight:400; color:var(--text-sm);">(' + roleDone + '/' + tasks.length + ')</span></div>';
                     }
                     tasks.forEach(function(task) {
