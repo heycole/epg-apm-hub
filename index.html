@@ -3221,7 +3221,22 @@
                             </div>
                         </div>
 
-                        <!-- Day 8/9 -->
+
+                        <!-- Day 8 — Owner Notification -->
+                        <div style="display:flex; gap:14px; margin-bottom:16px;">
+                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:#ede9fe; border:2px solid #7c3aed; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                                <div style="font-size:9px; font-weight:600; color:#7c3aed; line-height:1;">DAY</div>
+                                <div style="font-size:20px; font-weight:800; color:#7c3aed; line-height:1;">8</div>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--text);">Email Owner — Non-Payment Notification</div>
+                                <div style="background:#ede9fe; border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid #7c3aed;">
+                                    Email the property owner to let them know the tenant has not yet paid rent. Keep the message factual and brief — let them know you are actively following up and that they should be aware they may not receive their rent distribution this month if the situation is not resolved.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Day 8/9 — Urgent Tenant Text -->
                         <div style="display:flex; gap:14px; margin-bottom:16px;">
                             <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:#fde8e4; border:2px solid #e45b3a; display:flex; align-items:center; justify-content:center; flex-direction:column;">
                                 <div style="font-size:9px; font-weight:600; color:#e45b3a; line-height:1;">DAY</div>
@@ -4953,11 +4968,11 @@
             const in14Str = in14.toISOString().split('T')[0];
 
             const moveIns = (state.newLeases || [])
-                .filter(l => l.leaseStart && l.leaseStart >= today && l.leaseStart <= in14Str)
+                .filter(l => l.leaseStart)
                 .sort((a, b) => (a.leaseStart || '').localeCompare(b.leaseStart || ''));
 
             const moveOuts = (state.moveOuts || [])
-                .filter(m => m.moveOutDate && m.moveOutDate >= today && m.moveOutDate <= in14Str)
+                .filter(m => m.moveOutDate)
                 .sort((a, b) => (a.moveOutDate || '').localeCompare(b.moveOutDate || ''));
 
             const companyTasks = (state.companyTasks || []).filter(t => !t.completed);
@@ -5073,12 +5088,12 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <div>
                                 <span style="font-size:13px; font-weight:700; color:var(--text);">Move-ins</span>
-                                <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">Next 14 days · ${moveIns.length}</span>
+                                <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">${moveIns.length} scheduled</span>
                             </div>
                             <button class="btn" style="font-size:11px; padding:3px 9px;" onclick="navigateTo('leasing')">+ Add →</button>
                         </div>
                         ${moveIns.length === 0
-                            ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:10px 0;">No move-ins in next 14 days</p>'
+                            ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:10px 0;">No move-ins scheduled</p>'
                             : moveIns.map(l => chqMoveInRow(l)).join('')}
                     </div>
 
@@ -5087,12 +5102,12 @@
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                             <div>
                                 <span style="font-size:13px; font-weight:700; color:var(--text);">Move-outs</span>
-                                <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">Next 14 days · ${moveOuts.length}</span>
+                                <span style="font-size:12px; color:var(--text-sm); margin-left:8px;">${moveOuts.length} scheduled</span>
                             </div>
                             <button class="btn" style="font-size:11px; padding:3px 9px;" onclick="addMoveOut()">+ Add</button>
                         </div>
                         ${moveOuts.length === 0
-                            ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:10px 0;">No move-outs in next 14 days</p>'
+                            ? '<p style="color:var(--text-sm); font-size:12px; text-align:center; padding:10px 0;">No move-outs scheduled</p>'
                             : moveOuts.map(m => chqMoveOutRow(m)).join('')}
                     </div>
 
