@@ -4549,7 +4549,7 @@
         const STAFF_CONFIG = {
             'cole': {
                 title: 'Ops Manager',
-                calRoles: null,  // sees every role on the daily schedule
+                calRoles: null,  // sees every role — full team overview
                 links: [
                     { icon: '🔧', label: 'Work Orders',   page: 'maintenance' },
                     { icon: '📋', label: 'Applications',  page: 'rental-applications' },
@@ -4573,7 +4573,19 @@
             },
             'chris': {
                 title: 'Lead Coordinator',
-                calRoles: ['LEAD COORDINATOR'],
+                calRoles: ['LEAD COORDINATOR', 'FINANCE'],  // handles both
+                links: [
+                    { icon: '🔧', label: 'Work Orders',   page: 'maintenance' },
+                    { icon: '💰', label: 'Finance',       page: 'finance' },
+                    { icon: '🔄', label: 'Renewals',      page: 'lease-renewals' },
+                    { icon: '📋', label: 'Applications',  page: 'rental-applications' },
+                    { icon: '🚚', label: 'Move-In/Out',   page: 'move-in-out' },
+                    { icon: '📝', label: 'End of Day',    page: 'eod' },
+                ],
+            },
+            'mark': {
+                title: 'Maintenance',
+                calRoles: null,  // no dedicated calendar role yet — sees all
                 links: [
                     { icon: '🔧', label: 'Work Orders',   page: 'maintenance' },
                     { icon: '🏘️', label: 'Listings',      page: 'listings' },
@@ -4582,24 +4594,13 @@
                     { icon: '📝', label: 'End of Day',    page: 'eod' },
                 ],
             },
-            'mark': {
-                title: 'Finance & Renewals',
-                calRoles: ['FINANCE'],
-                links: [
-                    { icon: '💰', label: 'Finance',       page: 'finance' },
-                    { icon: '🔄', label: 'Renewals',      page: 'lease-renewals' },
-                    { icon: '📋', label: 'Applications',  page: 'rental-applications' },
-                    { icon: '📝', label: 'End of Day',    page: 'eod' },
-                ],
-            },
             'vance': {
-                title: 'Leasing Coordinator',
-                calRoles: ['LEASING COORDINATOR'],
+                title: 'Projects',
+                calRoles: null,  // no dedicated calendar role yet — sees all
                 links: [
-                    { icon: '📝', label: 'Leasing',       page: 'leasing' },
+                    { icon: '🔧', label: 'Work Orders',   page: 'maintenance' },
                     { icon: '📋', label: 'Applications',  page: 'rental-applications' },
-                    { icon: '🔄', label: 'Renewals',      page: 'lease-renewals' },
-                    { icon: '🏘️', label: 'Listings',      page: 'listings' },
+                    { icon: '🏢', label: 'Portfolio',     page: 'portfolio' },
                     { icon: '📝', label: 'End of Day',    page: 'eod' },
                 ],
             },
