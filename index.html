@@ -6913,26 +6913,66 @@
             renderDashboardCalendarTasks();
         }
 
-        // ── ICS parser: extract today's events from a raw ICS string ──────────
+        // ── ICS parser: extract today's events, expanding RRULE recurrences ──
         function parseICSForDate(icsText, dateStr) {
             var targetDate = dateStr.replace(/-/g, ''); // "20260511"
+            var parts = dateStr.split('-');
+            var targetDay  = parseInt(parts[2]);  // 11
+            var d = new Date(dateStr + 'T12:00:00');
+            var dayMap = ['SU','MO','TU','WE','TH','FR','SA'];
+            var targetWeekday = dayMap[d.getDay()]; // "MO"
+
             var events = [];
             var unfolded = icsText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n[ \t]/g, '');
             var blocks = unfolded.split('BEGIN:VEVENT');
             blocks.shift();
+
             blocks.forEach(function(block) {
                 var summary = '';
                 var dtstart = '';
+                var rrule   = '';
                 block.split('\n').forEach(function(line) {
                     if (line.indexOf('SUMMARY:') === 0) {
-                        summary = line.replace('SUMMARY:', '').trim();
+                        // Unescape ICS backslash sequences
+                        summary = line.replace('SUMMARY:', '').trim()
+                            .replace(/\\,/g, ',').replace(/\\n/g, ' ').replace(/\\/g, '');
                     } else if (line.indexOf('DTSTART') === 0) {
                         var val = line.split(':').slice(1).join(':').trim();
-                        var datePart = val.replace(/Z$/, '').replace(/-/g, '').substring(0, 8);
-                        dtstart = datePart;
+                        dtstart = val.replace(/Z$/, '').replace(/-/g, '').substring(0, 8);
+                    } else if (line.indexOf('RRULE:') === 0) {
+                        rrule = line.replace('RRULE:', '').trim();
                     }
                 });
-                if (summary && dtstart === targetDate) {
+                if (!summary) return;
+
+                var matches = false;
+                if (rrule) {
+                    // Skip if DTSTART is in the future
+                    if (dtstart > targetDate) return;
+                    // Skip if UNTIL is in the past
+                    var untilM = rrule.match(/UNTIL=(\d{8})/);
+                    if (untilM && untilM[1] < targetDate) return;
+
+                    var freqM = rrule.match(/FREQ=(\w+)/);
+                    var freq  = freqM ? freqM[1] : '';
+                    if (freq === 'DAILY') {
+                        matches = true;
+                    } else if (freq === 'WEEKLY') {
+                        var bdayM = rrule.match(/BYDAY=([A-Z,]+)/);
+                        if (bdayM) {
+                            var days = bdayM[1].split(',').map(function(x){ return x.trim().toUpperCase().slice(-2); });
+                            if (days.indexOf(targetWeekday) !== -1) matches = true;
+                        }
+                    } else if (freq === 'MONTHLY') {
+                        var bmdM = rrule.match(/BYMONTHDAY=(-?\d+)/);
+                        if (bmdM && parseInt(bmdM[1]) === targetDay) matches = true;
+                    }
+                } else {
+                    // Single event: DTSTART must match today exactly
+                    if (dtstart === targetDate) matches = true;
+                }
+
+                if (matches) {
                     var parsed = parseCalendarTask(summary);
                     events.push({ role: parsed.role, label: parsed.label });
                 }
@@ -6956,7 +6996,7 @@
 
             var calId = 'c_q2pjqh2jr9mjmlgeqob1k1814c@group.calendar.google.com';
             var icsUrl = 'https://calendar.google.com/calendar/ical/' + encodeURIComponent(calId) + '/public/basic.ics';
-            var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(icsUrl);
+            var proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=' + icsUrl;
 
             fetch(proxyUrl)
                 .then(function(r) {
