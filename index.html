@@ -1672,19 +1672,6 @@
 
             <!-- LEASING PAGE -->
             <div class="page" data-page="leasing">
-                <!-- NEW LEASES NEEDED TRACKER (top, prominent) -->
-                <div class="panel" style="border:2px solid var(--accent); background:linear-gradient(to bottom, rgba(203,121,47,0.04), rgba(255,255,255,1));">
-                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="display:flex; align-items:center; gap:8px;">
-                            <span style="background:var(--accent); color:white; padding:2px 10px; border-radius:4px; font-size:11px; font-weight:700; letter-spacing:0.5px;">ACTIVE</span>
-                            📝 New Leases Needed
-                        </span>
-                        <button class="btn btn-primary" style="font-size:13px; padding:8px 16px;" onclick="openAddNewLease()">+ Add Lease</button>
-                    </div>
-                    <p style="color:var(--text-sm); font-size:13px; margin-bottom:16px;">Track new leases as they're drafted, sent, and signed. Click any entry to expand — add Google Drive links to documents, update status, or log notes.</p>
-                    <div id="newLeaseList"></div>
-                </div>
-
                 <!-- LEASING PROCESS REFERENCE -->
                 <div class="panel">
                     <div class="panel-title">📋 Leasing Process</div>
@@ -1711,6 +1698,19 @@
                             <div class="pipeline-desc">Send move-in instructions, schedule move-in inspection, hand over keys, update unit to Occupied in AppFolio.</div>
                         </div>
                     </div>
+                </div>
+
+                <!-- NEW LEASES NEEDED TRACKER (top, prominent) -->
+                <div class="panel" style="border:2px solid var(--accent); background:linear-gradient(to bottom, rgba(203,121,47,0.04), rgba(255,255,255,1));">
+                    <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="display:flex; align-items:center; gap:8px;">
+                            <span style="background:var(--accent); color:white; padding:2px 10px; border-radius:4px; font-size:11px; font-weight:700; letter-spacing:0.5px;">ACTIVE</span>
+                            📝 New Leases Needed
+                        </span>
+                        <button class="btn btn-primary" style="font-size:13px; padding:8px 16px;" onclick="openAddNewLease()">+ Add Lease</button>
+                    </div>
+                    <p style="color:var(--text-sm); font-size:13px; margin-bottom:16px;">Track new leases as they're drafted, sent, and signed. Click any entry to expand — add Google Drive links to documents, update status, or log notes.</p>
+                    <div id="newLeaseList"></div>
                 </div>
 
                 <!-- SECURITY DEPOSIT EXPLAINER -->
@@ -1744,28 +1744,31 @@
                     </div>
                 </div>
 
-                <!-- LEASE EXECUTION CHECKLIST -->
-                <div class="panel" style="padding-bottom:0;">
-                    <div class="panel-title" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="document.getElementById('leaseDraftChecklistBody').classList.toggle('hidden'); this.querySelector('.chevron').textContent = document.getElementById('leaseDraftChecklistBody').classList.contains('hidden') ? '&#9658;' : '&#9660;';">
-                        <span>✍️ Lease Execution Checklist</span>
-                        <span class="chevron" style="font-size:14px; color:var(--muted);">&#9660;</span>
-                    </div>
-                    <div id="leaseDraftChecklistBody" style="padding-bottom:16px; padding-top:8px;">
-                        <p style="color:var(--text-sm); font-size:12px; margin-bottom:12px;">Run this checklist once an application is approved and you're ready to draft and execute the lease.</p>
-                        <div class="checklist" id="leaseDraftChecklist"></div>
-                        <div class="button-group" style="margin-top:10px;">
-                            <button class="btn btn-secondary" onclick="resetChecklist('leaseDraft')">Reset Checklist</button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- LEASING TIPS -->
                 <div class="panel">
                     <div class="panel-title">💡 Leasing Tips & Reminders</div>
                     <ul style="margin-left:18px; color:var(--text-sm); line-height:1.9; font-size:13px;">
                         <li><strong>Verify lease terms match the approved application</strong> — rent, start date, term length, and any special conditions</li>
                         <li><strong>Double-check tenant name spellings and contact info</strong> before sending</li>
-                        <li><strong>Attach all addendums</strong> — pet addendum, parking, utilities, etc. depending on the unit</li>
+                        <li><strong>Attach all required addendums</strong> — confirm which apply to this unit and include all that are needed:</li>
+                    </ul>
+                    <ul style="margin-left:36px; color:var(--text-sm); line-height:1.9; font-size:13px; margin-top:0; margin-bottom:0; list-style-type:circle;">
+                        <li>Pet Addendum <em style="color:var(--muted);">(if applicable)</em></li>
+                        <li>Parking Addendum <em style="color:var(--muted);">(if applicable)</em></li>
+                        <li>Rental License</li>
+                        <li>Certificate of Rental Suitability</li>
+                        <li>Partners in Good Housing</li>
+                        <li>Bed Bug Brochure &amp; Disclosure</li>
+                    </ul>
+                    <div style="background:#fef3c7; border-left:3px solid var(--warning); border-radius:6px; padding:10px 14px; margin:8px 0 4px 18px; font-size:13px; color:var(--text);">
+                        <strong>⚠️ If the property was built in or before 1978</strong> — also include:
+                        <ul style="margin:6px 0 0 18px; line-height:1.9; color:var(--text-sm);">
+                            <li>Lead Certificate &amp; Report</li>
+                            <li>Residential Lead Based Paint Hazard Form</li>
+                            <li>Lead Paint Brochure</li>
+                        </ul>
+                    </div>
+                    <ul style="margin-left:18px; color:var(--text-sm); line-height:1.9; font-size:13px; margin-top:4px; margin-bottom:0; list-style-type:disc;">
                         <li><strong>Collect funds BEFORE move-in</strong> — first month's rent, Security Deposit #1, and Security Deposit #2 (two months total). SD #2 is credited back after year one per PA law.</li>
                         <li><strong>Save the signed lease to Google Drive</strong> in the appropriate property folder and link it in this tracker</li>
                     </ul>
@@ -3185,100 +3188,6 @@
                         </div>
                     </div>
 
-                    <!-- OUTREACH TIMELINE + DELINQUENCY TRACKER side by side -->
-                    <div style="display:grid; grid-template-columns: 5fr 7fr; gap:16px; align-items:start;">
-
-                    <!-- OUTREACH TIMELINE -->
-                    <div class="panel">
-                        <div class="panel-title">📱 Outreach Timeline</div>
-                        <p style="color:var(--text-sm); margin-bottom:16px;">All texts are sent through AppFolio. Follow this exact schedule each month for any tenant with an unpaid balance.</p>
-
-                        <!-- Day 5 -->
-                        <div style="display:flex; gap:14px; margin-bottom:16px;">
-                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:var(--warning-light); border:2px solid var(--warning); display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                                <div style="font-size:9px; font-weight:600; color:var(--warning); line-height:1;">DAY</div>
-                                <div style="font-size:20px; font-weight:800; color:var(--warning); line-height:1;">5</div>
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--text);">Friendly Reminder — Late Fee Warning</div>
-                                <div style="background:var(--warning-light); border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid var(--warning);">
-                                    Hi <strong>[Tenant Name]</strong>, this is <strong>[NAME]</strong> from the property management company. I'm reaching out because we noticed your rent payment hasn't been received yet. This is just a reminder that the late fee will automatically hit your account tomorrow. Please let us know if you have any questions.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Day 6 -->
-                        <div style="display:flex; gap:14px; margin-bottom:16px;">
-                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:var(--accent-light); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                                <div style="font-size:9px; font-weight:600; color:var(--accent); line-height:1;">DAY</div>
-                                <div style="font-size:20px; font-weight:800; color:var(--accent); line-height:1;">6</div>
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--text);">Late Fee Applied — Payment Update Request</div>
-                                <div style="background:var(--accent-light); border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid var(--accent);">
-                                    Hi <strong>[Tenant Name]</strong>, this is <strong>[NAME]</strong> from the property management company. I'm reaching out your rent payment hasn't been received yet. A late fee has hit your ledger. Please update us on when we can expect your account to be paid.
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <!-- Day 8 — Owner Notification -->
-                        <div style="display:flex; gap:14px; margin-bottom:16px;">
-                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:#ede9fe; border:2px solid #7c3aed; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                                <div style="font-size:9px; font-weight:600; color:#7c3aed; line-height:1;">DAY</div>
-                                <div style="font-size:20px; font-weight:800; color:#7c3aed; line-height:1;">8</div>
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--text);">Email Owner — Non-Payment Notification</div>
-                                <div style="background:#ede9fe; border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid #7c3aed;">
-                                    Email the property owner to let them know the tenant has not yet paid rent. Keep the message factual and brief — let them know you are actively following up and that they should be aware they may not receive their rent distribution this month if the situation is not resolved.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Day 8/9 — Urgent Tenant Text -->
-                        <div style="display:flex; gap:14px; margin-bottom:16px;">
-                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:#fde8e4; border:2px solid #e45b3a; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                                <div style="font-size:9px; font-weight:600; color:#e45b3a; line-height:1;">DAY</div>
-                                <div style="font-size:18px; font-weight:800; color:#e45b3a; line-height:1;">8/9</div>
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--text);">Urgent — 10-Day Notice Warning</div>
-                                <div style="background:#fde8e4; border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid #e45b3a;">
-                                    Hi <strong>[Tenant Name]</strong>, this is <strong>[NAME]</strong> from the property management company. I'm following up regarding your past-due rent. We have still not received your payment and this matter is becoming urgent. Please be advised that unless we receive your rent payment you will automatically receive a 10-Day Notice to Quit. Please update us on the status of your payment as quickly as possible. Thank you.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Day 10 -->
-                        <div style="display:flex; gap:14px; margin-bottom:16px;">
-                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:var(--danger-light); border:2px solid var(--danger); display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                                <div style="font-size:9px; font-weight:600; color:var(--danger); line-height:1;">DAY</div>
-                                <div style="font-size:20px; font-weight:800; color:var(--danger); line-height:1;">10</div>
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--danger);">10-Day Notice to Quit</div>
-                                <div style="background:var(--danger-light); border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid var(--danger);">
-                                    <strong>10-Day Notice to Quit must be sent.</strong> Confirm with Property Manager whether to submit directly through AppFolio or send via certified mail. Do not skip this step — document the method used and keep confirmation on file.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Day 15 -->
-                        <div style="display:flex; gap:14px;">
-                            <div style="flex-shrink:0; width:56px; height:56px; border-radius:50%; background:#f0d0d0; border:2px solid #7a1a1a; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-                                <div style="font-size:9px; font-weight:600; color:#7a1a1a; line-height:1;">DAY</div>
-                                <div style="font-size:20px; font-weight:800; color:#7a1a1a; line-height:1;">15</div>
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:700; font-size:13px; margin-bottom:4px; color:#7a1a1a;">Eviction Diversion / Eviction Process</div>
-                                <div style="background:#f0d0d0; border-radius:8px; padding:12px; font-size:13px; color:var(--text-sm); line-height:1.7; border-left:3px solid #7a1a1a;">
-                                    <strong>Eviction Diversion or Eviction Process must begin</strong> unless the Property Manager has provided an alternative arrangement. Escalate immediately — do not delay past this date without explicit PM authorization.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- DELINQUENCY TRACKER -->
                     <div class="panel" style="border:2px solid var(--danger); background:linear-gradient(to bottom, rgba(220,53,69,0.03), rgba(255,255,255,1));">
                         <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center;">
@@ -3291,8 +3200,6 @@
                         <p style="color:var(--text-sm); font-size:13px; margin-bottom:16px;">Ever-changing list of delinquent tenants. Click any row to expand — log notes, update stage, adjust amount, or mark as resolved.</p>
                         <div id="delinquencyList"></div>
                     </div>
-
-                    </div><!-- end side-by-side grid -->
                 </div>
             </div>
 
@@ -4256,6 +4163,65 @@
             renderCompanyHQ();
         }
 
+        function editCompanyTask(id) {
+            if (String(id).startsWith('p-')) {
+                const idx = parseInt(String(id).replace('p-', ''));
+                editTask('Task', idx);
+                return;
+            }
+            const t = (state.companyTasks || []).find(t => String(t.id) === String(id));
+            if (!t) return;
+
+            const existing = document.getElementById('edit-ctask-modal');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'edit-ctask-modal';
+            overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(12,18,50,0.55);z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;';
+            const teamMembers = ['Cole','Diana','Chris','Mark','Vance','Elan'];
+            const assignedOptions = '<option value="">— Unassigned —</option>' +
+                teamMembers.map(n => `<option value="${n}" ${t.assignedTo === n ? 'selected' : ''}>${n}</option>`).join('');
+            overlay.innerHTML = `
+                <div style="background:var(--surface);border-radius:12px;padding:22px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+                    <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px;">Edit Task</div>
+                    <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;">Task</label>
+                    <input type="text" id="ectask-title" value="${t.title.replace(/"/g,'&quot;')}" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);margin-bottom:12px;">
+                    <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;">Assigned to</label>
+                    <select id="ectask-assigned" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);margin-bottom:12px;">${assignedOptions}</select>
+                    <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;">Due date (optional)</label>
+                    <input type="date" id="ectask-due" value="${t.dueDate||''}" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);margin-bottom:12px;">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);margin-bottom:18px;cursor:pointer;">
+                        <input type="checkbox" id="ectask-urgent" ${t.urgent ? 'checked' : ''} style="accent-color:var(--danger);width:16px;height:16px;">
+                        <span>▲ Urgent / flagged</span>
+                    </label>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;">
+                        <button class="btn" onclick="document.getElementById('edit-ctask-modal').remove()" style="font-size:13px;padding:8px 14px;">Cancel</button>
+                        <button class="btn btn-primary" onclick="saveEditCompanyTask('${id}')" style="font-size:13px;padding:8px 14px;">Save Changes</button>
+                    </div>
+                </div>`;
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+            setTimeout(() => {
+                const inp = document.getElementById('ectask-title');
+                if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+            }, 0);
+        }
+
+        function saveEditCompanyTask(id) {
+            const t = (state.companyTasks || []).find(t => String(t.id) === String(id));
+            if (!t) { document.getElementById('edit-ctask-modal')?.remove(); return; }
+            const title = (document.getElementById('ectask-title').value || '').trim();
+            if (!title) { document.getElementById('ectask-title').focus(); return; }
+            t.title = title;
+            t.assignedTo = document.getElementById('ectask-assigned').value || undefined;
+            t.dueDate = document.getElementById('ectask-due').value || undefined;
+            t.urgent = document.getElementById('ectask-urgent').checked || undefined;
+            saveStateKey('companyTasks', state.companyTasks);
+            document.getElementById('edit-ctask-modal')?.remove();
+            renderCompanyHQ();
+        }
+
+
         function addWeeklyFix() {
             const existing = document.getElementById('weekly-fix-modal');
             if (existing) existing.remove();
@@ -4909,10 +4875,11 @@
                         </div></td>
                         <td style="padding:9px 8px;font-size:12px;color:var(--text-sm);width:72px;white-space:nowrap;">${t.assignedTo || '—'}</td>
                         <td style="padding:9px 8px;font-size:12px;width:68px;white-space:nowrap;color:${t.dueDate && t.dueDate < todayStr ? 'var(--danger)' : 'var(--text-sm)'};">${t.dueDate ? new Date(t.dueDate + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'}</td>
-                        <td style="padding:9px 8px;width:130px;text-align:right;">
+                        <td style="padding:9px 8px;width:150px;text-align:right;">
                             <div style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">
                                 ${statusBadge(t)}
-                                <button onclick="markCompanyTaskDone('${t.id}')" title="Mark done" style="font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid rgba(45,122,79,0.4);background:transparent;color:var(--success);cursor:pointer;white-space:nowrap;">✓</button>
+                                <button onclick="editCompanyTask('${t.id}')" title="Edit task" style="font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-sm);cursor:pointer;">✏️</button>
+                                <button onclick="markCompanyTaskDone('${t.id}')" title="Archive task" style="font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid rgba(45,122,79,0.4);background:transparent;color:var(--success);cursor:pointer;white-space:nowrap;">✓</button>
                             </div>
                         </td>
                     </tr>`).join('');
@@ -5478,6 +5445,7 @@
             // Render page-specific content
             if (pageName === 'tasks') renderAllTasksPage();
             if (pageName === 'rental-applications' || pageName === 'leasing') populateChecklists();
+            if (pageName === 'leasing') renderNewLeases();
             if (pageName === 'team-overview') renderTeamOverview();
             if (pageName === 'portfolio') fetchPortfolio().then(renderPortfolio);
             if (pageName === 'rental-licenses') fetchRentalLicenses().then(renderRentalLicenses);
@@ -9641,7 +9609,7 @@
         if (sopContainer) {
             sopContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted); font-size:12px;">Loading SOPs...</div>';
             try {
-                const { data: links, error } = await sbData.from('sop_links').select('*').ilike('Topic', topicKey).order('created_at');
+                const { data: links, error } = await sbData.from('sop_links').select('*').ilike('Topic', topicKey.replace(/-/g, ' ')).order('created_at');
                 if (error) throw error;
                 if (links && links.length > 0) {
                     sopContainer.innerHTML = links.map(function(link) {
