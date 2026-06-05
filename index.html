@@ -9700,7 +9700,7 @@
                         </div>`
                 };
                 resourceRenderers['days-calculator'] = `
-                        <div style="font-size:14px; font-weight:600; color:var(--text); margin-bottom:14px; margin-top:20px;">Days Between Dates</div>
+                        <div style="font-size:14px; font-weight:600; color:var(--text); margin-bottom:14px;">Days Between Dates</div>
                         <div style="background:#111; border-radius:10px; padding:22px 24px; max-width:560px;">
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
                                 <div>
@@ -9721,7 +9721,9 @@
                             </div>
                         </div>`;
                 if (topic.resources && topic.resources.length > 0) {
-                    resContainer.innerHTML = topic.resources.map(r => resourceRenderers[r] || '').join('');
+                    resContainer.innerHTML = '<div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">'
+                        + topic.resources.map(r => '<div>' + (resourceRenderers[r] || '') + '</div>').join('')
+                        + '</div>';
                     // Wire up calculator after injecting HTML
                     (function(){
                         function rcPad(n){return String(n).padStart(2,'0');}
