@@ -1811,6 +1811,52 @@
                     el=document.getElementById('ref-day-120'); if(el) el.textContent=fmtDay(d120);
                 })();
                 </script>
+
+                <!-- DAYS BETWEEN DATES CALCULATOR -->
+                <div style="background:var(--surface); border-radius:10px; border:1px solid var(--border); padding:16px 18px; margin-bottom:16px; box-shadow:var(--shadow);">
+                    <div style="font-size:13px; font-weight:600; color:var(--text); margin-bottom:14px;">Days Between Dates</div>
+                    <div style="display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap;">
+                        <div>
+                            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:5px;">Start date</label>
+                            <input type="date" id="rl-start" style="font-size:13px; padding:7px 10px; border:1px solid var(--border); border-radius:7px; background:var(--bg); color:var(--text);" />
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:5px;">End date</label>
+                            <input type="date" id="rl-end" style="font-size:13px; padding:7px 10px; border:1px solid var(--border); border-radius:7px; background:var(--bg); color:var(--text);" />
+                        </div>
+                        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); padding-bottom:8px; cursor:pointer;">
+                            <input type="checkbox" id="rl-incl" checked /> Include end date
+                        </label>
+                        <div id="rl-result" style="display:none; padding-bottom:6px;">
+                            <div id="rl-days" style="font-size:22px; font-weight:500; color:var(--text);"></div>
+                            <div id="rl-sub" style="font-size:11px; color:var(--muted); margin-top:1px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                (function(){
+                    function rlCalc(){
+                        var s=document.getElementById('rl-start').value,e=document.getElementById('rl-end').value;
+                        var res=document.getElementById('rl-result');
+                        if(!s||!e){res.style.display='none';return;}
+                        var incl=document.getElementById('rl-incl').checked?1:0;
+                        var sd=new Date(s),ed=new Date(e);
+                        var total=Math.abs(Math.round((ed-sd)/86400000))+incl;
+                        var wks=Math.floor(total/7),rem=total%7;
+                        var sub=wks>0?(wks+'w'+(rem>0?' '+rem+'d':'')):(total+'d');
+                        document.getElementById('rl-days').textContent=total.toLocaleString()+' day'+(total===1?'':'s');
+                        document.getElementById('rl-sub').textContent='≈ '+sub;
+                        res.style.display='block';
+                    }
+                    ['rl-start','rl-end'].forEach(function(id){
+                        var el=document.getElementById(id);
+                        if(el) el.addEventListener('change',rlCalc);
+                    });
+                    var cb=document.getElementById('rl-incl');
+                    if(cb) cb.addEventListener('change',rlCalc);
+                })();
+                </script>
+
                 <!-- View toggle + actions -->
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
                     <div style="display:flex; gap:0; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
