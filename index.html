@@ -9662,7 +9662,7 @@
                 const resourceRenderers = {
                     'proration-calculator': `
                         <div style="font-size:14px; font-weight:600; color:var(--text); margin-bottom:14px;">Rent Proration Calculator</div>
-                        <div style="background:#111; border-radius:10px; padding:22px 24px; width:620px; max-width:100%;">
+                        <div style="background:#111; border-radius:10px; padding:22px 24px; width:620px; max-width:100%; flex:1;">
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
                                 <div>
                                     <label style="font-size:12px; color:rgba(255,255,255,0.45); display:block; margin-bottom:6px;">Move-in date</label>
@@ -9690,7 +9690,7 @@
                 };
                 resourceRenderers['days-calculator'] = `
                         <div style="font-size:14px; font-weight:600; color:var(--text); margin-bottom:14px;">Days Between Dates</div>
-                        <div style="background:#111; border-radius:10px; padding:22px 24px; width:620px; max-width:100%;">
+                        <div style="background:#111; border-radius:10px; padding:22px 24px; width:620px; max-width:100%; flex:1;">
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
                                 <div>
                                     <label style="font-size:12px; color:rgba(255,255,255,0.45); display:block; margin-bottom:6px;">Start date</label>
@@ -9713,8 +9713,8 @@
                             </div>
                         </div>`;
                 if (topic.resources && topic.resources.length > 0) {
-                    resContainer.innerHTML = '<div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">'
-                        + topic.resources.map(r => '<div>' + (resourceRenderers[r] || '') + '</div>').join('')
+                    resContainer.innerHTML = '<div style="display:flex; gap:20px; align-items:stretch; flex-wrap:wrap;">'
+                        + topic.resources.map(r => '<div style="display:flex; flex-direction:column;">' + (resourceRenderers[r] || '') + '</div>').join('')
                         + '</div>';
                     // Wire up calculator after injecting HTML
                     (function(){
