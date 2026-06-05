@@ -9640,27 +9640,27 @@
             if (resContainer) {
                 const resourceRenderers = {
                     'proration-calculator': `
-                        <div style="font-size:13px; font-weight:600; color:var(--text); margin-bottom:12px;">Rent Proration Calculator</div>
-                        <div style="background:#111; border-radius:10px; padding:18px 20px; max-width:480px;">
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                        <div style="font-size:14px; font-weight:600; color:var(--text); margin-bottom:14px;">Rent Proration Calculator</div>
+                        <div style="background:#111; border-radius:10px; padding:22px 24px; max-width:560px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
                                 <div>
-                                    <label style="font-size:11px; color:rgba(255,255,255,0.45); display:block; margin-bottom:5px;">Move-in date</label>
-                                    <input type="date" id="rc-movein" style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:#fff; font-size:13px; padding:7px 9px; width:100%; box-sizing:border-box;" />
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.45); display:block; margin-bottom:6px;">Move-in date</label>
+                                    <input type="date" id="rc-movein" style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:#fff; font-size:14px; padding:9px 11px; width:100%; box-sizing:border-box;" />
                                 </div>
                                 <div>
-                                    <label style="font-size:11px; color:rgba(255,255,255,0.45); display:block; margin-bottom:5px;">Through</label>
-                                    <input type="date" id="rc-through" readonly style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:rgba(255,255,255,0.35); font-size:13px; padding:7px 9px; width:100%; box-sizing:border-box; cursor:default;" />
-                                    <div style="font-size:10px; color:rgba(255,255,255,0.25); margin-top:3px;">Auto-fills to end of month</div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.45); display:block; margin-bottom:6px;">Through</label>
+                                    <input type="date" id="rc-through" readonly style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:rgba(255,255,255,0.35); font-size:14px; padding:9px 11px; width:100%; box-sizing:border-box; cursor:default;" />
+                                    <div style="font-size:11px; color:rgba(255,255,255,0.25); margin-top:4px;">Auto-fills to end of month</div>
                                 </div>
                             </div>
-                            <div style="margin-bottom:14px;">
-                                <label style="font-size:11px; color:rgba(255,255,255,0.45); display:block; margin-bottom:5px;">Monthly rent ($)</label>
-                                <input type="number" id="rc-rent" min="0" step="0.01" placeholder="1200.00" style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:#fff; font-size:13px; padding:7px 9px; width:140px; box-sizing:border-box;" />
+                            <div style="margin-bottom:18px;">
+                                <label style="font-size:12px; color:rgba(255,255,255,0.45); display:block; margin-bottom:6px;">Monthly rent ($)</label>
+                                <input type="number" id="rc-rent" min="0" step="0.01" placeholder="1200.00" style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:#fff; font-size:14px; padding:9px 11px; width:160px; box-sizing:border-box;" />
                             </div>
-                            <div id="rc-result" style="display:none; background:rgba(255,255,255,0.06); border-radius:7px; padding:12px 14px;">
-                                <div id="rc-amount" style="font-size:24px; font-weight:500; color:#fff; margin-bottom:3px;"></div>
-                                <div id="rc-breakdown" style="font-size:11px; color:rgba(255,255,255,0.45); line-height:1.7;"></div>
-                                <div id="rc-formula" style="font-size:10px; color:rgba(255,255,255,0.25); margin-top:7px; padding-top:7px; border-top:0.5px solid rgba(255,255,255,0.1);"></div>
+                            <div id="rc-result" style="display:none; background:rgba(255,255,255,0.06); border-radius:7px; padding:14px 16px;">
+                                <div id="rc-amount" style="font-size:28px; font-weight:500; color:#fff; margin-bottom:4px;"></div>
+                                <div id="rc-breakdown" style="font-size:12px; color:rgba(255,255,255,0.45); line-height:1.7;"></div>
+                                <div id="rc-formula" style="font-size:11px; color:rgba(255,255,255,0.25); margin-top:8px; padding-top:8px; border-top:0.5px solid rgba(255,255,255,0.1);"></div>
                             </div>
                         </div>`
                 };
