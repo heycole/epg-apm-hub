@@ -9587,7 +9587,7 @@
             leads:          { icon: '📞', title: 'Leads', category: 'Tenant Acquisition' },
             showings:       { icon: '🏠', title: 'Showings', category: 'Tenant Acquisition' },
             applications:   { icon: '📋', title: 'Applications', category: 'Tenant Acquisition' },
-            leasing:        { icon: '📝', title: 'Leasing', category: 'Tenant Acquisition' },
+            leasing:        { icon: '📝', title: 'Leasing', category: 'Tenant Acquisition', resources: ['proration-calculator'] },
             movein:         { icon: '🔑', title: 'Move-In Process', category: 'Tenant Acquisition' },
             renewals:       { icon: '🔄', title: 'Lease Renewals', category: 'Tenant Lifecycle' },
             moveout:        { icon: '📦', title: 'Move-Out Process', category: 'Tenant Lifecycle' },
@@ -9635,6 +9635,68 @@
             }
         }
 
+            // Render Resources
+            const resContainer = document.getElementById('sopSubResources');
+            if (resContainer) {
+                const resourceRenderers = {
+                    'proration-calculator': `
+                        <div style="font-size:13px; font-weight:600; color:var(--text); margin-bottom:12px;">Rent Proration Calculator</div>
+                        <div style="background:#111; border-radius:10px; padding:18px 20px; max-width:480px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                                <div>
+                                    <label style="font-size:11px; color:rgba(255,255,255,0.45); display:block; margin-bottom:5px;">Move-in date</label>
+                                    <input type="date" id="rc-movein" style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:#fff; font-size:13px; padding:7px 9px; width:100%; box-sizing:border-box;" />
+                                </div>
+                                <div>
+                                    <label style="font-size:11px; color:rgba(255,255,255,0.45); display:block; margin-bottom:5px;">Through</label>
+                                    <input type="date" id="rc-through" readonly style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:rgba(255,255,255,0.35); font-size:13px; padding:7px 9px; width:100%; box-sizing:border-box; cursor:default;" />
+                                    <div style="font-size:10px; color:rgba(255,255,255,0.25); margin-top:3px;">Auto-fills to end of month</div>
+                                </div>
+                            </div>
+                            <div style="margin-bottom:14px;">
+                                <label style="font-size:11px; color:rgba(255,255,255,0.45); display:block; margin-bottom:5px;">Monthly rent ($)</label>
+                                <input type="number" id="rc-rent" min="0" step="0.01" placeholder="1200.00" style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:#fff; font-size:13px; padding:7px 9px; width:140px; box-sizing:border-box;" />
+                            </div>
+                            <div id="rc-result" style="display:none; background:rgba(255,255,255,0.06); border-radius:7px; padding:12px 14px;">
+                                <div id="rc-amount" style="font-size:24px; font-weight:500; color:#fff; margin-bottom:3px;"></div>
+                                <div id="rc-breakdown" style="font-size:11px; color:rgba(255,255,255,0.45); line-height:1.7;"></div>
+                                <div id="rc-formula" style="font-size:10px; color:rgba(255,255,255,0.25); margin-top:7px; padding-top:7px; border-top:0.5px solid rgba(255,255,255,0.1);"></div>
+                            </div>
+                        </div>`
+                };
+                if (topic.resources && topic.resources.length > 0) {
+                    resContainer.innerHTML = topic.resources.map(r => resourceRenderers[r] || '').join('');
+                    // Wire up calculator after injecting HTML
+                    (function(){
+                        function rcPad(n){return String(n).padStart(2,'0');}
+                        function rcLeap(y){return(y%4===0&&y%100!==0)||y%400===0;}
+                        function rcDIM(m,y){return m===2&&rcLeap(y)?29:[31,28,31,30,31,30,31,31,30,31,30,31][m-1];}
+                        var rcMN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+                        var mi=document.getElementById('rc-movein'),th=document.getElementById('rc-through'),rn=document.getElementById('rc-rent');
+                        if(!mi||!th||!rn) return;
+                        mi.addEventListener('change',function(){
+                            if(!this.value)return;
+                            var p=this.value.split('-').map(Number),y=p[0],m=p[1];
+                            th.value=y+'-'+rcPad(m)+'-'+rcPad(rcDIM(m,y));
+                            rcCalc();
+                        });
+                        rn.addEventListener('input',rcCalc);
+                        function rcCalc(){
+                            var rent=parseFloat(rn.value),mIn=mi.value,mThru=th.value,res=document.getElementById('rc-result');
+                            if(!rent||isNaN(rent)||!mIn||!mThru){res.style.display='none';return;}
+                            var p1=mIn.split('-').map(Number),p2=mThru.split('-').map(Number);
+                            var s=new Date(p1[0],p1[1]-1,p1[2]),e=new Date(p2[0],p2[1]-1,p2[2]);
+                            var days=Math.round((e-s)/86400000)+1,dim=rcDIM(p1[1],p1[0]),daily=rent/dim,prorated=daily*days;
+                            document.getElementById('rc-amount').textContent='$'+prorated.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                            document.getElementById('rc-breakdown').textContent=days+' of '+dim+' days in '+rcMN[p1[1]-1]+'  ·  $'+daily.toFixed(4)+'/day';
+                            document.getElementById('rc-formula').textContent='$'+rent.toFixed(2)+' ÷ '+dim+' days × '+days+' days';
+                            res.style.display='block';
+                        }
+                    })();
+                } else {
+                    resContainer.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 0;text-align:center;"><p style="color:var(--muted);font-size:12px;font-style:italic;margin:0;">No additional resources yet</p></div>';
+                }
+            }
         const contentArea = document.querySelector('.content-area');
         if (contentArea) contentArea.scrollTop = 0;
     }
