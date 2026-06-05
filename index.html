@@ -9713,7 +9713,7 @@
                             </div>
                         </div>`;
                 if (topic.resources && topic.resources.length > 0) {
-                    resContainer.innerHTML = '<div style="display:flex; gap:20px; align-items:stretch; flex-wrap:wrap;">'
+                    resContainer.innerHTML = '<div style="display:flex; gap:20px; align-items:stretch; flex-wrap:wrap; justify-content:center;">'
                         + topic.resources.map(r => '<div style="display:flex; flex-direction:column;">' + (resourceRenderers[r] || '') + '</div>').join('')
                         + '</div>';
                     // Wire up calculator after injecting HTML
