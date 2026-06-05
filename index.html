@@ -1778,22 +1778,22 @@
             <!-- LEASE RENEWALS PAGE -->
             <div class="page" data-page="lease-renewals">
                 <!-- DATE REFERENCE BLOCKS -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;" id="renewal-date-blocks">
-                    <div style="background:var(--surface); border-radius:10px; border:1px solid var(--border); padding:14px 18px; box-shadow:var(--shadow);">
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
-                            <span style="font-size:11px; color:var(--muted);">From today</span>
-                            <span style="font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px; background:rgba(203,121,47,0.12); color:var(--accent);">90 days</span>
+                <div style="display:flex; gap:10px; margin-bottom:16px;">
+                    <div style="background:var(--surface); border-radius:8px; border:1px solid var(--border); padding:10px 14px; box-shadow:var(--shadow);">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:3px;">
+                            <span style="font-size:10px; color:var(--muted);">From today</span>
+                            <span style="font-size:10px; font-weight:700; padding:1px 7px; border-radius:999px; background:rgba(203,121,47,0.12); color:var(--accent);">90 days</span>
                         </div>
-                        <div id="ref-date-90" style="font-size:17px; font-weight:500; color:var(--text);"></div>
-                        <div id="ref-day-90" style="font-size:12px; color:var(--muted); margin-top:1px;"></div>
+                        <div id="ref-date-90" style="font-size:14px; font-weight:500; color:var(--text);"></div>
+                        <div id="ref-day-90" style="font-size:11px; color:var(--muted);"></div>
                     </div>
-                    <div style="background:var(--surface); border-radius:10px; border:1px solid var(--border); padding:14px 18px; box-shadow:var(--shadow);">
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
-                            <span style="font-size:11px; color:var(--muted);">From today</span>
-                            <span style="font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px; background:rgba(24,95,165,0.1); color:#185fa5;">120 days</span>
+                    <div style="background:var(--surface); border-radius:8px; border:1px solid var(--border); padding:10px 14px; box-shadow:var(--shadow);">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:3px;">
+                            <span style="font-size:10px; color:var(--muted);">From today</span>
+                            <span style="font-size:10px; font-weight:700; padding:1px 7px; border-radius:999px; background:rgba(24,95,165,0.1); color:#185fa5;">120 days</span>
                         </div>
-                        <div id="ref-date-120" style="font-size:17px; font-weight:500; color:var(--text);"></div>
-                        <div id="ref-day-120" style="font-size:12px; color:var(--muted); margin-top:1px;"></div>
+                        <div id="ref-date-120" style="font-size:14px; font-weight:500; color:var(--text);"></div>
+                        <div id="ref-day-120" style="font-size:11px; color:var(--muted);"></div>
                     </div>
                 </div>
                 <script>
@@ -1809,51 +1809,6 @@
                     el=document.getElementById('ref-day-90'); if(el) el.textContent=fmtDay(d90);
                     el=document.getElementById('ref-date-120'); if(el) el.textContent=fmtDate(d120);
                     el=document.getElementById('ref-day-120'); if(el) el.textContent=fmtDay(d120);
-                })();
-                </script>
-
-                <!-- DAYS BETWEEN DATES CALCULATOR -->
-                <div style="background:var(--surface); border-radius:10px; border:1px solid var(--border); padding:16px 18px; margin-bottom:16px; box-shadow:var(--shadow);">
-                    <div style="font-size:13px; font-weight:600; color:var(--text); margin-bottom:14px;">Days Between Dates</div>
-                    <div style="display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap;">
-                        <div>
-                            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:5px;">Start date</label>
-                            <input type="date" id="rl-start" style="font-size:13px; padding:7px 10px; border:1px solid var(--border); border-radius:7px; background:var(--bg); color:var(--text);" />
-                        </div>
-                        <div>
-                            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:5px;">End date</label>
-                            <input type="date" id="rl-end" style="font-size:13px; padding:7px 10px; border:1px solid var(--border); border-radius:7px; background:var(--bg); color:var(--text);" />
-                        </div>
-                        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); padding-bottom:8px; cursor:pointer;">
-                            <input type="checkbox" id="rl-incl" checked /> Include end date
-                        </label>
-                        <div id="rl-result" style="display:none; padding-bottom:6px;">
-                            <div id="rl-days" style="font-size:22px; font-weight:500; color:var(--text);"></div>
-                            <div id="rl-sub" style="font-size:11px; color:var(--muted); margin-top:1px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <script>
-                (function(){
-                    function rlCalc(){
-                        var s=document.getElementById('rl-start').value,e=document.getElementById('rl-end').value;
-                        var res=document.getElementById('rl-result');
-                        if(!s||!e){res.style.display='none';return;}
-                        var incl=document.getElementById('rl-incl').checked?1:0;
-                        var sd=new Date(s),ed=new Date(e);
-                        var total=Math.abs(Math.round((ed-sd)/86400000))+incl;
-                        var wks=Math.floor(total/7),rem=total%7;
-                        var sub=wks>0?(wks+'w'+(rem>0?' '+rem+'d':'')):(total+'d');
-                        document.getElementById('rl-days').textContent=total.toLocaleString()+' day'+(total===1?'':'s');
-                        document.getElementById('rl-sub').textContent='≈ '+sub;
-                        res.style.display='block';
-                    }
-                    ['rl-start','rl-end'].forEach(function(id){
-                        var el=document.getElementById(id);
-                        if(el) el.addEventListener('change',rlCalc);
-                    });
-                    var cb=document.getElementById('rl-incl');
-                    if(cb) cb.addEventListener('change',rlCalc);
                 })();
                 </script>
 
@@ -9667,7 +9622,7 @@
             leads:          { icon: '📞', title: 'Leads', category: 'Tenant Acquisition' },
             showings:       { icon: '🏠', title: 'Showings', category: 'Tenant Acquisition' },
             applications:   { icon: '📋', title: 'Applications', category: 'Tenant Acquisition' },
-            leasing:        { icon: '📝', title: 'Leasing', category: 'Tenant Acquisition', resources: ['proration-calculator'] },
+            leasing:        { icon: '📝', title: 'Leasing', category: 'Tenant Acquisition', resources: ['proration-calculator', 'days-calculator'] },
             movein:         { icon: '🔑', title: 'Move-In Process', category: 'Tenant Acquisition' },
             renewals:       { icon: '🔄', title: 'Lease Renewals', category: 'Tenant Lifecycle' },
             moveout:        { icon: '📦', title: 'Move-Out Process', category: 'Tenant Lifecycle' },
@@ -9744,6 +9699,27 @@
                             </div>
                         </div>`
                 };
+                resourceRenderers['days-calculator'] = `
+                        <div style="font-size:14px; font-weight:600; color:var(--text); margin-bottom:14px; margin-top:20px;">Days Between Dates</div>
+                        <div style="background:#111; border-radius:10px; padding:22px 24px; max-width:560px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.45); display:block; margin-bottom:6px;">Start date</label>
+                                    <input type="date" id="dc-start" style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:#fff; font-size:14px; padding:9px 11px; width:100%; box-sizing:border-box;" />
+                                </div>
+                                <div>
+                                    <label style="font-size:12px; color:rgba(255,255,255,0.45); display:block; margin-bottom:6px;">End date</label>
+                                    <input type="date" id="dc-end" style="background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.15); border-radius:7px; color:#fff; font-size:14px; padding:9px 11px; width:100%; box-sizing:border-box;" />
+                                </div>
+                            </div>
+                            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:rgba(255,255,255,0.45); margin-bottom:18px; cursor:pointer;">
+                                <input type="checkbox" id="dc-incl" checked /> Include end date
+                            </label>
+                            <div id="dc-result" style="display:none; background:rgba(255,255,255,0.06); border-radius:7px; padding:14px 16px;">
+                                <div id="dc-days" style="font-size:28px; font-weight:500; color:#fff; margin-bottom:4px;"></div>
+                                <div id="dc-sub" style="font-size:12px; color:rgba(255,255,255,0.45);"></div>
+                            </div>
+                        </div>`;
                 if (topic.resources && topic.resources.length > 0) {
                     resContainer.innerHTML = topic.resources.map(r => resourceRenderers[r] || '').join('');
                     // Wire up calculator after injecting HTML
@@ -9772,6 +9748,25 @@
                             document.getElementById('rc-formula').textContent='$'+rent.toFixed(2)+' ÷ '+dim+' days × '+days+' days';
                             res.style.display='block';
                         }
+                    })();
+                    // Wire up days calculator
+                    (function(){
+                        function dcCalc(){
+                            var s=document.getElementById('dc-start'),e=document.getElementById('dc-end'),res=document.getElementById('dc-result');
+                            if(!s||!e||!s.value||!e.value){if(res)res.style.display='none';return;}
+                            var incl=document.getElementById('dc-incl').checked?1:0;
+                            var total=Math.abs(Math.round((new Date(e.value)-new Date(s.value))/86400000))+incl;
+                            var wks=Math.floor(total/7),rem=total%7,yrs=Math.floor(total/365),mos=Math.floor((total%365)/30);
+                            var sub='';
+                            if(yrs>0) sub+=yrs+'yr ';
+                            if(mos>0) sub+=mos+'mo ';
+                            if(rem>0||(!yrs&&!mos)) sub+=(wks>0?rem:total)+'d';
+                            document.getElementById('dc-days').textContent=total.toLocaleString()+' day'+(total===1?'':'s');
+                            document.getElementById('dc-sub').textContent=sub.trim()?'≈ '+sub.trim():'';
+                            res.style.display='block';
+                        }
+                        ['dc-start','dc-end'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('change',dcCalc);});
+                        var cb=document.getElementById('dc-incl');if(cb)cb.addEventListener('change',dcCalc);
                     })();
                 } else {
                     resContainer.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 0;text-align:center;"><p style="color:var(--muted);font-size:12px;font-style:italic;margin:0;">No additional resources yet</p></div>';
