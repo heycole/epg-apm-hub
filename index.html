@@ -3474,7 +3474,7 @@
                     </div>
 
                     <!-- Content Cards Grid -->
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                    <div id="sopContentGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
                         <!-- SOPs Card -->
                         <div style="background:var(--surface); border-radius:12px; border:1px solid var(--border); overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
                             <div style="padding:16px 20px; background:linear-gradient(135deg, rgba(203,121,47,0.08) 0%, rgba(203,121,47,0.02) 100%); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px;">
@@ -7356,6 +7356,41 @@
         document.getElementById('sopSubIconBg').textContent = topic.icon;
         document.getElementById('sopSubTitle').textContent = topic.title;
         document.getElementById('sopSubCategory').textContent = topic.category;
+
+        // Remove any previously injected workflow card
+        const existingCard = document.getElementById('sopWorkflowCard');
+        if (existingCard) existingCard.remove();
+
+        // Inject workflow card for renewals
+        if (topicKey === 'renewals') {
+            const grid = document.getElementById('sopContentGrid');
+            if (grid) {
+                const card = document.createElement('div');
+                card.id = 'sopWorkflowCard';
+                card.style.cssText = 'background:var(--surface);border-radius:12px;border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);margin-bottom:16px;';
+                card.innerHTML = '<div style="padding:20px 24px;background:linear-gradient(135deg,rgba(203,121,47,0.08) 0%,rgba(203,121,47,0.02) 100%);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">'
+                    + '<div style="display:flex;align-items:center;gap:12px;">'
+                    + '<div style="width:40px;height:40px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 8px rgba(203,121,47,0.3);">🔄</div>'
+                    + '<div><div style="font-size:15px;font-weight:700;color:var(--text);">Visual Process Workflow</div>'
+                    + '<div style="font-size:12px;color:var(--muted);margin-top:2px;">Step-by-step renewal flowchart with decision paths</div></div></div>'
+                    + '<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+                    + '<button onclick="window.open('EPG_Lease_Task_Manager.html','_blank')" style="padding:8px 16px;background:transparent;border:1.5px solid var(--accent);border-radius:8px;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;">📋 Task Manager</button>'
+                    + '<button onclick="window.open('EPG_Lease_Renewal_Workflow.html','_blank')" style="padding:8px 16px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;">↗ Open Workflow</button>'
+                    + '</div></div>'
+                    + '<div style="padding:16px 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px 16px;border-left:3px solid #22c55e;">'
+                    + '<div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Renewal Path</div>'
+                    + '<div style="font-size:12px;color:var(--text-sm);line-height:1.6;">120d: AppFolio check → 105d: notify owner + tenant → 90d: confirm intent → 85d: draft lease → 65d: signing deadline → 60d: update AppFolio</div></div>'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px 16px;border-left:3px solid #ef4444;">'
+                    + '<div style="font-size:11px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Move-Out Path</div>'
+                    + '<div style="font-size:12px;color:var(--text-sm);line-height:1.6;">89d: confirm in writing → 85d: list property → 75d: begin showings → 40d: pre-move-out inspection → 15d: send deposit info → 10d: final prep</div></div>'
+                    + '<div style="background:var(--bg);border-radius:8px;padding:14px 16px;border-left:3px solid var(--accent);">'
+                    + '<div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Key Decision Point</div>'
+                    + '<div style="font-size:12px;color:var(--text-sm);line-height:1.6;">At 90 days before expiration: confirm tenant decision → set path in Task Manager → all subsequent deadlines auto-calculate from the expiration date</div></div>'
+                    + '</div>';
+                grid.parentNode.insertBefore(card, grid);
+            }
+        }
 
         const sopContainer = document.getElementById('sopSubSOPs');
         if (sopContainer) {
