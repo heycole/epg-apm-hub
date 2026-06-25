@@ -5735,20 +5735,7 @@
                             <label style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">ð Notes</label>
                             <textarea onchange="updateWorkOrderNotes(${wo.id}, this.value)" onclick="event.stopPropagation()" style="width:100%; min-height:60px; padding:8px; border:1px solid var(--border); border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; background:var(--card); color:var(--text); resize:vertical;">${wo.notes || ''}</textarea>
                         </div>
-                    <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                        <div>
-                            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:2px;">WO #</label>
-                            <input type="text" value="${wo.woNumber || ''}" onchange="const wo = state.workOrders.find(w => w.id === ${wo.id}); if(wo){wo.woNumber=this.value; saveState(state);}" style="width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;" placeholder="Enter WO #">
-                        </div>
-                        <div>
-                            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:2px;">Quote #</label>
-                            <input type="text" value="${wo.quoteNumber || ''}" onchange="const wo = state.workOrders.find(w => w.id === ${wo.id}); if(wo){wo.quoteNumber=this.value; saveState(state);}" style="width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;" placeholder="Enter Quote #">
-                        </div>
-                        <div>
-                            <label style="font-size:11px; color:var(--muted); display:block; margin-bottom:2px;">Invoice #</label>
-                            <input type="text" value="${wo.invoiceNumber || ''}" onchange="const wo = state.workOrders.find(w => w.id === ${wo.id}); if(wo){wo.invoiceNumber=this.value; saveState(state);}" style="width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px;" placeholder="Enter Invoice #">
-                        </div>
-                    </div>
+                    
                     </div>
                 `;
 
@@ -5760,6 +5747,11 @@
                                     <span style="font-size:10px; font-weight:700; text-transform:uppercase; padding:2px 6px; border-radius:3px; background:${priorityColor}; color:white;">${wo.priority}</span>
                                     <span style="font-weight:600; font-size:14px;">${wo.address}${wo.unit ? ' #' + wo.unit : ''}</span>
                                     <span style="font-size:10px; font-weight:600; padding:2px 6px; border-radius:3px; background:${agingColor}; color:white;">${agingLabel}</span>
+                                    <div style="display:inline-flex; gap:6px; margin-left:12px; align-items:center;" onclick="event.stopPropagation()">
+                                        <input type="text" value="${wo.woNumber || ''}" onchange="const w = state.workOrders.find(x => x.id === ${wo.id}); if(w){w.woNumber=this.value; saveState(state);}" placeholder="WO #" style="width:80px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:11px;">
+                                        <input type="text" value="${wo.quoteNumber || ''}" onchange="const w = state.workOrders.find(x => x.id === ${wo.id}); if(w){w.quoteNumber=this.value; saveState(state);}" placeholder="Quote #" style="width:80px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:11px;">
+                                        <input type="text" value="${wo.invoiceNumber || ''}" onchange="const w = state.workOrders.find(x => x.id === ${wo.id}); if(w){w.invoiceNumber=this.value; saveState(state);}" placeholder="Invoice #" style="width:80px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:11px;">
+                                    </div>
                                 </div>
                                 <div style="font-size:13px; color:var(--text-sm); margin-bottom:6px;">${wo.issue}</div>
                                 <div style="display:flex; align-items:center; gap:8px;">
