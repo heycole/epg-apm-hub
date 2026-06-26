@@ -1704,7 +1704,7 @@
                         <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'; this.querySelector('.rl-pg-chev').style.transform=this.nextElementSibling.style.display==='none'?'rotate(-90deg)':'';">
                             <div style="display:flex; align-items:center; gap:12px; flex:1;">
                                 <span class="panel-title" style="margin:0; font-size:14px;">ð Lease Renewal Process Guide</span>
-                                <span style="font-size:11px; color:var(--text-sm);">4% increase Â· no MTM Â· 90-day notice required</span>
+                                <span style="font-size:11px; color:var(--text-sm);">4% increase · no MTM · 90-day notice required</span>
                             </div>
                             <span class="rl-pg-chev" style="font-size:13px; color:var(--muted); transition:transform .2s;">â¾</span>
                         </div>
@@ -2843,7 +2843,7 @@
                             <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:18px; border-top:3px solid var(--success);">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
                                     <div style="font-size:15px; font-weight:700; color:var(--text);">Rent Money Account</div>
-                                    <div style="font-size:12px; font-weight:700; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap;">Â·Â·Â·Â· 9389</div>
+                                    <div style="font-size:12px; font-weight:700; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap;">···· 9389</div>
                                 </div>
                                 <p style="font-size:13px; color:var(--text-sm); line-height:1.6; margin:0;">Used to collect all rent payments. Also the account used to pay property-related expenses and bills.</p>
                                 <div style="margin-top:12px; display:flex; flex-direction:column; gap:5px;">
@@ -2856,7 +2856,7 @@
                             <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:18px; border-top:3px solid #6c8ebf;">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
                                     <div style="font-size:15px; font-weight:700; color:var(--text);">Security Deposit Account</div>
-                                    <div style="font-size:12px; font-weight:700; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap;">Â·Â·Â·Â· 9824</div>
+                                    <div style="font-size:12px; font-weight:700; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap;">···· 9824</div>
                                 </div>
                                 <p style="font-size:13px; color:var(--text-sm); line-height:1.6; margin:0;">Holds all security deposits â Security Deposit #1 and Security Deposit #2 (formerly last month's rent). Funds are transferred in when received and disbursed when issuing credits or returning deposits.</p>
                                 <div style="margin-top:12px; display:flex; flex-direction:column; gap:5px;">
@@ -2869,7 +2869,7 @@
                             <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:18px; border-top:3px solid var(--accent);">
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
                                     <div style="font-size:15px; font-weight:700; color:var(--text);">Operations Account</div>
-                                    <div style="font-size:12px; font-weight:700; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap;">Â·Â·Â·Â· 1652</div>
+                                    <div style="font-size:12px; font-weight:700; color:var(--text-sm); background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:3px 8px; white-space:nowrap;">···· 1652</div>
                                 </div>
                                 <p style="font-size:13px; color:var(--text-sm); line-height:1.6; margin:0;">Used for all company-related transactions for EPG Management. All management fees should be deposited here, and all company expenses should be paid from this account.</p>
                                 <div style="margin-top:12px; display:flex; flex-direction:column; gap:5px;">
@@ -3749,7 +3749,7 @@
                 avatar.textContent = initials;
             }
             if (userNameEl) {
-                userNameEl.textContent = name + (role === 'admin' ? ' Â· Admin' : '');
+                userNameEl.textContent = name + (role === 'admin' ? ' · Admin' : '');
             }
             const greetTextEl = document.querySelector('.greeting-banner .greeting-text');
             if (greetTextEl) greetTextEl.textContent = 'Welcome back, ' + (name.split(' ')[0] || name);
@@ -3995,7 +3995,7 @@
             }
         }
 
-        // Small inline "â Name Â· time" badge for completed task rows.
+        // Small inline "â Name · time" badge for completed task rows.
         function taskCompletedByHtml(task) {
             if (!task || !task.completed || !task.completedByName) return '';
             let when = '';
@@ -4004,7 +4004,7 @@
                     const d = new Date(task.completedAt);
                     if (!isNaN(d.getTime())) {
                         const sameDay = d.toDateString() === new Date().toDateString();
-                        when = ' Â· ' + (sameDay
+                        when = ' · ' + (sameDay
                             ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
                             : d.toLocaleDateString([], { month: 'short', day: 'numeric' }));
                     }
@@ -4013,7 +4013,7 @@
             return `<span style="font-size:10px; color:var(--text-sm); margin-left:6px; font-style:italic; white-space:nowrap;" title="Completed by ${task.completedByName}${when}">â ${task.completedByName}${when}</span>`;
         }
 
-        // Small inline "â Name Â· time" badge to render next to a checked step.
+        // Small inline "â Name · time" badge to render next to a checked step.
         function stepDoneByHtml(step) {
             if (!step || !step.doneByName) return '';
             let when = '';
@@ -4022,7 +4022,7 @@
                     const d = new Date(step.doneAt);
                     if (!isNaN(d.getTime())) {
                         const sameDay = d.toDateString() === new Date().toDateString();
-                        when = ' Â· ' + (sameDay
+                        when = ' · ' + (sameDay
                             ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
                             : d.toLocaleDateString([], { month: 'short', day: 'numeric' }));
                     }
@@ -4031,7 +4031,7 @@
             return `<span style="font-size:10px; color:var(--text-sm); margin-left:8px; font-style:italic; white-space:nowrap;" title="Checked by ${step.doneByName}${when}">â ${step.doneByName}${when}</span>`;
         }
 
-        // Compact "Added by X Â· MMM D" badge for shared cards.
+        // Compact "Added by X · MMM D" badge for shared cards.
         function attributionBadgeHtml(item) {
             if (!item) return '';
             const who = item.createdByName || 'Shared (Legacy)';
@@ -4040,7 +4040,7 @@
                 try {
                     const d = new Date(item.createdAt);
                     if (!isNaN(d.getTime())) {
-                        when = ' Â· ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                        when = ' · ' + d.toLocaleDateString([], { month: 'short', day: 'numeric' });
                     }
                 } catch (e) { /* ignore */ }
             }
@@ -4325,7 +4325,7 @@
                                 <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">ð Tasks</div>
                                 <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:6px;">
                                     <span style="font-size:24px; font-weight:700;">${openTasks.length}</span>
-                                    <span style="font-size:12px; color:var(--text-sm);">open Â· ${completedTasks.length} done</span>
+                                    <span style="font-size:12px; color:var(--text-sm);">open · ${completedTasks.length} done</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
                                     ${overdueTasks.length ? `<span style="color:var(--danger); font-weight:600;">â° ${overdueTasks.length} overdue</span>` : ''}
@@ -4445,7 +4445,7 @@
                 </div>
                 `;
             }).join('') + (remaining > 0
-                ? `<div style="padding:8px 12px; text-align:center;"><a href="#" onclick="event.preventDefault(); navigateTo('tasks');" style="font-size:12px; color:var(--accent); text-decoration:none; font-weight:600;">+ ${remaining} more Â· view all â</a></div>`
+                ? `<div style="padding:8px 12px; text-align:center;"><a href="#" onclick="event.preventDefault(); navigateTo('tasks');" style="font-size:12px; color:var(--accent); text-decoration:none; font-weight:600;">+ ${remaining} more · view all â</a></div>`
                 : '');
         }
 
@@ -5747,11 +5747,20 @@
                                     <span style="font-size:10px; font-weight:700; text-transform:uppercase; padding:2px 6px; border-radius:3px; background:${priorityColor}; color:white;">${wo.priority}</span>
                                     <span style="font-weight:600; font-size:14px;">${wo.address}${wo.unit ? ' #' + wo.unit : ''}</span>
                                     <span style="font-size:10px; font-weight:600; padding:2px 6px; border-radius:3px; background:${agingColor}; color:white;">${agingLabel}</span>
-                                    <div style="display:inline-flex; gap:6px; margin-left:12px; align-items:center;" onclick="event.stopPropagation()">
-                                        <input type="text" value="${wo.woNumber || ''}" onchange="const w = state.workOrders.find(x => x.id === ${wo.id}); if(w){w.woNumber=this.value; saveState(state);}" placeholder="WO #" style="width:80px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:11px;">
-                                        <input type="text" value="${wo.quoteNumber || ''}" onchange="const w = state.workOrders.find(x => x.id === ${wo.id}); if(w){w.quoteNumber=this.value; saveState(state);}" placeholder="Quote #" style="width:80px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:11px;">
-                                        <input type="text" value="${wo.invoiceNumber || ''}" onchange="const w = state.workOrders.find(x => x.id === ${wo.id}); if(w){w.invoiceNumber=this.value; saveState(state);}" placeholder="Invoice #" style="width:80px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:11px;">
-                                    </div>
+                                    <div style="display:inline-flex; gap:8px; margin-left:12px; align-items:flex-end;" onclick="event.stopPropagation()">
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                      <label style="font-size:9px; color:var(--text-secondary); font-weight:500; margin-bottom:2px; white-space:nowrap;">Work Order #</label>
+                      <input type="text" value="${wo.woNumber || ''}" onchange="const w = state.workOrders.find(x => x.id === ${wo.id}); if(w){w.woNumber=this.value; saveState(state);}" placeholder="WO #" style="width:80px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:11px;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                      <label style="font-size:9px; color:var(--text-secondary); font-weight:500; margin-bottom:2px; white-space:nowrap;">Quote #</label>
+                      <input type="text" value="${wo.quoteNumber || ''}" onchange="const w = state.workOrders.find(x => x.id === ${wo.id}); if(w){w.quoteNumber=this.value; saveState(state);}" placeholder="Quote #" style="width:80px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:11px;">
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                      <label style="font-size:9px; color:var(--text-secondary); font-weight:500; margin-bottom:2px; white-space:nowrap;">Invoice #</label>
+                      <input type="text" value="${wo.invoiceNumber || ''}" onchange="const w = state.workOrders.find(x => x.id === ${wo.id}); if(w){w.invoiceNumber=this.value; saveState(state);}" placeholder="Invoice #" style="width:80px; padding:2px 6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif; font-size:11px;">
+                    </div>
+                  </div>
                                 </div>
                                 <div style="font-size:13px; color:var(--text-sm); margin-bottom:6px;">${wo.issue}</div>
                                 <div style="display:flex; align-items:center; gap:8px;">
@@ -6336,7 +6345,7 @@
                                     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                                         <div style="min-width:0; flex:1;">
                                             <div style="font-weight:600; font-size:13px; color:var(--muted); text-decoration:line-through; margin-bottom:1px;">ð  ${r.property}</div>
-                                            <div style="font-size:11px; color:var(--muted);">ð¤ ${r.tenant}${d ? ` Â· â ${d}` : ''}</div>
+                                            <div style="font-size:11px; color:var(--muted);">ð¤ ${r.tenant}${d ? ` · â ${d}` : ''}</div>
                                         </div>
                                         <div style="display:flex; gap:4px; flex-shrink:0;">
                                             <button onclick="reopenRenewal(${r.id})" style="background:var(--bg); border:1px solid var(--border); color:var(--text-sm); border-radius:6px; padding:3px 8px; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap;">â© Reopen</button>
@@ -6674,7 +6683,7 @@
             }
 
             container.innerHTML = `
-                <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'} Â· ${items.reduce((sum, p) => sum + (p.units||0), 0)} total units â click any row to expand</div>
+                <div style="font-size:11px; color:var(--muted); margin-bottom:6px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'} · ${items.reduce((sum, p) => sum + (p.units||0), 0)} total units â click any row to expand</div>
                 <div style="overflow-x:auto;">
                     <table style="width:100%; border-collapse:collapse; font-size:12px; line-height:1.3;">
                         <thead>
@@ -6888,7 +6897,7 @@
             }
 
             container.innerHTML = `
-                <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'} Â· click any row to expand notes</div>
+                <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">${items.length} propert${items.length === 1 ? 'y' : 'ies'} · click any row to expand notes</div>
                 <div style="overflow-x:auto;">
                     <table style="width:100%; border-collapse:collapse; font-size:12px; line-height:1.4;">
                         <thead>
