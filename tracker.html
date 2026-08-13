@@ -341,13 +341,13 @@
 <!-- Task modal -->
 <div class="modal-bg" id="taskModal">
     <div class="modal">
-        <h3>New Task</h3>
+        <h3 id="taskModalTitle">New Task</h3>
         <div class="form-group"><label>Task Title *</label><input type="text" id="tTitle" placeholder="e.g. Follow up on lease renewals"></div>
         <div class="form-row">
             <div class="form-group"><label>Assignee</label>
                 <select id="tAssignee">
                     <option value="">— Unassigned —</option>
-                    <option>Chris</option><option>Mark</option><option>Cole</option><option>Vance</option>
+                    <option>Chris</option><option>Mark</option><option>Cole</option><option>Diana</option><option>Elan</option>
                 </select>
             </div>
             <div class="form-group"><label>Due Date</label><input type="date" id="tDue"></div>
@@ -693,7 +693,7 @@ function projectCardHtml(p) {
                 <div class="add-subtask-row">
                     <input type="text" id="subtask-input-${p.id}" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addSubtask('${p.id}')">
                     <select id="subtask-assignee-${p.id}">
-                        <option value="">Who</option><option>Chris</option><option>Mark</option><option>Cole</option><option>Vance</option>
+                        <option value="">Who</option><option>Chris</option><option>Mark</option><option>Cole</option><option>Diana</option><option>Elan</option>
                     </select>
                     <button onclick="addSubtask('${p.id}')">+ Add</button>
                 </div>
@@ -804,7 +804,8 @@ function taskCardHtml(t, status) {
         </div>
         <div class="task-card-actions">
             ${moves}
-            <button class="task-icon-btn" style="margin-left:auto;" onclick="${t.archived ? `unarchiveTask('${t.id}')` : `archiveTask('${t.id}')`}" title="${t.archived?'Restore':'Archive'}">${t.archived?'↩️':'🗄️'}</button>
+            <button class="task-icon-btn" style="margin-left:auto;" onclick="openTaskModal('${t.id}')" title="Edit">✏️</button>
+            <button class="task-icon-btn" onclick="${t.archived ? `unarchiveTask('${t.id}')` : `archiveTask('${t.id}')`}" title="${t.archived?'Restore':'Archive'}">${t.archived?'↩️':'🗄️'}</button>
         </div>
     </div>`;
 }
@@ -822,26 +823,48 @@ function moveTask(id, newStatus, fromToday) {
     if (document.getElementById('pane-eod').classList.contains('active')) renderEod();
 }
 
-function openTaskModal() {
-    document.getElementById('tTitle').value    = '';
-    document.getElementById('tAssignee').value = '';
-    document.getElementById('tDue').value      = '';
-    document.getElementById('tStatus').value   = 'todo';
+let editTaskId = null;
+
+function openTaskModal(id) {
+    editTaskId = id || null;
+    const t = id ? (state.teamTasks||[]).find(x => x.id === id) : null;
+    document.getElementById('taskModalTitle').textContent = t ? 'Edit Task' : 'New Task';
+    document.getElementById('tTitle').value    = t?.title    || '';
+    document.getElementById('tAssignee').value = t?.assignee || '';
+    document.getElementById('tDue').value      = t?.dueDate  || '';
+    document.getElementById('tStatus').value   = t?.status   || 'todo';
     const sel = document.getElementById('tProject');
     sel.innerHTML = '<option value="">— None —</option>' + (state.projects||[]).filter(p=>!p.archived).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+    sel.value = t?.projectId || '';
     document.getElementById('taskModal').classList.add('open');
     setTimeout(() => document.getElementById('tTitle').focus(), 50);
 }
-function closeTaskModal() { document.getElementById('taskModal').classList.remove('open'); }
+function closeTaskModal() { document.getElementById('taskModal').classList.remove('open'); editTaskId = null; }
 
 function saveTask() {
     const title = document.getElementById('tTitle').value.trim();
     if (!title) return alert('Task title is required.');
-    if (!state.teamTasks) state.teamTasks=[];
-    const t = { id:uid(), title, assignee:document.getElementById('tAssignee').value, dueDate:document.getElementById('tDue').value, status:document.getElementById('tStatus').value, projectId:document.getElementById('tProject').value, archived:false, createdAt:new Date().toISOString() };
-    state.teamTasks.push(t);
-    if (t.status === 'done') addToEod(t);
-    saveState(); closeTaskModal(); renderTasks();
+    if (!state.teamTasks) state.teamTasks = [];
+
+    if (editTaskId) {
+        const t = state.teamTasks.find(x => x.id === editTaskId);
+        if (t) {
+            const wasNotDone = t.status !== 'done';
+            t.title     = title;
+            t.assignee  = document.getElementById('tAssignee').value;
+            t.dueDate   = document.getElementById('tDue').value;
+            t.projectId = document.getElementById('tProject').value;
+            const newStatus = document.getElementById('tStatus').value;
+            t.status = newStatus;
+            if (newStatus === 'done' && wasNotDone) addToEod(t);
+            if (newStatus !== 'done') removeFromEod(t.id);
+        }
+    } else {
+        const t = { id:uid(), title, assignee:document.getElementById('tAssignee').value, dueDate:document.getElementById('tDue').value, status:document.getElementById('tStatus').value, projectId:document.getElementById('tProject').value, archived:false, createdAt:new Date().toISOString() };
+        state.teamTasks.push(t);
+        if (t.status === 'done') addToEod(t);
+    }
+    saveState(); closeTaskModal(); renderTasks(); renderToday();
 }
 
 function archiveTask(id) {
