@@ -123,7 +123,7 @@
         .task-card { background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border); }
         .task-card-title { font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px; }
         .task-card-meta { display:flex;align-items:center;gap:6px;flex-wrap:wrap; }
-        .assignee-pill { background:var(--surface);padding:1px 7px;border-radius:10px;border:1px solid var(--border);font-size:11px; }
+        .assignee-pill { background:var(--surface);padding:1px 7px;border-radius:10px;border:1px solid var(--border);font-size:11px; } /* fallback only */
         .task-due      { color:var(--warning)!important;font-weight:600; }
         .task-overdue  { color:var(--danger)!important;font-weight:600; }
         .task-card-actions { display:flex;gap:4px;margin-top:6px;align-items:center; }
@@ -131,6 +131,28 @@
         .task-move-btn:hover { background:var(--accent);color:#fff; }
         .task-icon-btn { font-size:13px;color:var(--muted);background:none;border:none;cursor:pointer; }
         .task-icon-btn:hover { color:var(--danger); }
+
+        /* Assignee color pills */
+        .ap { display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap; }
+        .ap-chris  { background:#DBEAFE;color:#1D4ED8; }
+        .ap-mark   { background:#EDE9FE;color:#6D28D9; }
+        .ap-cole   { background:#FEF3C7;color:#B45309; }
+        .ap-diana  { background:#FCE7F3;color:#BE185D; }
+        .ap-elan   { background:#D1FAE5;color:#065F46; }
+        .ap-macoy  { background:#FFEDD5;color:#C2410C; }
+        .ap-default{ background:#F3F4F6;color:#374151; }
+
+        /* Top 3 priorities */
+        .priority-cards { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px; }
+        .priority-card  { background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden; }
+        .priority-card-header { padding:12px 16px;border-bottom:1px solid var(--border);border-top:3px solid var(--accent);display:flex;align-items:center;gap:8px; }
+        .priority-card-name   { font-size:14px;font-weight:700;color:var(--navy); }
+        .priority-card-body   { padding:12px 16px; }
+        .priority-row { display:flex;align-items:center;gap:10px;margin-bottom:8px; }
+        .priority-num { width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+        .priority-input { flex:1;border:none;border-bottom:1px solid var(--border);padding:4px 2px;font-family:'DM Sans',sans-serif;font-size:13px;background:transparent;color:var(--text);outline:none; }
+        .priority-input:focus { border-bottom-color:var(--accent); }
+        .priority-input::placeholder { color:var(--muted); }
 
         /* Priority badges */
         .priority-high   { background:#FEE2E2;color:#B91C1C;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700; }
@@ -311,13 +333,8 @@
                     <button class="today-nav-btn" onclick="shiftTodayDate(1)">Next Day →</button>
                 </div>
             </div>
+            <div class="priority-cards" id="today-priorities"></div>
             <div class="today-people" id="today-people"></div>
-            <div class="today-cal-section">
-                <div class="today-cal-label">EPGMGMT Calendar</div>
-                <div class="today-cal-wrap">
-                    <iframe id="today-cal-iframe" height="500"></iframe>
-                </div>
-            </div>
         </div>
 
     </div><!-- /content -->
@@ -386,13 +403,13 @@ const sb     = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const sbData = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ persistSession:false, autoRefreshToken:false } });
 
 // ── State ─────────────────────────────────────────────
-let state = { projects:[], teamTasks:[], eodReport:{} };
+let state = { projects:[], teamTasks:[], eodReport:{}, dailyPriorities:{} };
 let saveTimer   = null;
 let stateReady  = false;
 
 async function loadState() {
     const { data } = await sbData.from('hub_state').select('state_data').eq('id','epg_tracker').single();
-    if (data?.state_data) state = { projects:[], teamTasks:[], eodReport:{}, ...data.state_data };
+    if (data?.state_data) state = { projects:[], teamTasks:[], eodReport:{}, dailyPriorities:{}, ...data.state_data };
     stateReady = true;
 }
 
@@ -453,6 +470,12 @@ function switchTab(tab) {
 
 // ── Helpers ───────────────────────────────────────────
 function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function assigneePill(name) {
+    const key = (name||'').toLowerCase().replace(/\s+/g,'');
+    const cls = ['chris','mark','cole','diana','elan','macoy'].includes(key) ? `ap-${key}` : 'ap-default';
+    return `<span class="ap ${cls}">👤 ${name}</span>`;
+}
 function toDateKey(d) { return d.toISOString().slice(0,10); }
 function fmtDate(s) {
     if (!s) return '';
@@ -588,8 +611,17 @@ function todayDate() {
 function shiftTodayDate(n) { todayOffset += n; renderToday(); }
 function goToToday() { todayOffset = 0; renderToday(); }
 
-const PEOPLE = ['Chris', 'Mark'];
-const PERSON_COLORS = { Chris:'#3B82F6', Mark:'#8B5CF6' };
+const PEOPLE = ['Chris', 'Macoy'];
+const PERSON_COLORS = { Chris:'#1D4ED8', Macoy:'#C2410C' };
+
+function savePriority(person, idx, val) {
+    if (!state.dailyPriorities) state.dailyPriorities = {};
+    const key = toDateKey(todayDate());
+    if (!state.dailyPriorities[key]) state.dailyPriorities[key] = {};
+    if (!state.dailyPriorities[key][person]) state.dailyPriorities[key][person] = ['','',''];
+    state.dailyPriorities[key][person][idx] = val;
+    saveState();
+}
 
 function renderToday() {
     const d = todayDate();
@@ -598,14 +630,33 @@ function renderToday() {
     document.getElementById('today-day-display').textContent =
         d.toLocaleDateString('en-US', { weekday:'long' });
 
-    // Cal iframe — day view for the selected date
-    const ds = d.toISOString().slice(0,10).replace(/-/g,'');
-    const calUrl = `https://calendar.google.com/calendar/embed?src=yourfriends%40epgmgmt.com&ctz=America%2FNew_York&mode=AGENDA&dates=${ds}%2F${ds}&showNav=0&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23ffffff`;
-    document.getElementById('today-cal-iframe').src = calUrl;
-
-    // Person columns: show tasks assigned to each person, not archived
-    const allTasks = (state.teamTasks || []).filter(t => !t.archived);
     const todayKey = toDateKey(d);
+
+    // ── Top 3 priority cards ──
+    const priData = state.dailyPriorities?.[todayKey] || {};
+    const priHtml = PEOPLE.map(person => {
+        const vals = priData[person] || ['','',''];
+        const color = PERSON_COLORS[person] || 'var(--accent)';
+        const rows = [0,1,2].map(i => `
+            <div class="priority-row">
+                <div class="priority-num" style="background:${color};">${i+1}</div>
+                <input class="priority-input" type="text" placeholder="Priority ${i+1}…"
+                    value="${(vals[i]||'').replace(/"/g,'&quot;')}"
+                    onchange="savePriority('${person}',${i},this.value)"
+                    onblur="savePriority('${person}',${i},this.value)">
+            </div>`).join('');
+        return `<div class="priority-card">
+            <div class="priority-card-header" style="border-top-color:${color};">
+                <span class="ap ap-${person.toLowerCase()}" style="font-size:13px;">👤 ${person}</span>
+                <span class="priority-card-name" style="color:${color};">Top 3 Today</span>
+            </div>
+            <div class="priority-card-body">${rows}</div>
+        </div>`;
+    }).join('');
+    document.getElementById('today-priorities').innerHTML = priHtml;
+
+    // ── Task columns ──
+    const allTasks = (state.teamTasks || []).filter(t => !t.archived);
     const eodToday = (state.eodReport?.[todayKey] || []).map(e => e.taskId);
 
     const peopleHtml = PEOPLE.map(person => {
@@ -616,10 +667,11 @@ function renderToday() {
         let items = '';
         open.forEach(t => {
             const proj = (state.projects||[]).find(p => p.id === t.projectId);
+            const priLabel = t.priority === 'high' ? '<span class="priority-high" style="font-size:10px;">HIGH</span> ' : t.priority === 'medium' ? '<span class="priority-medium" style="font-size:10px;">MED</span> ' : '';
             items += `<div class="person-task-item">
                 <input type="checkbox" class="person-task-check" onchange="moveTask('${t.id}','done',true)" title="Mark done">
-                <div>
-                    <div class="person-task-title">${t.title}</div>
+                <div style="flex:1;">
+                    <div class="person-task-title">${priLabel}${t.title}</div>
                     ${proj ? `<div class="person-task-proj">📁 ${proj.name}</div>` : ''}
                     ${t.dueDate ? `<div style="font-size:11px;">${duePill(t.dueDate)}</div>` : ''}
                 </div>
@@ -631,10 +683,7 @@ function renderToday() {
                 <div><div class="person-task-title done-text">${t.title}</div></div>
             </div>`;
         });
-
-        if (!open.length && !doneToday.length) {
-            items = '<div class="person-empty">No tasks assigned</div>';
-        }
+        if (!open.length && !doneToday.length) items = '<div class="person-empty">No tasks assigned</div>';
 
         return `<div class="person-col">
             <div class="person-col-header" style="border-top-color:${PERSON_COLORS[person]||'var(--accent)'};">
@@ -815,7 +864,7 @@ function taskCardHtml(t, status) {
             ${t.priority === 'high'   ? '<span class="priority-high">HIGH</span>'   : ''}
             ${t.priority === 'medium' ? '<span class="priority-medium">MED</span>'  : ''}
             ${t.priority === 'low'    ? '<span class="priority-low">LOW</span>'     : ''}
-            ${t.assignee ? `<span class="assignee-pill">👤 ${t.assignee}</span>` : ''}
+            ${t.assignee ? assigneePill(t.assignee) : ''}
             ${duePill(t.dueDate)}
             ${proj ? `<span style="font-size:11px;color:var(--accent);">📁 ${proj.name}</span>` : ''}
         </div>
