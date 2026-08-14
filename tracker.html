@@ -132,6 +132,11 @@
         .task-icon-btn { font-size:13px;color:var(--muted);background:none;border:none;cursor:pointer; }
         .task-icon-btn:hover { color:var(--danger); }
 
+        /* Priority badges */
+        .priority-high   { background:#FEE2E2;color:#B91C1C;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700; }
+        .priority-medium { background:#FEF3C7;color:#B45309;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700; }
+        .priority-low    { background:#F0FDF4;color:#15803D;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:700; }
+
         /* Show archived toggle */
         .archive-toggle { font-size:12px;color:var(--text-sm);cursor:pointer;display:flex;align-items:center;gap:5px; }
         .archive-toggle:hover { color:var(--text); }
@@ -356,11 +361,19 @@
             <div class="form-group"><label>Status</label>
                 <select id="tStatus"><option value="todo">To Do</option><option value="inprogress">In Progress</option><option value="done">Done</option></select>
             </div>
-            <div class="form-group"><label>Linked Project</label><select id="tProject"><option value="">— None —</option></select></div>
+            <div class="form-group"><label>Priority</label>
+                <select id="tPriority">
+                    <option value="">— None —</option>
+                    <option value="high">🔴 High</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="low">🟢 Low</option>
+                </select>
+            </div>
         </div>
+        <div class="form-group"><label>Linked Project</label><select id="tProject"><option value="">— None —</option></select></div>
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeTaskModal()">Cancel</button>
-            <button class="btn btn-primary" onclick="saveTask()">Add Task</button>
+            <button class="btn btn-primary" id="taskSaveBtn" onclick="saveTask()">Add Task</button>
         </div>
     </div>
 </div>
@@ -757,16 +770,17 @@ function addSubtask(projectId) {
     if (!p) return;
     if (!p.tasks) p.tasks=[];
     p.tasks.push({ id:uid(), title, done:false, assignee:assignee?.value||'', createdAt:new Date().toISOString() });
+    localStorage.setItem('epg_proj_open_'+projectId, 'true');
     saveState(); renderProjects();
 }
 function toggleSubtask(projectId, taskId, done) {
     const p = (state.projects||[]).find(x => x.id===projectId);
     const t = p?.tasks?.find(x => x.id===taskId);
-    if (t) { t.done=done; saveState(); renderProjects(); }
+    if (t) { t.done=done; localStorage.setItem('epg_proj_open_'+projectId,'true'); saveState(); renderProjects(); }
 }
 function deleteSubtask(projectId, taskId) {
     const p = (state.projects||[]).find(x => x.id===projectId);
-    if (p) { p.tasks=p.tasks.filter(t => t.id!==taskId); saveState(); renderProjects(); }
+    if (p) { p.tasks=p.tasks.filter(t => t.id!==taskId); localStorage.setItem('epg_proj_open_'+projectId,'true'); saveState(); renderProjects(); }
 }
 
 // ── Tasks ─────────────────────────────────────────────
@@ -798,6 +812,9 @@ function taskCardHtml(t, status) {
     return `<div class="task-card">
         <div class="task-card-title">${t.title}</div>
         <div class="task-card-meta">
+            ${t.priority === 'high'   ? '<span class="priority-high">HIGH</span>'   : ''}
+            ${t.priority === 'medium' ? '<span class="priority-medium">MED</span>'  : ''}
+            ${t.priority === 'low'    ? '<span class="priority-low">LOW</span>'     : ''}
             ${t.assignee ? `<span class="assignee-pill">👤 ${t.assignee}</span>` : ''}
             ${duePill(t.dueDate)}
             ${proj ? `<span style="font-size:11px;color:var(--accent);">📁 ${proj.name}</span>` : ''}
@@ -829,10 +846,12 @@ function openTaskModal(id) {
     editTaskId = id || null;
     const t = id ? (state.teamTasks||[]).find(x => x.id === id) : null;
     document.getElementById('taskModalTitle').textContent = t ? 'Edit Task' : 'New Task';
+    document.getElementById('taskSaveBtn').textContent = t ? 'Save Changes' : 'Add Task';
     document.getElementById('tTitle').value    = t?.title    || '';
     document.getElementById('tAssignee').value = t?.assignee || '';
     document.getElementById('tDue').value      = t?.dueDate  || '';
     document.getElementById('tStatus').value   = t?.status   || 'todo';
+    document.getElementById('tPriority').value = t?.priority || '';
     const sel = document.getElementById('tProject');
     sel.innerHTML = '<option value="">— None —</option>' + (state.projects||[]).filter(p=>!p.archived).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
     sel.value = t?.projectId || '';
@@ -853,6 +872,7 @@ function saveTask() {
             t.title     = title;
             t.assignee  = document.getElementById('tAssignee').value;
             t.dueDate   = document.getElementById('tDue').value;
+            t.priority  = document.getElementById('tPriority').value;
             t.projectId = document.getElementById('tProject').value;
             const newStatus = document.getElementById('tStatus').value;
             t.status = newStatus;
@@ -860,7 +880,7 @@ function saveTask() {
             if (newStatus !== 'done') removeFromEod(t.id);
         }
     } else {
-        const t = { id:uid(), title, assignee:document.getElementById('tAssignee').value, dueDate:document.getElementById('tDue').value, status:document.getElementById('tStatus').value, projectId:document.getElementById('tProject').value, archived:false, createdAt:new Date().toISOString() };
+        const t = { id:uid(), title, assignee:document.getElementById('tAssignee').value, dueDate:document.getElementById('tDue').value, priority:document.getElementById('tPriority').value, status:document.getElementById('tStatus').value, projectId:document.getElementById('tProject').value, archived:false, createdAt:new Date().toISOString() };
         state.teamTasks.push(t);
         if (t.status === 'done') addToEod(t);
     }
