@@ -541,7 +541,7 @@ function renderHome() {
     // Calendar — today only
     const ds = toDateKey(new Date()).replace(/-/g,'');
     document.getElementById('home-cal-iframe').src =
-        `https://calendar.google.com/calendar/embed?src=c_q2pjqh2jr9mjmlgeqob1k1814c%40group.calendar.google.com&ctz=America%2FNew_York&mode=DAY&dates=${ds}&showNav=0&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23ffffff`;
+        `https://calendar.google.com/calendar/embed?src=c_q2pjqh2jr9mjmlgeqob1k1814c%40group.calendar.google.com&ctz=America%2FNew_York&mode=AGENDA&dates=${ds}%2F${ds}&showNav=0&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23ffffff`;
 }
 
 // ── EOD helpers ───────────────────────────────────────
