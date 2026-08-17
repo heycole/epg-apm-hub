@@ -110,6 +110,21 @@
         .add-subtask-row select { padding:5px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;max-width:90px; }
         .add-subtask-row button { padding:5px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap; }
 
+        /* Task filter bar */
+        .task-filter-bar { display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:10px 14px;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow); }
+        .task-filter-group { display:flex;align-items:center;gap:6px; }
+        .task-filter-label { font-size:11px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap; }
+        .task-filter-select { padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--bg);color:var(--text);cursor:pointer; }
+        .task-filter-select:focus { outline:none;border-color:var(--accent); }
+        .task-filter-clear { margin-left:auto;font-size:11px;color:var(--text-sm);background:none;border:none;cursor:pointer;padding:3px 6px;border-radius:4px;font-family:'DM Sans',sans-serif; }
+        .task-filter-clear:hover { color:var(--accent); }
+        .task-filter-active { border-color:var(--accent) !important;background:#FEF3C7 !important; }
+
+        /* Inline notes */
+        .proj-notes-area { width:100%;min-height:56px;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--bg);color:var(--text);resize:vertical;margin-top:6px; }
+        .proj-notes-area:focus { outline:none;border-color:var(--accent); }
+        .task-notes-snippet { font-size:11px;color:var(--text-sm);margin-top:4px;font-style:italic;white-space:pre-wrap;word-break:break-word;border-left:2px solid var(--border);padding-left:6px; }
+
         /* Tasks kanban */
         .tasks-columns { display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start; }
         .task-col { background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden; }
@@ -261,8 +276,8 @@
 
     <div class="tab-bar">
         <div class="tab active" data-tab="home"     onclick="switchTab('home')">🏠 Home</div>
-        <div class="tab" data-tab="projects" onclick="switchTab('projects')">📁 Projects</div>
         <div class="tab" data-tab="tasks"    onclick="switchTab('tasks')">✓ Tasks</div>
+        <div class="tab" data-tab="projects" onclick="switchTab('projects')">📁 Projects</div>
         <div class="tab" data-tab="today"    onclick="switchTab('today')">📅 Today / EOD</div>
     </div>
 
@@ -279,21 +294,6 @@
             </div>
         </div>
 
-        <!-- PROJECTS -->
-        <div class="tab-pane" id="pane-projects">
-            <div id="projects-loading"><div class="loading-ring"></div></div>
-            <div id="projects-view" style="display:none;">
-                <div class="section-header">
-                    <span class="section-title">Projects</span>
-                    <div class="section-actions">
-                        <label class="archive-toggle"><input type="checkbox" id="showArchivedProjects" onchange="renderProjects()"> Show archived</label>
-                        <button class="btn btn-primary" onclick="openProjectModal()">+ New Project</button>
-                    </div>
-                </div>
-                <div class="projects-grid" id="projects-grid"></div>
-            </div>
-        </div>
-
         <!-- TASKS -->
         <div class="tab-pane" id="pane-tasks">
             <div class="section-header">
@@ -302,6 +302,25 @@
                     <label class="archive-toggle"><input type="checkbox" id="showArchivedTasks" onchange="renderTasks()"> Show archived</label>
                     <button class="btn btn-primary" onclick="openTaskModal()">+ New Task</button>
                 </div>
+            </div>
+            <div class="task-filter-bar">
+                <div class="task-filter-group">
+                    <span class="task-filter-label">Person</span>
+                    <select id="taskFilterPerson" class="task-filter-select" onchange="renderTasks()">
+                        <option value="">All</option>
+                        <option>Chris</option><option>Macoy</option><option>Cole</option><option>Diana</option><option>Elan</option>
+                    </select>
+                </div>
+                <div class="task-filter-group">
+                    <span class="task-filter-label">Priority</span>
+                    <select id="taskFilterPriority" class="task-filter-select" onchange="renderTasks()">
+                        <option value="">All</option>
+                        <option value="high">🔴 High</option>
+                        <option value="medium">🟡 Medium</option>
+                        <option value="low">🟢 Low</option>
+                    </select>
+                </div>
+                <button class="task-filter-clear" onclick="clearTaskFilters()">Clear filters</button>
             </div>
             <div class="tasks-columns">
                 <div class="task-col col-todo">
@@ -316,6 +335,21 @@
                     <div class="task-col-header"><span class="task-col-title">Done</span><span class="task-col-count" id="count-done">0</span></div>
                     <div class="task-col-body" id="col-done"></div>
                 </div>
+            </div>
+        </div>
+
+        <!-- PROJECTS -->
+        <div class="tab-pane" id="pane-projects">
+            <div id="projects-loading"><div class="loading-ring"></div></div>
+            <div id="projects-view" style="display:none;">
+                <div class="section-header">
+                    <span class="section-title">Projects</span>
+                    <div class="section-actions">
+                        <label class="archive-toggle"><input type="checkbox" id="showArchivedProjects" onchange="renderProjects()"> Show archived</label>
+                        <button class="btn btn-primary" onclick="openProjectModal()">+ New Project</button>
+                    </div>
+                </div>
+                <div class="projects-grid" id="projects-grid"></div>
             </div>
         </div>
 
@@ -365,6 +399,7 @@
             <div class="form-group"><label>Due Date</label><input type="date" id="pDue"></div>
         </div>
         <div class="form-group"><label>Description</label><textarea id="pDesc" rows="3" placeholder="What is this project about?"></textarea></div>
+        <div class="form-group"><label>Notes</label><textarea id="pNotes" rows="3" placeholder="Add any notes, context, or links…"></textarea></div>
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeProjectModal()">Cancel</button>
             <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
@@ -400,6 +435,7 @@
             </div>
         </div>
         <div class="form-group"><label>Linked Project</label><select id="tProject"><option value="">— None —</option></select></div>
+        <div class="form-group"><label>Notes</label><textarea id="tNotes" rows="3" placeholder="Add any notes, context, or links…"></textarea></div>
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeTaskModal()">Cancel</button>
             <button class="btn btn-primary" id="taskSaveBtn" onclick="saveTask()">Add Task</button>
@@ -820,6 +856,11 @@ function projectCardHtml(p) {
                     </select>
                     <button onclick="addSubtask('${p.id}')">+ Add</button>
                 </div>
+                <div style="margin-top:10px;">
+                    <div style="font-size:11px;font-weight:700;color:var(--text-sm);margin-bottom:4px;">📝 Notes</div>
+                    <textarea class="proj-notes-area" placeholder="Add notes, links, or context…"
+                        onblur="saveProjectNote('${p.id}',this.value)">${(p.notes||'').replace(/</g,'&lt;')}</textarea>
+                </div>
             </div>
         </div>
     </div>`;
@@ -845,6 +886,7 @@ function openProjectModal(id) {
     document.getElementById('pOwner').value    = p?.owner    || '';
     document.getElementById('pDue').value      = p?.dueDate  || '';
     document.getElementById('pDesc').value     = p?.description || '';
+    document.getElementById('pNotes').value    = p?.notes       || '';
     document.getElementById('projectModal').classList.add('open');
     setTimeout(() => document.getElementById('pName').focus(), 50);
 }
@@ -855,12 +897,17 @@ function saveProject() {
     if (!name) return alert('Project name is required.');
     if (editProjectId) {
         const p = (state.projects||[]).find(x => x.id===editProjectId);
-        if (p) { p.name=name; p.status=document.getElementById('pStatus').value; p.priority=document.getElementById('pPriority').value; p.owner=document.getElementById('pOwner').value; p.dueDate=document.getElementById('pDue').value; p.description=document.getElementById('pDesc').value.trim(); }
+        if (p) { p.name=name; p.status=document.getElementById('pStatus').value; p.priority=document.getElementById('pPriority').value; p.owner=document.getElementById('pOwner').value; p.dueDate=document.getElementById('pDue').value; p.description=document.getElementById('pDesc').value.trim(); p.notes=document.getElementById('pNotes').value.trim(); }
     } else {
         if (!state.projects) state.projects=[];
-        state.projects.push({ id:uid(), name, status:document.getElementById('pStatus').value, priority:document.getElementById('pPriority').value, owner:document.getElementById('pOwner').value, dueDate:document.getElementById('pDue').value, description:document.getElementById('pDesc').value.trim(), tasks:[], archived:false, createdAt:new Date().toISOString() });
+        state.projects.push({ id:uid(), name, status:document.getElementById('pStatus').value, priority:document.getElementById('pPriority').value, owner:document.getElementById('pOwner').value, dueDate:document.getElementById('pDue').value, description:document.getElementById('pDesc').value.trim(), notes:document.getElementById('pNotes').value.trim(), tasks:[], archived:false, createdAt:new Date().toISOString() });
     }
     saveState(); closeProjectModal(); renderProjects();
+}
+
+function saveProjectNote(projectId, val) {
+    const p = (state.projects||[]).find(x => x.id===projectId);
+    if (p) { p.notes = val.trim(); saveState(); }
 }
 
 function archiveProject(id) {
@@ -895,9 +942,27 @@ function deleteSubtask(projectId, taskId) {
 }
 
 // ── Tasks ─────────────────────────────────────────────
+function clearTaskFilters() {
+    const fp = document.getElementById('taskFilterPerson');
+    const fpr = document.getElementById('taskFilterPriority');
+    if (fp)  fp.value  = '';
+    if (fpr) fpr.value = '';
+    renderTasks();
+}
+
 function renderTasks() {
-    const showArchived = document.getElementById('showArchivedTasks')?.checked;
-    const tasks = (state.teamTasks||[]).filter(t => showArchived ? t.archived : !t.archived);
+    const showArchived    = document.getElementById('showArchivedTasks')?.checked;
+    const filterPerson    = document.getElementById('taskFilterPerson')?.value   || '';
+    const filterPriority  = document.getElementById('taskFilterPriority')?.value || '';
+
+    // Highlight active filters
+    document.getElementById('taskFilterPerson')?.classList.toggle('task-filter-active', !!filterPerson);
+    document.getElementById('taskFilterPriority')?.classList.toggle('task-filter-active', !!filterPriority);
+
+    let tasks = (state.teamTasks||[]).filter(t => showArchived ? t.archived : !t.archived);
+    if (filterPerson)   tasks = tasks.filter(t => t.assignee === filterPerson);
+    if (filterPriority) tasks = tasks.filter(t => t.priority === filterPriority);
+
     const cols = { todo:[], inprogress:[], done:[] };
     tasks.forEach(t => { if (cols[t.status]) cols[t.status].push(t); });
 
@@ -920,6 +985,7 @@ function taskCardHtml(t, status) {
     const mvBtns = { todo:[['inprogress','→ In Progress']], inprogress:[['todo','← To Do'],['done','✓ Done']], done:[['inprogress','← In Progress']] };
     const proj = (state.projects||[]).find(p => p.id===t.projectId);
     const moves = (mvBtns[status]||[]).map(([s,lbl]) => `<button class="task-move-btn" onclick="moveTask('${t.id}','${s}')">${lbl}</button>`).join('');
+    const notesSnippet = t.notes ? `<div class="task-notes-snippet">${t.notes.length > 80 ? t.notes.slice(0,80)+'…' : t.notes}</div>` : '';
     return `<div class="task-card">
         <div class="task-card-title">${t.title}</div>
         <div class="task-card-meta">
@@ -930,6 +996,7 @@ function taskCardHtml(t, status) {
             ${duePill(t.dueDate)}
             ${proj ? `<span style="font-size:11px;color:var(--accent);">📁 ${proj.name}</span>` : ''}
         </div>
+        ${notesSnippet}
         <div class="task-card-actions">
             ${moves}
             <button class="task-icon-btn" style="margin-left:auto;" onclick="openTaskModal('${t.id}')" title="Edit">✏️</button>
@@ -948,7 +1015,6 @@ function moveTask(id, newStatus, fromToday) {
     saveState();
     renderTasks();
     renderToday();
-    if (document.getElementById('pane-eod').classList.contains('active')) renderEod();
 }
 
 let editTaskId = null;
@@ -963,6 +1029,7 @@ function openTaskModal(id) {
     document.getElementById('tDue').value      = t?.dueDate  || '';
     document.getElementById('tStatus').value   = t?.status   || 'todo';
     document.getElementById('tPriority').value = t?.priority || '';
+    document.getElementById('tNotes').value    = t?.notes    || '';
     const sel = document.getElementById('tProject');
     sel.innerHTML = '<option value="">— None —</option>' + (state.projects||[]).filter(p=>!p.archived).map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
     sel.value = t?.projectId || '';
@@ -985,13 +1052,14 @@ function saveTask() {
             t.dueDate   = document.getElementById('tDue').value;
             t.priority  = document.getElementById('tPriority').value;
             t.projectId = document.getElementById('tProject').value;
+            t.notes     = document.getElementById('tNotes').value.trim();
             const newStatus = document.getElementById('tStatus').value;
             t.status = newStatus;
             if (newStatus === 'done' && wasNotDone) addToEod(t);
             if (newStatus !== 'done') removeFromEod(t.id);
         }
     } else {
-        const t = { id:uid(), title, assignee:document.getElementById('tAssignee').value, dueDate:document.getElementById('tDue').value, priority:document.getElementById('tPriority').value, status:document.getElementById('tStatus').value, projectId:document.getElementById('tProject').value, archived:false, createdAt:new Date().toISOString() };
+        const t = { id:uid(), title, assignee:document.getElementById('tAssignee').value, dueDate:document.getElementById('tDue').value, priority:document.getElementById('tPriority').value, status:document.getElementById('tStatus').value, projectId:document.getElementById('tProject').value, notes:document.getElementById('tNotes').value.trim(), archived:false, createdAt:new Date().toISOString() };
         state.teamTasks.push(t);
         if (t.status === 'done') addToEod(t);
     }
