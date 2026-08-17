@@ -260,7 +260,8 @@
     </header>
 
     <div class="tab-bar">
-        <div class="tab active" data-tab="projects" onclick="switchTab('projects')">📁 Projects</div>
+        <div class="tab active" data-tab="home"     onclick="switchTab('home')">🏠 Home</div>
+        <div class="tab" data-tab="projects" onclick="switchTab('projects')">📁 Projects</div>
         <div class="tab" data-tab="tasks"    onclick="switchTab('tasks')">✓ Tasks</div>
         <div class="tab" data-tab="eod"      onclick="switchTab('eod')">📋 EOD Report</div>
         <div class="tab" data-tab="today"    onclick="switchTab('today')">📅 Today</div>
@@ -268,8 +269,19 @@
 
     <div id="content">
 
+        <!-- HOME -->
+        <div class="tab-pane active" id="pane-home">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;" id="home-priorities"></div>
+            <div>
+                <div class="today-cal-label" style="margin-bottom:10px;">📅 EPGMGMT — Today</div>
+                <div style="background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;">
+                    <iframe id="home-cal-iframe" width="100%" height="520" style="border:none;display:block;"></iframe>
+                </div>
+            </div>
+        </div>
+
         <!-- PROJECTS -->
-        <div class="tab-pane active" id="pane-projects">
+        <div class="tab-pane" id="pane-projects">
             <div id="projects-loading"><div class="loading-ring"></div></div>
             <div id="projects-view" style="display:none;">
                 <div class="section-header">
@@ -333,7 +345,6 @@
                     <button class="today-nav-btn" onclick="shiftTodayDate(1)">Next Day →</button>
                 </div>
             </div>
-            <div class="priority-cards" id="today-priorities"></div>
             <div class="today-people" id="today-people"></div>
         </div>
 
@@ -349,9 +360,24 @@
             <div class="form-group"><label>Status</label>
                 <select id="pStatus"><option value="planning">Planning</option><option value="active" selected>Active</option><option value="hold">On Hold</option><option value="complete">Complete</option></select>
             </div>
-            <div class="form-group"><label>Owner</label><input type="text" id="pOwner" placeholder="e.g. Cole"></div>
+            <div class="form-group"><label>Priority</label>
+                <select id="pPriority">
+                    <option value="">— None —</option>
+                    <option value="high">🔴 High</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="low">🟢 Low</option>
+                </select>
+            </div>
         </div>
-        <div class="form-group"><label>Due Date</label><input type="date" id="pDue"></div>
+        <div class="form-row">
+            <div class="form-group"><label>Owner</label>
+                <select id="pOwner">
+                    <option value="">— Unassigned —</option>
+                    <option>Chris</option><option>Macoy</option><option>Cole</option><option>Diana</option><option>Elan</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Due Date</label><input type="date" id="pDue"></div>
+        </div>
         <div class="form-group"><label>Description</label><textarea id="pDesc" rows="3" placeholder="What is this project about?"></textarea></div>
         <div class="modal-actions">
             <button class="btn btn-ghost" onclick="closeProjectModal()">Cancel</button>
@@ -453,6 +479,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
         document.getElementById('loginOverlay').classList.add('hidden');
         document.getElementById('userLabel').textContent = session.user.email || '';
         await loadState();
+        renderHome();
         renderProjects();
         renderTasks();
         renderEod();
@@ -464,6 +491,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
 function switchTab(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + tab));
+    if (tab === 'home')  renderHome();
     if (tab === 'eod')   renderEod();
     if (tab === 'today') renderToday();
 }
@@ -496,6 +524,40 @@ function duePill(s) {
 function fmtTime(iso) {
     if (!iso) return '';
     return new Date(iso).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+}
+
+// ── Home ──────────────────────────────────────────────
+function renderHome() {
+    const todayKey = toDateKey(new Date());
+    const priData  = state.dailyPriorities?.[todayKey] || {};
+
+    // Priority cards
+    const priHtml = PEOPLE.map(person => {
+        const vals  = priData[person] || ['','',''];
+        const color = PERSON_COLORS[person] || 'var(--accent)';
+        const key   = person.toLowerCase();
+        const rows  = [0,1,2].map(i => `
+            <div class="priority-row">
+                <div class="priority-num" style="background:${color};">${i+1}</div>
+                <input class="priority-input" type="text" placeholder="Priority ${i+1}…"
+                    value="${(vals[i]||'').replace(/"/g,'&quot;')}"
+                    onchange="savePriority('${person}',${i},this.value)"
+                    onblur="savePriority('${person}',${i},this.value)">
+            </div>`).join('');
+        return `<div class="priority-card">
+            <div class="priority-card-header" style="border-top-color:${color};">
+                <span class="ap ap-${key}" style="font-size:13px;">👤 ${person}</span>
+                <span class="priority-card-name" style="color:${color}; margin-left:8px;">Top 3 Today</span>
+            </div>
+            <div class="priority-card-body">${rows}</div>
+        </div>`;
+    }).join('');
+    document.getElementById('home-priorities').innerHTML = priHtml;
+
+    // Calendar — today only
+    const ds = toDateKey(new Date()).replace(/-/g,'');
+    document.getElementById('home-cal-iframe').src =
+        `https://calendar.google.com/calendar/embed?src=c_q2pjqh2jr9mjmlgeqob1k1814c%40group.calendar.google.com&ctz=America%2FNew_York&mode=DAY&dates=${ds}&showNav=0&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&bgcolor=%23ffffff`;
 }
 
 // ── EOD helpers ───────────────────────────────────────
@@ -632,29 +694,6 @@ function renderToday() {
 
     const todayKey = toDateKey(d);
 
-    // ── Top 3 priority cards ──
-    const priData = state.dailyPriorities?.[todayKey] || {};
-    const priHtml = PEOPLE.map(person => {
-        const vals = priData[person] || ['','',''];
-        const color = PERSON_COLORS[person] || 'var(--accent)';
-        const rows = [0,1,2].map(i => `
-            <div class="priority-row">
-                <div class="priority-num" style="background:${color};">${i+1}</div>
-                <input class="priority-input" type="text" placeholder="Priority ${i+1}…"
-                    value="${(vals[i]||'').replace(/"/g,'&quot;')}"
-                    onchange="savePriority('${person}',${i},this.value)"
-                    onblur="savePriority('${person}',${i},this.value)">
-            </div>`).join('');
-        return `<div class="priority-card">
-            <div class="priority-card-header" style="border-top-color:${color};">
-                <span class="ap ap-${person.toLowerCase()}" style="font-size:13px;">👤 ${person}</span>
-                <span class="priority-card-name" style="color:${color};">Top 3 Today</span>
-            </div>
-            <div class="priority-card-body">${rows}</div>
-        </div>`;
-    }).join('');
-    document.getElementById('today-priorities').innerHTML = priHtml;
-
     // ── Task columns ──
     const allTasks = (state.teamTasks || []).filter(t => !t.archived);
     const eodToday = (state.eodReport?.[todayKey] || []).map(e => e.taskId);
@@ -734,6 +773,9 @@ function projectCardHtml(p) {
                 <span class="project-name">${p.name}</span>
                 <div class="project-actions">
                     ${p.archived ? '<span class="badge badge-archived">Archived</span>' : `<span class="badge ${badgeMap[p.status]||''}">${labelMap[p.status]||p.status}</span>`}
+                    ${p.priority === 'high'   ? '<span class="priority-high">HIGH</span>'   : ''}
+                    ${p.priority === 'medium' ? '<span class="priority-medium">MED</span>'  : ''}
+                    ${p.priority === 'low'    ? '<span class="priority-low">LOW</span>'     : ''}
                     <button class="icon-btn" onclick="event.stopPropagation();openProjectModal('${p.id}')" title="Edit">✏️</button>
                     ${p.archived
                         ? `<button class="icon-btn" onclick="event.stopPropagation();unarchiveProject('${p.id}')" title="Restore">↩️</button>`
@@ -742,7 +784,7 @@ function projectCardHtml(p) {
                 </div>
             </div>
             <div class="project-meta">
-                ${p.owner ? `<span>👤 ${p.owner}</span>` : ''}
+                ${p.owner ? assigneePill(p.owner) : ''}
                 ${p.dueDate ? `<span>📅 ${fmtDate(p.dueDate)}</span>` : ''}
                 ${tasks.length ? `<span style="margin-left:auto;">${done}/${tasks.length} done</span>` : ''}
             </div>
@@ -778,11 +820,12 @@ function openProjectModal(id) {
     editProjectId = id || null;
     const p = id ? (state.projects||[]).find(x => x.id===id) : null;
     document.getElementById('projectModalTitle').textContent = p ? 'Edit Project' : 'New Project';
-    document.getElementById('pName').value   = p?.name || '';
-    document.getElementById('pStatus').value = p?.status || 'active';
-    document.getElementById('pOwner').value  = p?.owner || '';
-    document.getElementById('pDue').value    = p?.dueDate || '';
-    document.getElementById('pDesc').value   = p?.description || '';
+    document.getElementById('pName').value     = p?.name     || '';
+    document.getElementById('pStatus').value   = p?.status   || 'active';
+    document.getElementById('pPriority').value = p?.priority || '';
+    document.getElementById('pOwner').value    = p?.owner    || '';
+    document.getElementById('pDue').value      = p?.dueDate  || '';
+    document.getElementById('pDesc').value     = p?.description || '';
     document.getElementById('projectModal').classList.add('open');
     setTimeout(() => document.getElementById('pName').focus(), 50);
 }
@@ -793,10 +836,10 @@ function saveProject() {
     if (!name) return alert('Project name is required.');
     if (editProjectId) {
         const p = (state.projects||[]).find(x => x.id===editProjectId);
-        if (p) { p.name=name; p.status=document.getElementById('pStatus').value; p.owner=document.getElementById('pOwner').value.trim(); p.dueDate=document.getElementById('pDue').value; p.description=document.getElementById('pDesc').value.trim(); }
+        if (p) { p.name=name; p.status=document.getElementById('pStatus').value; p.priority=document.getElementById('pPriority').value; p.owner=document.getElementById('pOwner').value; p.dueDate=document.getElementById('pDue').value; p.description=document.getElementById('pDesc').value.trim(); }
     } else {
         if (!state.projects) state.projects=[];
-        state.projects.push({ id:uid(), name, status:document.getElementById('pStatus').value, owner:document.getElementById('pOwner').value.trim(), dueDate:document.getElementById('pDue').value, description:document.getElementById('pDesc').value.trim(), tasks:[], archived:false, createdAt:new Date().toISOString() });
+        state.projects.push({ id:uid(), name, status:document.getElementById('pStatus').value, priority:document.getElementById('pPriority').value, owner:document.getElementById('pOwner').value, dueDate:document.getElementById('pDue').value, description:document.getElementById('pDesc').value.trim(), tasks:[], archived:false, createdAt:new Date().toISOString() });
     }
     saveState(); closeProjectModal(); renderProjects();
 }
