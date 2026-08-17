@@ -263,8 +263,7 @@
         <div class="tab active" data-tab="home"     onclick="switchTab('home')">🏠 Home</div>
         <div class="tab" data-tab="projects" onclick="switchTab('projects')">📁 Projects</div>
         <div class="tab" data-tab="tasks"    onclick="switchTab('tasks')">✓ Tasks</div>
-        <div class="tab" data-tab="eod"      onclick="switchTab('eod')">📋 EOD Report</div>
-        <div class="tab" data-tab="today"    onclick="switchTab('today')">📅 Today</div>
+        <div class="tab" data-tab="today"    onclick="switchTab('today')">📅 Today / EOD</div>
     </div>
 
     <div id="content">
@@ -320,20 +319,6 @@
             </div>
         </div>
 
-        <!-- EOD REPORT -->
-        <div class="tab-pane" id="pane-eod">
-            <div class="section-header">
-                <span class="section-title">EOD Report</span>
-                <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print</button>
-            </div>
-            <div class="eod-date-nav">
-                <button class="eod-nav-btn" onclick="shiftEodDate(-1)">← Prev</button>
-                <span class="eod-date-label" id="eod-date-label"></span>
-                <button class="eod-nav-btn" onclick="shiftEodDate(1)">Next →</button>
-            </div>
-            <div id="eod-body"></div>
-        </div>
-
         <!-- TODAY -->
         <div class="tab-pane" id="pane-today">
             <div class="today-header">
@@ -346,6 +331,7 @@
                 </div>
             </div>
             <div class="today-people" id="today-people"></div>
+            <div id="today-eod-section" style="margin-top:24px;"></div>
         </div>
 
     </div><!-- /content -->
@@ -482,7 +468,6 @@ sb.auth.onAuthStateChange(async (event, session) => {
         renderHome();
         renderProjects();
         renderTasks();
-        renderEod();
         renderToday();
     }
 });
@@ -492,7 +477,6 @@ function switchTab(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + tab));
     if (tab === 'home')  renderHome();
-    if (tab === 'eod')   renderEod();
     if (tab === 'today') renderToday();
 }
 
@@ -734,6 +718,41 @@ function renderToday() {
     }).join('');
 
     document.getElementById('today-people').innerHTML = peopleHtml;
+
+    // ── EOD completed section ──
+    const eodEntries = (state.eodReport?.[todayKey] || []).filter(e => !e.archived);
+    const eodSection = document.getElementById('today-eod-section');
+    if (!eodEntries.length) {
+        eodSection.innerHTML = '';
+        return;
+    }
+    const byPerson = {};
+    eodEntries.forEach(e => {
+        const who = e.assignee || 'Unassigned';
+        if (!byPerson[who]) byPerson[who] = [];
+        byPerson[who].push(e);
+    });
+    let eodHtml = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text-sm);text-transform:uppercase;letter-spacing:.06em;">✅ Completed</div>
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print EOD</button>
+    </div>`;
+    Object.keys(byPerson).forEach(who => {
+        eodHtml += `<div style="margin-bottom:14px;">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;">${assigneePill(who)}</div>`;
+        byPerson[who].forEach(e => {
+            eodHtml += `<div class="eod-item">
+                <span style="font-size:15px;">✅</span>
+                <div style="flex:1;">
+                    <div class="eod-item-title">${e.title}</div>
+                    ${e.projectName ? `<div class="eod-item-meta">📁 ${e.projectName}</div>` : ''}
+                </div>
+                <span class="eod-time">${fmtTime(e.completedAt)}</span>
+                <button class="icon-btn" onclick="archiveEodItem('${todayKey}','${e.id}')" title="Archive">🗄️</button>
+            </div>`;
+        });
+        eodHtml += '</div>';
+    });
+    eodSection.innerHTML = eodHtml;
 }
 
 // ── Projects ──────────────────────────────────────────
